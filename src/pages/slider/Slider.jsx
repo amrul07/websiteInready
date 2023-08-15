@@ -18,6 +18,7 @@ import {
   Input,
   Pagination,
   OutlinedInput,
+  CardMedia,
 } from "@mui/material";
 import Header from "../../components/header/Header";
 
@@ -37,6 +38,8 @@ import { ModalSlider } from "../../components/modal/Index";
 import { initialData } from "../../utils/InitialData";
 import { themePagination } from "../../components/paginations/Index";
 import Footer from "../../components/footer/Footer";
+import IconKegiatan from "../../assets/detailKegiatan.svg";
+import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 
 const useStyles = makeStyles({
   blueRow: {
@@ -60,6 +63,16 @@ const Slider = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const csvFileRef = useRef(null);
   const [category, setCategory] = useState("filterByAlbum");
+  const [selectedDetail, setSelectedDetail] = useState(null);
+
+  // detail
+  const handleDetailClick = (detail) => {
+    setSelectedDetail(detail);
+  };
+
+  const handleCloseDetail = () => {
+    setSelectedDetail(null);
+  };
 
   // category
   const handleCategoryChange = (event) => {
@@ -235,200 +248,237 @@ const Slider = () => {
         onClickExcel={exportToExcel}
       />
       <Box my={3}>
-        <Card>
-          <Stack
-            display={"flex"}
-            direction={"row"}
-            sx={{
-              py: 3,
-              justifyContent: "space-between",
-              borderBottom: "1px solid rgba(232, 232, 232, 0.87)",
-              width: "95%",
-              alignItems: "center",
-              margin: "auto",
-            }}
-          >
-            <FormControl sx={{ fontFamily: "Poppins" }}>
-              <Stack display={"flex"} direction={"row"}>
-                <Typography sx={{ fontFamily: "Poppins" }}>
-                  Tampilkan
-                </Typography>
-                <Select
-                  sx={{ height: 25, width: 62, mx: 1, fontFamily: "Poppins" }}
-                  value={itemsPerPage}
-                  onChange={handleChangeItemsPerPage}
-                >
-                  <MenuItem value={5}>5</MenuItem>
-                  <MenuItem value={10}>10</MenuItem>
-                  <MenuItem value={15}>15</MenuItem>
-                  <MenuItem value={data.length}>All</MenuItem>
-                </Select>
-                <Typography sx={{ fontFamily: "Poppins" }}>Data</Typography>
-              </Stack>
-            </FormControl>
-            {/* menu */}
-            <FormControl sx={{ fontFamily: "Poppins" }}>
-              <Stack>
-                <Select
-                  sx={{ height: 30, width: 200, fontFamily: "Poppins" }}
-                  value={category}
-                  onChange={handleCategoryChange}
-                >
-                  <MenuItem
-                    sx={{ fontFamily: "Poppins" }}
-                    value={"filterByAlbum"}
-                  >
-                    Filter By Album
-                  </MenuItem>
-                  <MenuItem
-                    sx={{ fontFamily: "Poppins" }}
-                    value={"detailKegiatan"}
-                  >
-                    Detail Kegiatan
-                  </MenuItem>
-                </Select>
-              </Stack>
-            </FormControl>
-          </Stack>
-          <div id="print-content">
-            <TableContainer
-              sx={{ px: 5, fontFamily: "Poppins" }}
-              component={Paper}
-            >
-              <Table>
-                <TableHead sx={{ fontFamily: "Poppins" }}>
-                  <TableRow>
-                    <TableCell sx={{ fontFamily: "Poppins", width: "170px" }}>
-                      Gambar
-                    </TableCell>
-                    <TableCell sx={{ fontFamily: "Poppins", width: "240px" }}>
-                      Album
-                    </TableCell>
-                    <TableCell sx={{ fontFamily: "Poppins", width: "450px" }}>
-                      Deskripsi
-                    </TableCell>
-                    <TableCell
-                      sx={{
-                        fontFamily: "Poppins",
-                        width: "100px",
-                        textAlign: "center",
-                      }}
-                    >
-                      Aksi
-                    </TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody sx={{ fontFamily: "Poppins" }}>
-                  {data
-                    .slice((page - 1) * itemsPerPage, page * itemsPerPage)
-                    .map((row) => (
-                      <TableRow key={row.id} className={classes.blueRow}>
-                        <TableCell>
-                          <img
-                            style={{ objectFit: "cover" }}
-                            src={row.image}
-                            alt={`Gambar ${row.album}`}
-                            width="99"
-                            height="111"
-                          />
-                        </TableCell>
-                        <TableCell sx={{ fontFamily: "Poppins" }}>
-                          {editingId === row.id ? (
-                            <TextField
-                              value={newAlbum}
-                              onChange={(e) => handleInputChange(e, "album")}
-                            />
-                          ) : (
-                            // <OutlinedInput placeholder="Please enter text" />
-                            row.album
-                          )}
-                        </TableCell>
-                        {/* edit yg asli */}
-                        {/* <TableCell sx={{ fontFamily: "Poppins" }}>
-                        {row.album}
-                      </TableCell> */}
-                        <TableCell sx={{ fontFamily: "Poppins" }}>
-                          {editingId === row.id ? (
-                            <TextField
-                              value={newDescription}
-                              onChange={(e) =>
-                                handleInputChange(e, "description")
-                              }
-                            />
-                          ) : (
-                            row.description
-                          )}
-                        </TableCell>
-                        {/* deskripsi asli */}
-                        {/* <TableCell sx={{ fontFamily: "Poppins" }}>
-                        {row.description}
-                      </TableCell> */}
-                        <TableCell>
-                          <Stack
-                            direction={"row"}
-                            spacing={1}
-                            sx={{
-                              // display: "flex",
-                              alignItems: "center",
-                              alignSelf: "center",
-                            }}
-                          >
-                            {editingId === row.id ? (
-                              <ButtonYellow
-                                sx={{ color: "white" }}
-                                variant="contained"
-                                onClick={handleSaveEdit}
-                              >
-                                Save
-                              </ButtonYellow>
-                            ) : (
-                              <ButtonYellow
-                                sx={{ color: "white" }}
-                                variant="Contained"
-                                onClick={() => handleEdit(row.id)}
-                              >
-                                <CreateIcon />
-                              </ButtonYellow>
-                            )}
-                            <ButtonPink
-                              sx={{ fontSize: "20px", color: "#FF2E00" }}
-                              variant="Contained"
-                              size="small"
-                              onClick={() => handleDelete(row.id)}
-                            >
-                              <RiDeleteBin5Fill
-                                sx={{ color: "#FF2E00", fontSize: "20px" }}
-                              />
-                            </ButtonPink>
-                          </Stack>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          </div>
-          <Card sx={{ px: 4, py: 4 }}>
+        {selectedDetail ? (
+          // halaman detail
+          <Card>
+            <Stack sx={{ py: 2, pl: 4, display: "flex", gap: 2,flexDirection: "row" }}>
+              <CardMedia
+                sx={{ width: "24px", height: "24px",cursor: "pointer" }}
+                image={IconKegiatan}
+                onClick={handleCloseDetail}
+              />
+              <Typography
+                sx={{
+                  fontFamily: "Poppins",
+                  color: "#D1D3E2",
+                  fontWeight: 500,
+                  cursor: "pointer"
+                }}
+                onClick={handleCloseDetail}
+              >
+                Kegiatan
+              </Typography>
+              <Typography sx={{ mt: "4px", ml: "-4px" }}>
+                <ArrowForwardIosIcon
+                  sx={{ color: "#576974", fontSize: "18px" }}
+                />
+              </Typography>
+              <Typography sx={{ fontFamily: "Poppins", color: "#576974" ,ml: "-5px",mt: "2px",fontWeight: 500}}>
+                Detail Kegiatan
+              </Typography>
+            </Stack>
+          </Card>
+        ) : (
+          <Card>
             <Stack
               display={"flex"}
               direction={"row"}
-              sx={{ justifyContent: "space-between" }}
+              sx={{
+                py: 3,
+                justifyContent: "space-between",
+                borderBottom: "1px solid rgba(232, 232, 232, 0.87)",
+                width: "95%",
+                alignItems: "center",
+                margin: "auto",
+              }}
             >
-              <Typography sx={{ fontFamily: "Poppins" }}>
-                Menampilkan 1 - {itemsPerPage} dari {data.length} Data
-              </Typography>
-              {/* pagination */}
-              <ThemeProvider theme={themePagination}>
-                <Pagination
-                  sx={{ color: "#FFC400" }}
-                  count={Math.ceil(data.length / itemsPerPage)}
-                  page={page}
-                  onChange={handleChangePage}
-                />
-              </ThemeProvider>
+              <FormControl sx={{ fontFamily: "Poppins" }}>
+                <Stack display={"flex"} direction={"row"}>
+                  <Typography sx={{ fontFamily: "Poppins" }}>
+                    Tampilkan
+                  </Typography>
+                  <Select
+                    sx={{ height: 25, width: 62, mx: 1, fontFamily: "Poppins" }}
+                    value={itemsPerPage}
+                    onChange={handleChangeItemsPerPage}
+                  >
+                    <MenuItem value={5}>5</MenuItem>
+                    <MenuItem value={10}>10</MenuItem>
+                    <MenuItem value={15}>15</MenuItem>
+                    <MenuItem value={data.length}>All</MenuItem>
+                  </Select>
+                  <Typography sx={{ fontFamily: "Poppins" }}>Data</Typography>
+                </Stack>
+              </FormControl>
+              {/* menu */}
+              <FormControl sx={{ fontFamily: "Poppins" }}>
+                <Stack>
+                  <Select
+                    sx={{ height: 30, width: 200, fontFamily: "Poppins" }}
+                    value={category}
+                    onChange={handleCategoryChange}
+                  >
+                    <MenuItem
+                      sx={{ fontFamily: "Poppins" }}
+                      value={"filterByAlbum"}
+                    >
+                      Filter By Album
+                    </MenuItem>
+                    <MenuItem
+                      sx={{ fontFamily: "Poppins" }}
+                      value={"detailKegiatan"}
+                    >
+                      Detail Kegiatan
+                    </MenuItem>
+                  </Select>
+                </Stack>
+              </FormControl>
             </Stack>
+            <div id="print-content">
+              <TableContainer
+                sx={{ px: 5, fontFamily: "Poppins" }}
+                component={Paper}
+              >
+                <Table>
+                  <TableHead sx={{ fontFamily: "Poppins" }}>
+                    <TableRow>
+                      <TableCell sx={{ fontFamily: "Poppins", width: "170px" }}>
+                        Gambar
+                      </TableCell>
+                      <TableCell sx={{ fontFamily: "Poppins", width: "240px" }}>
+                        Album
+                      </TableCell>
+                      <TableCell sx={{ fontFamily: "Poppins", width: "450px" }}>
+                        Deskripsi
+                      </TableCell>
+                      <TableCell
+                        sx={{
+                          fontFamily: "Poppins",
+                          width: "100px",
+                          textAlign: "center",
+                        }}
+                      >
+                        Aksi
+                      </TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody sx={{ fontFamily: "Poppins" }}>
+                    {data
+                      .slice((page - 1) * itemsPerPage, page * itemsPerPage)
+                      .map((row) => (
+                        <TableRow
+                          sx={{ cursor: "pointer" }}
+                          key={row.id}
+                          className={classes.blueRow}
+                          onClick={() => handleDetailClick(row)}
+                        >
+                          <TableCell>
+                            <img
+                              style={{ objectFit: "cover" }}
+                              src={row.image}
+                              alt={`Gambar ${row.album}`}
+                              width="99"
+                              height="111"
+                            />
+                          </TableCell>
+                          <TableCell sx={{ fontFamily: "Poppins" }}>
+                            {editingId === row.id ? (
+                              <TextField
+                                value={newAlbum}
+                                onChange={(e) => handleInputChange(e, "album")}
+                              />
+                            ) : (
+                              // <OutlinedInput placeholder="Please enter text" />
+                              row.album
+                            )}
+                          </TableCell>
+                          {/* edit yg asli */}
+                          {/* <TableCell sx={{ fontFamily: "Poppins" }}>
+                        {row.album}
+                      </TableCell> */}
+                          <TableCell sx={{ fontFamily: "Poppins" }}>
+                            {editingId === row.id ? (
+                              <TextField
+                                value={newDescription}
+                                onChange={(e) =>
+                                  handleInputChange(e, "description")
+                                }
+                              />
+                            ) : (
+                              row.description
+                            )}
+                          </TableCell>
+                          {/* deskripsi asli */}
+                          {/* <TableCell sx={{ fontFamily: "Poppins" }}>
+                        {row.description}
+                      </TableCell> */}
+                          <TableCell>
+                            <Stack
+                              direction={"row"}
+                              spacing={1}
+                              sx={{
+                                // display: "flex",
+                                alignItems: "center",
+                                alignSelf: "center",
+                              }}
+                            >
+                              {editingId === row.id ? (
+                                <ButtonYellow
+                                  sx={{ color: "white" }}
+                                  variant="contained"
+                                  onClick={handleSaveEdit}
+                                >
+                                  Save
+                                </ButtonYellow>
+                              ) : (
+                                <ButtonYellow
+                                  sx={{ color: "white" }}
+                                  variant="Contained"
+                                  onClick={() => handleEdit(row.id)}
+                                >
+                                  <CreateIcon />
+                                </ButtonYellow>
+                              )}
+                              <ButtonPink
+                                sx={{ fontSize: "20px", color: "#FF2E00" }}
+                                variant="Contained"
+                                size="small"
+                                onClick={() => handleDelete(row.id)}
+                              >
+                                <RiDeleteBin5Fill
+                                  sx={{ color: "#FF2E00", fontSize: "20px" }}
+                                />
+                              </ButtonPink>
+                            </Stack>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </div>
+            <Card sx={{ px: 4, py: 4 }}>
+              <Stack
+                display={"flex"}
+                direction={"row"}
+                sx={{ justifyContent: "space-between" }}
+              >
+                <Typography sx={{ fontFamily: "Poppins" }}>
+                  Menampilkan 1 - {itemsPerPage} dari {data.length} Data
+                </Typography>
+                {/* pagination */}
+                <ThemeProvider theme={themePagination}>
+                  <Pagination
+                    sx={{ color: "#FFC400" }}
+                    count={Math.ceil(data.length / itemsPerPage)}
+                    page={page}
+                    onChange={handleChangePage}
+                  />
+                </ThemeProvider>
+              </Stack>
+            </Card>
           </Card>
-        </Card>
+        )}
       </Box>
       {/* filter by album end */}
 
@@ -611,7 +661,7 @@ const Slider = () => {
       <ModalSlider open={isModalOpen} onClick={closeModal} />
 
       {/* Detail Kegiatan */}
-      {/* {category === "detailKegiatan" && (
+      {category === "detailKegiatan" && (
         <Box mt={3}>
           <Card sx={{ py: 2, pl: 4, display: "flex", gap: 2 }}>
             <CardMedia
@@ -623,11 +673,11 @@ const Slider = () => {
             >
               Kegiatan
             </Typography>
-            <Typography sx={{ mt: "4px", ml: "-4px" }}>
+            {/* <Typography sx={{ mt: "4px", ml: "-4px" }}>
               <ArrowForwardIosIcon
                 sx={{ color: "#576974", fontSize: "18px" }}
               />{" "}
-            </Typography>
+            </Typography> */}
             <FormControl
               variant="standard"
               style={{ border: "none" }}
@@ -661,7 +711,7 @@ const Slider = () => {
             </FormControl>
           </Card>
         </Box>
-      )} */}
+      )}
       <Footer />
     </Box>
   );
