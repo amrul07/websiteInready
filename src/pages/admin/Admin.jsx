@@ -19,6 +19,7 @@ import {
   OutlinedInput,
   TextField,
   Autocomplete,
+  CardMedia,
 } from "@mui/material";
 import Header from "../../components/header/Header";
 
@@ -32,11 +33,14 @@ import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternate";
 import ImageIcon from "@mui/icons-material/Image";
 import Papa from "papaparse";
 import * as XLSX from "xlsx";
-import { ButtonPink, ButtonYellow } from "../../components/button/Index";
+import { ButtonGreen, ButtonPink, ButtonYellow } from "../../components/button/Index";
 import { ModalSlider } from "../../components/modal/Index";
 import { dataAdmin } from "../../utils/InitialData";
 import { themePagination } from "../../components/paginations/Index";
 import Footer from "../../components/footer/Footer";
+import IconKegiatan from "../../assets/detailKegiatan.svg";
+import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
+import VisibilityIcon from "@mui/icons-material/Visibility";
 
 const useStyles = makeStyles({
   blueRow: {
@@ -60,6 +64,16 @@ const Admin = () => {
   const csvFileRef = useRef(null);
   const [category, setCategory] = useState("filterByAlbum");
   const currentDate = new Date().toLocaleDateString();
+  const [selectedDetail, setSelectedDetail] = useState(null);
+
+  // detail
+  const handleDetailClick = (detail) => {
+    setSelectedDetail(detail);
+  };
+
+  const handleCloseDetail = () => {
+    setSelectedDetail(null);
+  };
 
   // category
   const handleCategoryChange = (event) => {
@@ -183,6 +197,157 @@ const Admin = () => {
         onClickExcel={exportToExcel}
       />
       <Box my={3}>
+      {selectedDetail ? (
+          // halaman detail
+          <Box>
+            <Card>
+              <Stack
+                sx={{
+                  py: 2,
+                  pl: 4,
+                  display: "flex",
+                  gap: 2,
+                  flexDirection: "row",
+                }}
+              >
+                <CardMedia
+                  sx={{ width: "24px", height: "24px", cursor: "pointer" }}
+                  image={IconKegiatan}
+                  onClick={handleCloseDetail}
+                />
+                <Typography
+                  sx={{
+                    fontFamily: "Poppins",
+                    color: "#D1D3E2",
+                    fontWeight: 500,
+                    cursor: "pointer",
+                  }}
+                  onClick={handleCloseDetail}
+                >
+                  Admin
+                </Typography>
+                <Typography sx={{ mt: "4px", ml: "-4px" }}>
+                  <ArrowForwardIosIcon
+                    sx={{ color: "#576974", fontSize: "18px" }}
+                  />
+                </Typography>
+                <Typography
+                  sx={{
+                    fontFamily: "Poppins",
+                    color: "#576974",
+                    ml: "-5px",
+                    mt: "2px",
+                    fontWeight: 500,
+                  }}
+                >
+                  Detail Admin
+                </Typography>
+              </Stack>
+            </Card>
+            <Box sx={{ textAlign: "center", marginTop: "20px" }}>
+              <Card
+                sx={{ paddingX: 4, paddingY: 3, textAlign: "left" }}
+                className="album-description"
+              >
+                <Grid
+                  container
+                  sx={{ display: "flex", flexDirection: "row", my: 1 }}
+                >
+                  <Grid item xs={4}>
+                    <Typography
+                      sx={{ fontFamily: "Poppins", fontSize: "16px" }}
+                    >
+                      Username
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={8}>
+                    <Typography
+                      sx={{ fontFamily: "Poppins", fontSize: "16px" }}
+                    >
+                      : {selectedDetail.username}
+                    </Typography>
+                  </Grid>
+                </Grid>
+                <Grid
+                  container
+                  sx={{ display: "flex", flexDirection: "row", my: 1 }}
+                >
+                  <Grid item xs={4}>
+                    <Typography
+                      sx={{ fontFamily: "Poppins", fontSize: "16px" }}
+                    >
+                      Password
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={8}>
+                    <Typography
+                      sx={{ fontFamily: "Poppins", fontSize: "16px" }}
+                    >
+                      : {selectedDetail.password}
+                    </Typography>
+                  </Grid>
+                </Grid>
+                <Grid
+                  container
+                  sx={{ display: "flex", flexDirection: "row", my: 1 }}
+                >
+                  <Grid item xs={4}>
+                    <Typography
+                      sx={{ fontFamily: "Poppins", fontSize: "16px" }}
+                    >
+                      Level
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={8}>
+                    <Typography
+                      sx={{ fontFamily: "Poppins", fontSize: "16px" }}
+                    >
+                      : {selectedDetail.level}
+                    </Typography>
+                  </Grid>
+                </Grid>
+                <Grid
+                  container
+                  sx={{ display: "flex", flexDirection: "row", my: 1 }}
+                >
+                  <Grid item xs={4}>
+                    <Typography
+                      sx={{ fontFamily: "Poppins", fontSize: "16px" }}
+                    >
+                      TanggalPost
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={8}>
+                    <Typography
+                      sx={{ fontFamily: "Poppins", fontSize: "16px" }}
+                    >
+                      : {selectedDetail.tanggalPost}
+                    </Typography>
+                  </Grid>
+                </Grid>
+                <Grid
+                  container
+                  sx={{ display: "flex", flexDirection: "row", my: 1 }}
+                >
+                  <Grid item xs={4}>
+                    <Typography
+                      sx={{ fontFamily: "Poppins", fontSize: "16px" }}
+                    >
+                      TanggalUpdate
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={8}>
+                    <Typography
+                      sx={{ fontFamily: "Poppins", fontSize: "16px" }}
+                    >
+                      : {selectedDetail.tanggalUpdate}
+                    </Typography>
+                  </Grid>
+                </Grid>
+              </Card>
+            </Box>
+          </Box>
+        ) : (
         <Card>
           <Stack
             display={"flex"}
@@ -285,6 +450,14 @@ const Admin = () => {
                               justifyContent: "end",
                             }}
                           >
+                            <ButtonGreen
+                                variant="Contained"
+                                sx={{ color: "white" }}
+                                style={{ width: "-10px" }}
+                                onClick={() => handleDetailClick(row)}
+                              >
+                                <VisibilityIcon />
+                              </ButtonGreen>
                             <ButtonYellow
                               sx={{ color: "white" }}
                               variant="Contained"
@@ -331,6 +504,7 @@ const Admin = () => {
             </Stack>
           </Card>
         </Card>
+         )}
       </Box>
       {/* Drawer */}
       <Drawer anchor="right" open={openDrawer} sx={{ width: 700 }}>

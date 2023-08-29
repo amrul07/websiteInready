@@ -1,9 +1,16 @@
 import Drawer from "@mui/material/Drawer";
 import React, { useEffect, useState } from "react";
-import { Box, Typography, Stack, CardMedia, Grid } from "@mui/material";
+import {
+  Box,
+  Typography,
+  Stack,
+  CardMedia,
+  Grid,
+  IconButton,
+} from "@mui/material";
 import { useLocation, useNavigate } from "react-router-dom";
 import Logo from "../../assets/navbar/Logo.png";
-import "../../index.css"
+import "../../index.css";
 
 const drawerWidth = 240;
 
@@ -52,7 +59,7 @@ const NavbarComponent = ({ menu, type }) => {
           title="green iguana"
         />
 
-        <Typography 
+        <Typography
           sx={{
             fontFamily: "Poppins",
             fontSize: "20px",
@@ -105,24 +112,31 @@ const NavbarComponent = ({ menu, type }) => {
                 <Grid item xs={2} sx={{ marginLeft: "10px" }}>
                   <Typography
                     sx={{
-                      margin: "auto",
-                      pt: "2px",
-                      fontSize: "18px",
-                      width: "30px",
-                      height: "25px",
+                      // marginX: "auto",
+                      // pt: "-10px",
+                      // fontSize: "18px",
+                      width: "32px",
+                      height: "30px",
                       textAlign: "center",
                       background: val.router === urlpath ? "#FFC300" : "#fff",
-                      borderRadius: "8px",
+                      borderRadius: "12px",
                       color: val.router === urlpath ? "black" : "#576974",
                     }}
                   >
-                    {val.icon}
+                    {React.cloneElement(val.icon, {
+                      fill: urlpath === val.router ? "black" : "#576974",
+                    })}
                   </Typography>
-                  {/* <img src={val} alt="" /> */}
                 </Grid>
                 <Grid item xs={6}>
                   <Typography
-                    sx={{ color: val.router === urlpath ? "black" : "#576974",fontFamily: "Poppins",fontWeight: 500 }}
+                    sx={{
+                      color: val.router === urlpath ? "black" : "#576974",
+                      fontFamily: "Poppins",
+                      fontWeight: 500,
+                      fontSize: "16px",
+                      pt: "4px"
+                    }}
                   >
                     {val.title}
                   </Typography>

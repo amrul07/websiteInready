@@ -21,25 +21,38 @@ import {
   CardMedia,
 } from "@mui/material";
 import Header from "../../components/header/Header";
-
 import { makeStyles } from "@mui/styles";
 import { ThemeProvider } from "@mui/material/styles";
 import CreateIcon from "@mui/icons-material/Create";
 import { RiDeleteBin5Fill } from "react-icons/ri";
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import Drawer from "@mui/material/Drawer";
 import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternate";
 import ImageIcon from "@mui/icons-material/Image";
 import Papa from "papaparse";
 import * as XLSX from "xlsx";
 import "./Slider.css";
-import { ButtonPink, ButtonYellow } from "../../components/button/Index";
+import {
+  ButtonBlue,
+  ButtonGreen,
+  ButtonPink,
+  ButtonYellow,
+} from "../../components/button/Index";
 import { ModalSlider } from "../../components/modal/Index";
 import { initialData } from "../../utils/InitialData";
 import { themePagination } from "../../components/paginations/Index";
 import Footer from "../../components/footer/Footer";
 import IconKegiatan from "../../assets/detailKegiatan.svg";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+
+import Glide from "@glidejs/glide";
+// import Glide, { Controls } from "@glidejs/glide/dist/glide.modular.esm";
+import "@glidejs/glide/dist/css/glide.core.min.css";
+import "@glidejs/glide/dist/css/glide.theme.min.css";
+import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
+// import Foto from "../assets/navbar/Logo.png";
+// import Foto2 from "../assets/sukses.svg";
 
 const useStyles = makeStyles({
   blueRow: {
@@ -122,6 +135,7 @@ const Slider = () => {
     setNewImage(selectedItem.image);
     setNewAlbum(selectedItem.album);
     setNewDescription(selectedItem.description);
+    setOpenDrawer(true);
   };
 
   const handleDelete = (id) => {
@@ -172,9 +186,15 @@ const Slider = () => {
   };
 
   const handleImageChange = (e) => {
-    setNewImage(e.target.value);
+    const imageFile = e.target.files[0];
+    if (imageFile) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        setEditingId({ ...editingId, image: event.target.result });
+      };
+      reader.readAsDataURL(imageFile);
+    }
   };
-
   const handleAlbumChange = (e) => {
     setNewAlbum(e.target.value);
   };
@@ -229,6 +249,38 @@ const Slider = () => {
     document.body.innerHTML = originalContents;
   };
 
+  // glide js
+
+  useEffect(() => {
+    if (selectedDetail) {
+      const totalImages = selectedDetail.image.length;
+      const perView = totalImages <= 5 ? totalImages : 5;
+      const glide = new Glide(`#glide-${selectedDetail.id}`, {
+        type: "carousel",
+        startAt: 0,
+        perView: perView, // Menggunakan 'auto' agar mengikuti jumlah gambar
+        // focusAt: "center", // Gambar berada di tengah
+        rewind: true,
+        animationTimingFunc: "linear",
+        animationDuration: 800,
+        breakpoints: {
+          800: {
+            perView: 2,
+          },
+          480: {
+            perView: 1,
+          },
+        },
+      });
+
+      glide.mount();
+
+      return () => {
+        glide.destroy();
+      };
+    }
+  }, [selectedDetail]);
+
   return (
     <Box sx={{ fontFamily: "Poppins", mt: "-23px" }}>
       {/* import csv */}
@@ -250,34 +302,155 @@ const Slider = () => {
       <Box my={3}>
         {selectedDetail ? (
           // halaman detail
-          <Card>
-            <Stack sx={{ py: 2, pl: 4, display: "flex", gap: 2,flexDirection: "row" }}>
-              <CardMedia
-                sx={{ width: "24px", height: "24px",cursor: "pointer" }}
-                image={IconKegiatan}
-                onClick={handleCloseDetail}
-              />
-              <Typography
+          <Box>
+            <Card>
+              <Stack
                 sx={{
-                  fontFamily: "Poppins",
-                  color: "#D1D3E2",
-                  fontWeight: 500,
-                  cursor: "pointer"
+                  py: 2,
+                  pl: 4,
+                  display: "flex",
+                  gap: 2,
+                  flexDirection: "row",
                 }}
-                onClick={handleCloseDetail}
               >
-                Kegiatan
-              </Typography>
-              <Typography sx={{ mt: "4px", ml: "-4px" }}>
-                <ArrowForwardIosIcon
-                  sx={{ color: "#576974", fontSize: "18px" }}
+                <CardMedia
+                  sx={{ width: "24px", height: "24px", cursor: "pointer" }}
+                  image={IconKegiatan}
+                  onClick={handleCloseDetail}
                 />
-              </Typography>
-              <Typography sx={{ fontFamily: "Poppins", color: "#576974" ,ml: "-5px",mt: "2px",fontWeight: 500}}>
-                Detail Kegiatan
-              </Typography>
-            </Stack>
-          </Card>
+                <Typography
+                  sx={{
+                    fontFamily: "Poppins",
+                    color: "#D1D3E2",
+                    fontWeight: 500,
+                    cursor: "pointer",
+                  }}
+                  onClick={handleCloseDetail}
+                >
+                  Kegiatan
+                </Typography>
+                <Typography sx={{ mt: "4px", ml: "-4px" }}>
+                  <ArrowForwardIosIcon
+                    sx={{ color: "#576974", fontSize: "18px" }}
+                  />
+                </Typography>
+                <Typography
+                  sx={{
+                    fontFamily: "Poppins",
+                    color: "#576974",
+                    ml: "-5px",
+                    mt: "2px",
+                    fontWeight: 500,
+                  }}
+                >
+                  Detail Kegiatan
+                </Typography>
+              </Stack>
+            </Card>
+            <Box sx={{ textAlign: "center", marginTop: "20px" }}>
+              <div id={`glide-${selectedDetail.id}`} className="glide">
+                <div className="glide__track" data-glide-el="track">
+                  <ul className="glide__slides">
+                    {selectedDetail.image.map((image, index) => (
+                      <li className="glide__slide" key={index}>
+                        <img
+                          src={image}
+                          alt={`Album ${selectedDetail.id} - ${index}`}
+                          style={{
+                            width: "200px",
+                            height: "180px",
+                            objectFit: "cover",
+                            borderRadius: "12px",
+                          }}
+                        />
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                <div class="glide__arrows" data-glide-el="controls">
+                  <button
+                    style={{ border: "none", boxShadow: "none" }}
+                    class="glide__arrow glide__arrow--left"
+                    data-glide-dir="<"
+                  >
+                    <ArrowBackIosIcon />
+                  </button>
+                  <button
+                    style={{ border: "none", boxShadow: "none" }}
+                    class="glide__arrow glide__arrow--right"
+                    data-glide-dir=">"
+                  >
+                    <ArrowForwardIosIcon />
+                  </button>
+                </div>
+              </div>
+              <Card
+                sx={{ mt: 1, paddingX: 4, paddingY: 5, textAlign: "left" }}
+                className="album-description"
+              >
+                <Stack
+                  sx={{
+                    display: "flex",
+                    flexDirection: "row",
+                    fontFamily: "Poppins",
+                  }}
+                >
+                  <Typography
+                    sx={{
+                      paddingRight: "240px",
+                      fontFamily: "Poppins",
+                      fontSize: "16px",
+                    }}
+                  >
+                    Album
+                  </Typography>
+                  <Typography
+                    sx={{
+                      paddingRight: "5px",
+                      fontFamily: "Poppins",
+                      fontSize: "16px",
+                    }}
+                  >
+                    :
+                  </Typography>
+                  <Typography sx={{ fontFamily: "Poppins", fontSize: "16px" }}>
+                    {selectedDetail.album}
+                  </Typography>
+                </Stack>
+                <Stack
+                  sx={{
+                    display: "flex",
+                    flexDirection: "row",
+                    fontFamily: "Poppins",
+                    my: 1,
+                  }}
+                >
+                  <Typography
+                    sx={{
+                      paddingRight: "220px",
+                      fontFamily: "Poppins",
+                      fontSize: "16px",
+                    }}
+                  >
+                    Deskripsi
+                  </Typography>
+                  <Typography
+                    sx={{
+                      paddingRight: "5px",
+                      fontFamily: "Poppins",
+                      fontSize: "16px",
+                    }}
+                  >
+                    :
+                  </Typography>
+                </Stack>
+                <Typography sx={{ fontFamily: "Poppins", fontSize: "16px" }}>
+                  {selectedDetail.description}
+                </Typography>
+              </Card>
+            </Box>
+          </Box>
         ) : (
           <Card>
             <Stack
@@ -366,22 +539,17 @@ const Slider = () => {
                     {data
                       .slice((page - 1) * itemsPerPage, page * itemsPerPage)
                       .map((row) => (
-                        <TableRow
-                          sx={{ cursor: "pointer" }}
-                          key={row.id}
-                          className={classes.blueRow}
-                          onClick={() => handleDetailClick(row)}
-                        >
+                        <TableRow key={row.id} className={classes.blueRow}>
                           <TableCell>
                             <img
                               style={{ objectFit: "cover" }}
-                              src={row.image}
+                              src={row.image[0]}
                               alt={`Gambar ${row.album}`}
                               width="99"
                               height="111"
                             />
                           </TableCell>
-                          <TableCell sx={{ fontFamily: "Poppins" }}>
+                          {/* <TableCell sx={{ fontFamily: "Poppins" }}>
                             {editingId === row.id ? (
                               <TextField
                                 value={newAlbum}
@@ -391,12 +559,12 @@ const Slider = () => {
                               // <OutlinedInput placeholder="Please enter text" />
                               row.album
                             )}
-                          </TableCell>
+                          </TableCell> */}
                           {/* edit yg asli */}
-                          {/* <TableCell sx={{ fontFamily: "Poppins" }}>
-                        {row.album}
-                      </TableCell> */}
                           <TableCell sx={{ fontFamily: "Poppins" }}>
+                            {row.album}
+                          </TableCell>
+                          {/* <TableCell sx={{ fontFamily: "Poppins" }}>
                             {editingId === row.id ? (
                               <TextField
                                 value={newDescription}
@@ -407,11 +575,11 @@ const Slider = () => {
                             ) : (
                               row.description
                             )}
-                          </TableCell>
+                          </TableCell> */}
                           {/* deskripsi asli */}
-                          {/* <TableCell sx={{ fontFamily: "Poppins" }}>
-                        {row.description}
-                      </TableCell> */}
+                          <TableCell sx={{ fontFamily: "Poppins" }}>
+                            {row.description}
+                          </TableCell>
                           <TableCell>
                             <Stack
                               direction={"row"}
@@ -422,23 +590,22 @@ const Slider = () => {
                                 alignSelf: "center",
                               }}
                             >
-                              {editingId === row.id ? (
-                                <ButtonYellow
-                                  sx={{ color: "white" }}
-                                  variant="contained"
-                                  onClick={handleSaveEdit}
-                                >
-                                  Save
-                                </ButtonYellow>
-                              ) : (
-                                <ButtonYellow
-                                  sx={{ color: "white" }}
-                                  variant="Contained"
-                                  onClick={() => handleEdit(row.id)}
-                                >
-                                  <CreateIcon />
-                                </ButtonYellow>
-                              )}
+                              <ButtonGreen
+                                variant="Contained"
+                                sx={{ color: "white" }}
+                                style={{ width: "-10px" }}
+                                onClick={() => handleDetailClick(row)}
+                              >
+                                <VisibilityIcon />
+                              </ButtonGreen>
+                              <ButtonYellow
+                                sx={{ color: "white" }}
+                                variant="Contained"
+                                onClick={() => handleEdit(row.id)}
+                              >
+                                <CreateIcon />
+                              </ButtonYellow>
+
                               <ButtonPink
                                 sx={{ fontSize: "20px", color: "#FF2E00" }}
                                 variant="Contained"

@@ -19,6 +19,7 @@ import {
     OutlinedInput,
     TextField,
     Autocomplete,
+    CardMedia,
   } from "@mui/material";
   import Header from "../../components/header/Header";
   
@@ -32,11 +33,14 @@ import {
   import ImageIcon from "@mui/icons-material/Image";
   import Papa from "papaparse";
   import * as XLSX from "xlsx";
-  import { ButtonPink, ButtonYellow } from "../../components/button/Index";
+  import { ButtonGreen, ButtonPink, ButtonYellow } from "../../components/button/Index";
   import { ModalSlider } from "../../components/modal/Index";
   import { dataKarya } from "../../utils/InitialData";
   import { themePagination } from "../../components/paginations/Index";
   import Footer from "../../components/footer/Footer";
+  import IconKegiatan from "../../assets/detailKegiatan.svg";
+import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
+import VisibilityIcon from "@mui/icons-material/Visibility";
   
   const useStyles = makeStyles({
     blueRow: {
@@ -65,6 +69,22 @@ const Karya = () => {
     const csvFileRef = useRef(null);
     const [category, setCategory] = useState("filterByAlbum");
     const currentDate = new Date().toLocaleDateString();
+    const [selectedDetail, setSelectedDetail] = useState(null);
+    const [showFullText, setShowFullText] = useState(false);
+  
+    // membatasi text
+    const toggleText = () => {
+      setShowFullText(!showFullText);
+    };
+  
+    // detail
+    const handleDetailClick = (detail) => {
+      setSelectedDetail(detail);
+    };
+  
+    const handleCloseDetail = () => {
+      setSelectedDetail(null);
+    };
   
     // category
     const handleCategoryChange = (event) => {
@@ -234,6 +254,223 @@ const Karya = () => {
           onClickExcel={exportToExcel}
         />
         <Box my={3}>
+        {selectedDetail ? (
+          // halaman detail
+          <Box>
+            <Card>
+              <Stack
+                sx={{
+                  py: 2,
+                  pl: 4,
+                  display: "flex",
+                  gap: 2,
+                  flexDirection: "row",
+                }}
+              >
+                <CardMedia
+                  sx={{ width: "24px", height: "24px", cursor: "pointer" }}
+                  image={IconKegiatan}
+                  onClick={handleCloseDetail}
+                />
+                <Typography
+                  sx={{
+                    fontFamily: "Poppins",
+                    color: "#D1D3E2",
+                    fontWeight: 500,
+                    cursor: "pointer",
+                  }}
+                  onClick={handleCloseDetail}
+                >
+                  Karya
+                </Typography>
+                <Typography sx={{ mt: "4px", ml: "-4px" }}>
+                  <ArrowForwardIosIcon
+                    sx={{ color: "#576974", fontSize: "18px" }}
+                  />
+                </Typography>
+                <Typography
+                  sx={{
+                    fontFamily: "Poppins",
+                    color: "#576974",
+                    ml: "-5px",
+                    mt: "2px",
+                    fontWeight: 500,
+                  }}
+                >
+                  Detail Karya
+                </Typography>
+              </Stack>
+            </Card>
+            <Box sx={{ textAlign: "center", marginTop: "20px" }}>
+              <Grid container spacing={2}>
+                <Grid item xs={4}>
+                  <img
+                    src={selectedDetail.image}
+                    alt="jgugu"
+                    style={{
+                      width: "80%",
+                      height: "300px",
+                      objectFit: "cover",
+                      borderRadius: "12px",
+                      marginTop: "20%",
+                    }}
+                  />
+                </Grid>
+                <Grid item xs={8}>
+                  <Card
+                    sx={{ paddingX: 4, paddingY: 3, textAlign: "left" }}
+                    className="album-description"
+                  >
+                    <Grid
+                      container
+                      sx={{ display: "flex", flexDirection: "row", my: 1 }}
+                    >
+                      <Grid item xs={4}>
+                        <Typography
+                          sx={{ fontFamily: "Poppins", fontSize: "16px" }}
+                        >
+                          Judul karya
+                        </Typography>
+                      </Grid>
+                      <Grid item xs={8}>
+                        <Typography
+                          sx={{ fontFamily: "Poppins", fontSize: "16px" }}
+                        >
+                          : {selectedDetail.judulKarya}
+                        </Typography>
+                      </Grid>
+                    </Grid>
+                    <Grid
+                      container
+                      sx={{ display: "flex", flexDirection: "row", my: 1 }}
+                    >
+                      <Grid item xs={4}>
+                        <Typography
+                          sx={{ fontFamily: "Poppins", fontSize: "16px" }}
+                        >
+                          Kreator
+                        </Typography>
+                      </Grid>
+                      <Grid item xs={8}>
+                        <Typography
+                          sx={{ fontFamily: "Poppins", fontSize: "16px" }}
+                        >
+                          : {selectedDetail.kreator}
+                        </Typography>
+                      </Grid>
+                    </Grid>
+                    <Grid
+                      container
+                      sx={{ display: "flex", flexDirection: "row", my: 1 }}
+                    >
+                      <Grid item xs={4}>
+                        <Typography
+                          sx={{ fontFamily: "Poppins", fontSize: "16px" }}
+                        >
+                          Konsentrasi
+                        </Typography>
+                      </Grid>
+                      <Grid item xs={8}>
+                        <Typography
+                          sx={{ fontFamily: "Poppins", fontSize: "16px" }}
+                        >
+                          : {selectedDetail.konsentrasi}
+                        </Typography>
+                      </Grid>
+                    </Grid>
+                    <Grid
+                      container
+                      sx={{ display: "flex", flexDirection: "row", my: 1 }}
+                    >
+                      <Grid item xs={4}>
+                        <Typography
+                          sx={{ fontFamily: "Poppins", fontSize: "16px" }}
+                        >
+                          Link
+                        </Typography>
+                      </Grid>
+                      <Grid item xs={8}>
+                        <Typography
+                          sx={{ fontFamily: "Poppins", fontSize: "16px" }}
+                        >
+                          : {selectedDetail.link}
+                        </Typography>
+                      </Grid>
+                    </Grid>
+                    <Grid
+                      container
+                      sx={{ display: "flex", flexDirection: "row", my: 1 }}
+                    >
+                      <Grid item xs={4}>
+                        <Typography
+                          sx={{ fontFamily: "Poppins", fontSize: "16px" }}
+                        >
+                          Tanggal post
+                        </Typography>
+                      </Grid>
+                      <Grid item xs={8}>
+                        <Typography
+                          sx={{ fontFamily: "Poppins", fontSize: "16px" }}
+                        >
+                          : {selectedDetail.tanggalPost}
+                        </Typography>
+                      </Grid>
+                    </Grid>
+                    <Grid
+                      container
+                      sx={{ display: "flex", flexDirection: "row", my: 1 }}
+                    >
+                      <Grid item xs={4}>
+                        <Typography
+                          sx={{ fontFamily: "Poppins", fontSize: "16px" }}
+                        >
+                          Tanggal Update
+                        </Typography>
+                      </Grid>
+                      <Grid item xs={8}>
+                        <Typography
+                          sx={{ fontFamily: "Poppins", fontSize: "16px" }}
+                        >
+                          : {selectedDetail.tanggalUpdate}
+                        </Typography>
+                      </Grid>
+                    </Grid>
+                    <Grid
+                      container
+                      sx={{ display: "flex", flexDirection: "row", my: 1 }}
+                    >
+                      <Grid item xs={4}>
+                        <Typography
+                          sx={{ fontFamily: "Poppins", fontSize: "16px" }}
+                        >
+                          Deskripsi
+                        </Typography>
+                      </Grid>
+                      <Grid item xs={8}>
+                        <Typography
+                          sx={{ fontFamily: "Poppins", fontSize: "16px" }}
+                        >
+                          :
+                        </Typography>
+                      </Grid>
+                    </Grid>
+                    <Typography
+                      sx={{ fontFamily: "Poppins", fontSize: "16px" }}
+                    >
+                      
+                      {showFullText
+                        ? selectedDetail.deskripsi
+                        : selectedDetail.deskripsi.slice(0, 450) + "..."}
+                      <Typography sx={{mt: 1,fontFamily: "Poppins",color: "#FFC400",cursor: "pointer"}} onClick={toggleText}>
+                        {showFullText ? "Lihat lebih sedikit" : "Lihat lebih banyak..."}
+                      </Typography>
+                    </Typography>
+                  </Card>
+                </Grid>
+              </Grid>
+            </Box>
+          </Box>
+        ) : (
           <Card>
             <Stack
               display={"flex"}
@@ -342,6 +579,14 @@ const Karya = () => {
                                 alignSelf: "center",
                               }}
                             >
+                              <ButtonGreen
+                                variant="Contained"
+                                sx={{ color: "white" }}
+                                style={{ width: "-10px" }}
+                                onClick={() => handleDetailClick(row)}
+                              >
+                                <VisibilityIcon />
+                              </ButtonGreen>
                               {editingId === row.id ? (
                                 <ButtonYellow
                                   sx={{ color: "white" }}
@@ -398,6 +643,7 @@ const Karya = () => {
               </Stack>
             </Card>
           </Card>
+          )}
         </Box>
         {/* Drawer */}
         <Drawer anchor="right" open={openDrawer} sx={{ width: 700 }}>

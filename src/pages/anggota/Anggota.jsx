@@ -23,6 +23,7 @@ import {
   FormControlLabel,
   Radio,
   Autocomplete,
+  CardMedia,
 } from "@mui/material";
 import Header from "../../components/header/Header";
 
@@ -36,11 +37,19 @@ import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternate";
 import ImageIcon from "@mui/icons-material/Image";
 import Papa from "papaparse";
 import * as XLSX from "xlsx";
-import { ButtonPink, ButtonYellow } from "../../components/button/Index";
+import {
+  ButtonGreen,
+  ButtonPink,
+  ButtonYellow,
+} from "../../components/button/Index";
 import { ModalSlider } from "../../components/modal/Index";
 import { dataAnggota, dataAngkatan } from "../../utils/InitialData";
 import { themePagination } from "../../components/paginations/Index";
 import Footer from "../../components/footer/Footer";
+import IconKegiatan from "../../assets/detailKegiatan.svg";
+import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import Foto from "../../assets/navbar/Logo.png";
 
 const useStyles = makeStyles({
   blueRow: {
@@ -77,6 +86,16 @@ const Anggota = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const csvFileRef = useRef(null);
   const [category, setCategory] = useState("filterByAlbum");
+  const [selectedDetail, setSelectedDetail] = useState(null);
+
+  // detail
+  const handleDetailClick = (detail) => {
+    setSelectedDetail(detail);
+  };
+
+  const handleCloseDetail = () => {
+    setSelectedDetail(null);
+  };
 
   // category
   const handleCategoryChange = (event) => {
@@ -226,22 +245,6 @@ const Anggota = () => {
     setIsModalOpen(true);
   };
 
-  const handleImageChange = (e) => {
-    setNewImage(e.target.value);
-  };
-
-  const handleAlbumChange = (e) => {
-    setNewAlbum(e.target.value);
-  };
-
-  const handleDescriptionChange = (e) => {
-    setNewDescription(e.target.value);
-  };
-
-  const handleFileChange = (event) => {
-    setSelectedFile(event.target.files[0]);
-  };
-
   const handleDeleteFile = () => {
     setSelectedFile(null);
   };
@@ -265,14 +268,6 @@ const Anggota = () => {
     setPage(1);
   };
 
-  const handleChangeMenu = (event) => {
-    setMenu(event.target.value);
-  };
-
-  const closeModal = () => {
-    setIsModalOpen(false);
-  };
-
   // print
   const handlePrint = () => {
     const printContent = document.getElementById("print-content");
@@ -294,172 +289,484 @@ const Anggota = () => {
         onClickExcel={exportToExcel}
       />
       <Box my={3}>
-        <Card>
-          <Stack
-            display={"flex"}
-            direction={"row"}
-            sx={{
-              py: 3,
-              justifyContent: "space-between",
-              borderBottom: "1px solid rgba(232, 232, 232, 0.87)",
-              width: "95%",
-              alignItems: "center",
-              margin: "auto",
-            }}
-          >
-            <FormControl sx={{ fontFamily: "Poppins" }}>
-              <Stack display={"flex"} direction={"row"}>
-                <Typography sx={{ fontFamily: "Poppins" }}>
-                  Tampilkan
+        {selectedDetail ? (
+          // halaman detail
+          <Box>
+            <Card>
+              <Stack
+                sx={{
+                  py: 2,
+                  pl: 4,
+                  display: "flex",
+                  gap: 2,
+                  flexDirection: "row",
+                }}
+              >
+                <CardMedia
+                  sx={{ width: "24px", height: "24px", cursor: "pointer" }}
+                  image={IconKegiatan}
+                  onClick={handleCloseDetail}
+                />
+                <Typography
+                  sx={{
+                    fontFamily: "Poppins",
+                    color: "#D1D3E2",
+                    fontWeight: 500,
+                    cursor: "pointer",
+                  }}
+                  onClick={handleCloseDetail}
+                >
+                  Anggota
                 </Typography>
-                <Select
-                  sx={{ height: 25, width: 62, mx: 1, fontFamily: "Poppins" }}
-                  value={itemsPerPage}
-                  onChange={handleChangeItemsPerPage}
+                <Typography sx={{ mt: "4px", ml: "-4px" }}>
+                  <ArrowForwardIosIcon
+                    sx={{ color: "#576974", fontSize: "18px" }}
+                  />
+                </Typography>
+                <Typography
+                  sx={{
+                    fontFamily: "Poppins",
+                    color: "#576974",
+                    ml: "-5px",
+                    mt: "2px",
+                    fontWeight: 500,
+                  }}
                 >
-                  <MenuItem value={5}>5</MenuItem>
-                  <MenuItem value={10}>10</MenuItem>
-                  <MenuItem value={15}>15</MenuItem>
-                  <MenuItem value={data.length}>All</MenuItem>
-                </Select>
-                <Typography sx={{ fontFamily: "Poppins" }}>Data</Typography>
+                  Detail Anggota
+                </Typography>
               </Stack>
-            </FormControl>
-            {/* menu */}
-            <FormControl sx={{ fontFamily: "Poppins" }}>
-              <Stack>
-                <Select
-                  sx={{ height: 30, width: 200, fontFamily: "Poppins" }}
-                  value={category}
-                  onChange={handleCategoryChange}
-                >
-                  <MenuItem
-                    sx={{ fontFamily: "Poppins" }}
-                    value={"filterByAlbum"}
+            </Card>
+            <Box sx={{ textAlign: "center", marginTop: "20px" }}>
+              <Grid container spacing={2}>
+                <Grid  item xs={4}>
+                  <img
+                    src={selectedDetail.image}
+                    alt="jgugu"
+                    style={{
+                      width: "80%",
+                      height: "70%",
+                      objectFit: "cover",
+                      borderRadius: "12px",
+                      marginTop: "20%"
+                    }}
+                  />
+                </Grid>
+                <Grid item xs={8}>
+                  <Card
+                    sx={{ paddingX: 4, paddingY: 3, textAlign: "left" }}
+                    className="album-description"
                   >
-                    Filter By Album
-                  </MenuItem>
-                  <MenuItem
-                    sx={{ fontFamily: "Poppins" }}
-                    value={"detailKegiatan"}
-                  >
-                    Detail Kegiatan
-                  </MenuItem>
-                </Select>
-              </Stack>
-            </FormControl>
-          </Stack>
-          <div id="print-content">
-            <TableContainer
-              sx={{ px: 5, fontFamily: "Poppins" }}
-              component={Paper}
-            >
-              <Table>
-                <TableHead sx={{ fontFamily: "Poppins" }}>
-                  <TableRow>
-                    <TableCell sx={{ fontFamily: "Poppins", width: "200px" }}>
-                      Nri
-                    </TableCell>
-                    <TableCell sx={{ fontFamily: "Poppins", width: "250px" }}>
-                      Nama
-                    </TableCell>
-                    <TableCell sx={{ fontFamily: "Poppins", width: "250px" }}>
-                      Alamat
-                    </TableCell>
-                    <TableCell sx={{ fontFamily: "Poppins" }}>NO.WA</TableCell>
-                    <TableCell
-                      sx={{
-                        fontFamily: "Poppins",
-                        width: "100px",
-                        textAlign: "center",
-                      }}
+                    <Grid
+                      container
+                      sx={{ display: "flex", flexDirection: "row", my: 1 }}
                     >
-                      Aksi
-                    </TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody sx={{ fontFamily: "Poppins" }}>
-                  {data
-                    .slice((page - 1) * itemsPerPage, page * itemsPerPage)
-                    .map((row) => (
-                      <TableRow key={row.id} className={classes.blueRow}>
-                        <TableCell sx={{ fontFamily: "Poppins" }}>
-                          {row.nri}
-                        </TableCell>
-                        <TableCell sx={{ fontFamily: "Poppins" }}>
-                          {row.nama}
-                        </TableCell>
-                        {/* edit yg asli */}
-                        {/* <TableCell sx={{ fontFamily: "Poppins" }}>
-                        {row.album}
-                      </TableCell> */}
-                        <TableCell sx={{ fontFamily: "Poppins" }}>
-                          {row.alamat}
-                        </TableCell>
-                        {/* deskripsi asli */}
-                        {/* <TableCell sx={{ fontFamily: "Poppins" }}>
-                        {row.description}
-                      </TableCell> */}
-                        <TableCell sx={{ fontFamily: "Poppins" }}>
-                          {row.noWa}
-                        </TableCell>
-                        <TableCell>
-                          <Stack
-                            direction={"row"}
-                            spacing={1}
-                            sx={{
-                              // display: "flex",
-                              alignItems: "center",
-                              alignSelf: "center",
-                            }}
-                          >
-                            <ButtonYellow
-                              sx={{ color: "white" }}
-                              variant="Contained"
-                              onClick={() => handleEdit(row.id)}
-                            >
-                              <CreateIcon />
-                            </ButtonYellow>
-
-                            <ButtonPink
-                              sx={{ fontSize: "20px", color: "#FF2E00" }}
-                              variant="Contained"
-                              size="small"
-                              onClick={() => handleDelete(row.id)}
-                            >
-                              <RiDeleteBin5Fill
-                                sx={{ color: "#FF2E00", fontSize: "20px" }}
-                              />
-                            </ButtonPink>
-                          </Stack>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          </div>
-          <Card sx={{ px: 4, py: 4 }}>
+                      <Grid item xs={4}>
+                        <Typography
+                          sx={{ fontFamily: "Poppins", fontSize: "16px" }}
+                        >
+                          Nama
+                        </Typography>
+                      </Grid>
+                      <Grid item xs={8}>
+                        <Typography
+                          sx={{ fontFamily: "Poppins", fontSize: "16px" }}
+                        >
+                          : {selectedDetail.nama}
+                        </Typography>
+                      </Grid>
+                    </Grid>
+                    <Grid
+                      container
+                      sx={{ display: "flex", flexDirection: "row", my: 1 }}
+                    >
+                      <Grid item xs={4}>
+                        <Typography
+                          sx={{ fontFamily: "Poppins", fontSize: "16px" }}
+                        >
+                          NRI
+                        </Typography>
+                      </Grid>
+                      <Grid item xs={8}>
+                        <Typography
+                          sx={{ fontFamily: "Poppins", fontSize: "16px" }}
+                        >
+                          : {selectedDetail.nri}
+                        </Typography>
+                      </Grid>
+                    </Grid>
+                    <Grid
+                      container
+                      sx={{ display: "flex", flexDirection: "row", my: 1 }}
+                    >
+                      <Grid item xs={4}>
+                        <Typography
+                          sx={{ fontFamily: "Poppins", fontSize: "16px" }}
+                        >
+                          Alamat
+                        </Typography>
+                      </Grid>
+                      <Grid item xs={8}>
+                        <Typography
+                          sx={{ fontFamily: "Poppins", fontSize: "16px" }}
+                        >
+                          : {selectedDetail.alamat}
+                        </Typography>
+                      </Grid>
+                    </Grid>
+                    <Grid
+                      container
+                      sx={{ display: "flex", flexDirection: "row", my: 1 }}
+                    >
+                      <Grid item xs={4}>
+                        <Typography
+                          sx={{ fontFamily: "Poppins", fontSize: "16px" }}
+                        >
+                          Tempat,Tanggal lahir
+                        </Typography>
+                      </Grid>
+                      <Grid item xs={8}>
+                        <Typography
+                          sx={{ fontFamily: "Poppins", fontSize: "16px" }}
+                        >
+                          : {selectedDetail.tempatLahir},{selectedDetail.tanggalLahir}
+                        </Typography>
+                      </Grid>
+                    </Grid>
+                    <Grid
+                      container
+                      sx={{ display: "flex", flexDirection: "row", my: 1 }}
+                    >
+                      <Grid item xs={4}>
+                        <Typography
+                          sx={{ fontFamily: "Poppins", fontSize: "16px" }}
+                        >
+                          Jenis kelamin
+                        </Typography>
+                      </Grid>
+                      <Grid item xs={8}>
+                        <Typography
+                          sx={{ fontFamily: "Poppins", fontSize: "16px" }}
+                        >
+                          : {selectedDetail.jenisKelamin}
+                        </Typography>
+                      </Grid>
+                    </Grid>
+                    <Grid
+                      container
+                      sx={{ display: "flex", flexDirection: "row", my: 1 }}
+                    >
+                      <Grid item xs={4}>
+                        <Typography
+                          sx={{ fontFamily: "Poppins", fontSize: "16px" }}
+                        >
+                          Angkatan
+                        </Typography>
+                      </Grid>
+                      <Grid item xs={8}>
+                        <Typography
+                          sx={{ fontFamily: "Poppins", fontSize: "16px" }}
+                        >
+                          : {selectedDetail.angkatan}
+                        </Typography>
+                      </Grid>
+                    </Grid>
+                    <Grid
+                      container
+                      sx={{ display: "flex", flexDirection: "row", my: 1 }}
+                    >
+                      <Grid item xs={4}>
+                        <Typography
+                          sx={{ fontFamily: "Poppins", fontSize: "16px" }}
+                        >
+                          Jurusan
+                        </Typography>
+                      </Grid>
+                      <Grid item xs={8}>
+                        <Typography
+                          sx={{ fontFamily: "Poppins", fontSize: "16px" }}
+                        >
+                          : {selectedDetail.jurusan}
+                        </Typography>
+                      </Grid>
+                    </Grid>
+                    <Grid
+                      container
+                      sx={{ display: "flex", flexDirection: "row", my: 1 }}
+                    >
+                      <Grid item xs={4}>
+                        <Typography
+                          sx={{ fontFamily: "Poppins", fontSize: "16px" }}
+                        >
+                          Konsentrasi
+                        </Typography>
+                      </Grid>
+                      <Grid item xs={8}>
+                        <Typography
+                          sx={{ fontFamily: "Poppins", fontSize: "16px" }}
+                        >
+                          : {selectedDetail.konsentrasi}
+                        </Typography>
+                      </Grid>
+                    </Grid>
+                    <Grid
+                      container
+                      sx={{ display: "flex", flexDirection: "row", my: 1 }}
+                    >
+                      <Grid item xs={4}>
+                        <Typography
+                          sx={{ fontFamily: "Poppins", fontSize: "16px" }}
+                        >
+                          Jabatan
+                        </Typography>
+                      </Grid>
+                      <Grid item xs={8}>
+                        <Typography
+                          sx={{ fontFamily: "Poppins", fontSize: "16px" }}
+                        >
+                          : {selectedDetail.jabatan}
+                        </Typography>
+                      </Grid>
+                    </Grid>
+                    <Grid
+                      container
+                      sx={{ display: "flex", flexDirection: "row", my: 1 }}
+                    >
+                      <Grid item xs={4}>
+                        <Typography
+                          sx={{ fontFamily: "Poppins", fontSize: "16px" }}
+                        >
+                          NO WhatsApp
+                        </Typography>
+                      </Grid>
+                      <Grid item xs={8}>
+                        <Typography
+                          sx={{ fontFamily: "Poppins", fontSize: "16px" }}
+                        >
+                          : {selectedDetail.noWa}
+                        </Typography>
+                      </Grid>
+                    </Grid>
+                    <Grid
+                      container
+                      sx={{ display: "flex", flexDirection: "row", my: 1 }}
+                    >
+                      <Grid item xs={4}>
+                        <Typography
+                          sx={{ fontFamily: "Poppins", fontSize: "16px" }}
+                        >
+                          Instagram
+                        </Typography>
+                      </Grid>
+                      <Grid item xs={8}>
+                        <Typography
+                          sx={{ fontFamily: "Poppins", fontSize: "16px" }}
+                        >
+                          : {selectedDetail.instagram}
+                        </Typography>
+                      </Grid>
+                    </Grid>
+                    <Grid
+                      container
+                      sx={{ display: "flex", flexDirection: "row", my: 1 }}
+                    >
+                      <Grid item xs={4}>
+                        <Typography
+                          sx={{ fontFamily: "Poppins", fontSize: "16px" }}
+                        >
+                          Facebook
+                        </Typography>
+                      </Grid>
+                      <Grid item xs={8}>
+                        <Typography
+                          sx={{ fontFamily: "Poppins", fontSize: "16px" }}
+                        >
+                          : {selectedDetail.facebook}
+                        </Typography>
+                      </Grid>
+                    </Grid>
+                  </Card>
+                </Grid>
+              </Grid>
+            </Box>
+          </Box>
+        ) : (
+          <Card>
             <Stack
               display={"flex"}
               direction={"row"}
-              sx={{ justifyContent: "space-between" }}
+              sx={{
+                py: 3,
+                justifyContent: "space-between",
+                borderBottom: "1px solid rgba(232, 232, 232, 0.87)",
+                width: "95%",
+                alignItems: "center",
+                margin: "auto",
+              }}
             >
-              <Typography sx={{ fontFamily: "Poppins" }}>
-                Menampilkan 1 - {itemsPerPage} dari {data.length} Data
-              </Typography>
-              {/* pagination */}
-              <ThemeProvider theme={themePagination}>
-                <Pagination
-                  sx={{ color: "#FFC400" }}
-                  count={Math.ceil(data.length / itemsPerPage)}
-                  page={page}
-                  onChange={handleChangePage}
-                />
-              </ThemeProvider>
+              <FormControl sx={{ fontFamily: "Poppins" }}>
+                <Stack display={"flex"} direction={"row"}>
+                  <Typography sx={{ fontFamily: "Poppins" }}>
+                    Tampilkan
+                  </Typography>
+                  <Select
+                    sx={{ height: 25, width: 62, mx: 1, fontFamily: "Poppins" }}
+                    value={itemsPerPage}
+                    onChange={handleChangeItemsPerPage}
+                  >
+                    <MenuItem value={5}>5</MenuItem>
+                    <MenuItem value={10}>10</MenuItem>
+                    <MenuItem value={15}>15</MenuItem>
+                    <MenuItem value={data.length}>All</MenuItem>
+                  </Select>
+                  <Typography sx={{ fontFamily: "Poppins" }}>Data</Typography>
+                </Stack>
+              </FormControl>
+              {/* menu */}
+              <FormControl sx={{ fontFamily: "Poppins" }}>
+                <Stack>
+                  <Select
+                    sx={{ height: 30, width: 200, fontFamily: "Poppins" }}
+                    value={category}
+                    onChange={handleCategoryChange}
+                  >
+                    <MenuItem
+                      sx={{ fontFamily: "Poppins" }}
+                      value={"filterByAlbum"}
+                    >
+                      Filter By Album
+                    </MenuItem>
+                    <MenuItem
+                      sx={{ fontFamily: "Poppins" }}
+                      value={"detailKegiatan"}
+                    >
+                      Detail Kegiatan
+                    </MenuItem>
+                  </Select>
+                </Stack>
+              </FormControl>
             </Stack>
+            <div id="print-content">
+              <TableContainer
+                sx={{ px: 5, fontFamily: "Poppins" }}
+                component={Paper}
+              >
+                <Table>
+                  <TableHead sx={{ fontFamily: "Poppins" }}>
+                    <TableRow>
+                      <TableCell sx={{ fontFamily: "Poppins", width: "200px" }}>
+                        Nri
+                      </TableCell>
+                      <TableCell sx={{ fontFamily: "Poppins", width: "250px" }}>
+                        Nama
+                      </TableCell>
+                      <TableCell sx={{ fontFamily: "Poppins", width: "250px" }}>
+                        Alamat
+                      </TableCell>
+                      <TableCell sx={{ fontFamily: "Poppins" }}>
+                        NO.WA
+                      </TableCell>
+                      <TableCell
+                        sx={{
+                          fontFamily: "Poppins",
+                          width: "100px",
+                          textAlign: "center",
+                        }}
+                      >
+                        Aksi
+                      </TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody sx={{ fontFamily: "Poppins" }}>
+                    {data
+                      .slice((page - 1) * itemsPerPage, page * itemsPerPage)
+                      .map((row) => (
+                        <TableRow key={row.id} className={classes.blueRow}>
+                          <TableCell sx={{ fontFamily: "Poppins" }}>
+                            {row.nri}
+                          </TableCell>
+                          <TableCell sx={{ fontFamily: "Poppins" }}>
+                            {row.nama}
+                          </TableCell>
+                          {/* edit yg asli */}
+                          {/* <TableCell sx={{ fontFamily: "Poppins" }}>
+                        {row.album}
+                      </TableCell> */}
+                          <TableCell sx={{ fontFamily: "Poppins" }}>
+                            {row.alamat}
+                          </TableCell>
+                          {/* deskripsi asli */}
+                          {/* <TableCell sx={{ fontFamily: "Poppins" }}>
+                        {row.description}
+                      </TableCell> */}
+                          <TableCell sx={{ fontFamily: "Poppins" }}>
+                            {row.noWa}
+                          </TableCell>
+                          <TableCell>
+                            <Stack
+                              direction={"row"}
+                              spacing={1}
+                              sx={{
+                                // display: "flex",
+                                alignItems: "center",
+                                alignSelf: "center",
+                              }}
+                            >
+                              <ButtonGreen
+                                variant="Contained"
+                                sx={{ color: "white" }}
+                                style={{ width: "-10px" }}
+                                onClick={() => handleDetailClick(row)}
+                              >
+                                <VisibilityIcon />
+                              </ButtonGreen>
+                              <ButtonYellow
+                                sx={{ color: "white" }}
+                                variant="Contained"
+                                onClick={() => handleEdit(row.id)}
+                              >
+                                <CreateIcon />
+                              </ButtonYellow>
+
+                              <ButtonPink
+                                sx={{ fontSize: "20px", color: "#FF2E00" }}
+                                variant="Contained"
+                                size="small"
+                                onClick={() => handleDelete(row.id)}
+                              >
+                                <RiDeleteBin5Fill
+                                  sx={{ color: "#FF2E00", fontSize: "20px" }}
+                                />
+                              </ButtonPink>
+                            </Stack>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </div>
+            <Card sx={{ px: 4, py: 4 }}>
+              <Stack
+                display={"flex"}
+                direction={"row"}
+                sx={{ justifyContent: "space-between" }}
+              >
+                <Typography sx={{ fontFamily: "Poppins" }}>
+                  Menampilkan 1 - {itemsPerPage} dari {data.length} Data
+                </Typography>
+                {/* pagination */}
+                <ThemeProvider theme={themePagination}>
+                  <Pagination
+                    sx={{ color: "#FFC400" }}
+                    count={Math.ceil(data.length / itemsPerPage)}
+                    page={page}
+                    onChange={handleChangePage}
+                  />
+                </ThemeProvider>
+              </Stack>
+            </Card>
           </Card>
-        </Card>
+        )}
       </Box>
       {/* Drawer */}
       <Drawer anchor="right" open={openDrawer} sx={{ width: 700 }}>
@@ -573,7 +880,7 @@ const Anggota = () => {
               </Typography>
               {selectedFile && (
                 <Stack
-                  sx={{ display: "flex", flexDirection: "row" }}
+                  sx={{ display: "flex", flexDirection: "row", my: 1 }}
                   // gap={"2px"}
                 >
                   <ImageIcon
