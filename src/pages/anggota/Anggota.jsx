@@ -66,8 +66,6 @@ const Anggota = () => {
   const [openDrawer, setOpenDrawer] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
   const [newImage, setNewImage] = useState("");
-  const [newAlbum, setNewAlbum] = useState("");
-  const [newDescription, setNewDescription] = useState("");
   const [newNri, setNewNri] = useState("");
   const [newName, setNewName] = useState("");
   const [newAlamat, setNewAlamat] = useState("");
@@ -87,6 +85,7 @@ const Anggota = () => {
   const csvFileRef = useRef(null);
   const [category, setCategory] = useState("filterByAlbum");
   const [selectedDetail, setSelectedDetail] = useState(null);
+  const [editMode, setEditMode] = useState(false);
 
   // detail
   const handleDetailClick = (detail) => {
@@ -144,31 +143,91 @@ const Anggota = () => {
     setEditingId(id);
     const selectedItem = data.find((item) => item.id === id);
     setNewImage(selectedItem.image);
-    setNewAlbum(selectedItem.album);
-    setNewDescription(selectedItem.description);
+    setNewName(selectedItem.nama);
+    setNewNri(selectedItem.nri);
+    setNewAlamat(selectedItem.alamat);
+    setNewTempatLahir(selectedItem.tempatLahir);
+    setNewTanggalLahir(selectedItem.tanggalLahir);
+    setNewJenisKelamin(selectedItem.jenisKelamin);
+    setNewAngkatan(selectedItem.angkatan);
+    setNewJurusan(selectedItem.jurusan);
+    setNewKonsentrasi(selectedItem.konsentrasi);
+    setNewJabatan(selectedItem.jabatan);
+    setNewNoWa(selectedItem.noWa);
+    setNewIg(selectedItem.instagram);
+    setNewFb(selectedItem.facebook);
+    setOpenDrawer(true);
+    setEditMode(true);
   };
-
+  // delete
   const handleDelete = (id) => {
     const updatedData = data.filter((item) => item.id !== id);
     setData(updatedData);
   };
 
-  const handleSaveEdit = () => {
-    const updatedData = data.map((item) =>
-      item.id === editingId
-        ? {
-            id: editingId,
-            image: newImage,
-            album: newAlbum,
-            description: newDescription,
-          }
-        : item
-    );
-    setData(updatedData);
+  const handleSave = () => {
+    if (editMode) {
+      const updatedData = data.map((item) =>
+        item.id === editingId
+          ? {
+              id: editingId,
+              image: [newImage],
+              nama: newName,
+              nri: newNri,
+              alamat: newAlamat,
+              tempatLahir: newTempatLahir,
+              tanggalLahir: newTanggalLahir,
+              jenisKelamin: newJenisKelamin,
+              angkatan: newAngkatan,
+              jurusan: newJurusan,
+              konsentrasi: newKonsentrasi,
+              jabatan: newJabatan,
+              noWa: newNoWa,
+              instagram: newIg,
+              facebook: newFb,
+            }
+          : item
+      );
+      setData(updatedData);
+      setEditMode(false);
+    } else {
+      const newData = {
+        id: data.length + 1,
+        image: [newImage],
+        nama: newName,
+        nri: newNri,
+        alamat: newAlamat,
+        tempatLahir: newTempatLahir,
+        tanggalLahir: newTanggalLahir,
+        jenisKelamin: newJenisKelamin,
+        angkatan: newAngkatan,
+        jurusan: newJurusan,
+        konsentrasi: newKonsentrasi,
+        jabatan: newJabatan,
+        noWa: newNoWa,
+        instagram: newIg,
+        facebook: newFb,
+      };
+      setData([...data, newData]);
+    }
+
     setEditingId(null);
+    setNewName("");
+    setNewNri("");
     setNewImage("");
-    setNewAlbum("");
-    setNewDescription("");
+    setNewAlamat("");
+    setNewTempatLahir("");
+    setNewTanggalLahir("");
+    setNewJenisKelamin("");
+    setNewAngkatan("");
+    setNewJurusan("");
+    setNewKonsentrasi("");
+    setNewJabatan("");
+    setNewNoWa("");
+    setNewIg("");
+    setNewFb("");
+    setOpenDrawer(false);
+    setIsModalOpen(true);
   };
 
   const handleAddChange = (e, field) => {
@@ -205,6 +264,19 @@ const Anggota = () => {
     } else if (field === "fb") {
       setNewFb(e.target.value);
     }
+  };
+
+  // image
+  const handleImageChange = (e) => {
+    const selectedImage = e.target.files[0];
+    if (selectedImage) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        setNewImage(reader.result);
+      };
+      reader.readAsDataURL(selectedImage);
+    }
+    setSelectedFile(e.target.files[0]);
   };
 
   const handleAddData = () => {
@@ -253,9 +325,13 @@ const Anggota = () => {
     document.querySelector('input[type="file"]').click();
   };
 
-  const toggleDrawer = (open) => () => {
-    setOpenDrawer(open);
-  };
+  // drawer
+  const toggleDrawer =
+    (open, isEditMode = false) =>
+    () => {
+      setOpenDrawer(open);
+      setEditMode(isEditMode);
+    };
 
   const classes = useStyles();
 
@@ -338,7 +414,7 @@ const Anggota = () => {
             </Card>
             <Box sx={{ textAlign: "center", marginTop: "20px" }}>
               <Grid container spacing={2}>
-                <Grid  item xs={4}>
+                <Grid item xs={4}>
                   <img
                     src={selectedDetail.image}
                     alt="jgugu"
@@ -347,7 +423,7 @@ const Anggota = () => {
                       height: "70%",
                       objectFit: "cover",
                       borderRadius: "12px",
-                      marginTop: "20%"
+                      marginTop: "20%",
                     }}
                   />
                 </Grid>
@@ -428,7 +504,8 @@ const Anggota = () => {
                         <Typography
                           sx={{ fontFamily: "Poppins", fontSize: "16px" }}
                         >
-                          : {selectedDetail.tempatLahir},{selectedDetail.tanggalLahir}
+                          : {selectedDetail.tempatLahir},
+                          {selectedDetail.tanggalLahir}
                         </Typography>
                       </Grid>
                     </Grid>
@@ -687,17 +764,11 @@ const Anggota = () => {
                           <TableCell sx={{ fontFamily: "Poppins" }}>
                             {row.nama}
                           </TableCell>
-                          {/* edit yg asli */}
-                          {/* <TableCell sx={{ fontFamily: "Poppins" }}>
-                        {row.album}
-                      </TableCell> */}
+
                           <TableCell sx={{ fontFamily: "Poppins" }}>
                             {row.alamat}
                           </TableCell>
-                          {/* deskripsi asli */}
-                          {/* <TableCell sx={{ fontFamily: "Poppins" }}>
-                        {row.description}
-                      </TableCell> */}
+
                           <TableCell sx={{ fontFamily: "Poppins" }}>
                             {row.noWa}
                           </TableCell>
@@ -854,7 +925,7 @@ const Anggota = () => {
                   type="file"
                   accept="image/*"
                   style={{ display: "none" }}
-                  onChange={(e) => handleAddChange(e, "file")}
+                  onChange={handleImageChange}
                 />
                 <ButtonYellow
                   sx={{
@@ -868,7 +939,7 @@ const Anggota = () => {
                   color="primary"
                   onClick={handleChooseFileClick}
                   value={newImage}
-                  onChange={(e) => handleAddChange(e, "image")}
+                  // onChange={(e) => handleAddChange(e, "image")}
                 >
                   Pilih File
                 </ButtonYellow>
@@ -1166,7 +1237,7 @@ const Anggota = () => {
           >
             <ButtonYellow
               // onClick={toggleDrawer(false)}
-              onClick={handleAddData}
+              onClick={handleSave}
               sx={{
                 width: "130px",
                 py: 1,
@@ -1175,7 +1246,7 @@ const Anggota = () => {
               }}
               startIcon={<CreateIcon />}
             >
-              Simpan
+              {editMode ? "Save" : "Simpan"}
             </ButtonYellow>
             <ButtonPink
               onClick={toggleDrawer(false)}

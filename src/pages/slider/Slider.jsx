@@ -12,7 +12,6 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  TextField,
   Typography,
   Grid,
   Input,
@@ -33,7 +32,6 @@ import Papa from "papaparse";
 import * as XLSX from "xlsx";
 import "./Slider.css";
 import {
-  ButtonBlue,
   ButtonGreen,
   ButtonPink,
   ButtonYellow,
@@ -47,12 +45,9 @@ import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 
 import Glide from "@glidejs/glide";
-// import Glide, { Controls } from "@glidejs/glide/dist/glide.modular.esm";
 import "@glidejs/glide/dist/css/glide.core.min.css";
 import "@glidejs/glide/dist/css/glide.theme.min.css";
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
-// import Foto from "../assets/navbar/Logo.png";
-// import Foto2 from "../assets/sukses.svg";
 
 const useStyles = makeStyles({
   blueRow: {
@@ -77,6 +72,8 @@ const Slider = () => {
   const csvFileRef = useRef(null);
   const [category, setCategory] = useState("filterByAlbum");
   const [selectedDetail, setSelectedDetail] = useState(null);
+  const [editMode, setEditMode] = useState(false);
+  
 
   // detail
   const handleDetailClick = (detail) => {
@@ -129,6 +126,7 @@ const Slider = () => {
   };
   // export excel end
 
+  // edit
   const handleEdit = (id) => {
     setEditingId(id);
     const selectedItem = data.find((item) => item.id === id);
@@ -136,65 +134,59 @@ const Slider = () => {
     setNewAlbum(selectedItem.album);
     setNewDescription(selectedItem.description);
     setOpenDrawer(true);
+    setEditMode(true);
   };
-
+// delete
   const handleDelete = (id) => {
     const updatedData = data.filter((item) => item.id !== id);
     setData(updatedData);
   };
 
-  const handleSaveEdit = () => {
-    const updatedData = data.map((item) =>
-      item.id === editingId
-        ? {
-            id: editingId,
-            image: newImage,
-            album: newAlbum,
-            description: newDescription,
-          }
-        : item
-    );
-    setData(updatedData);
-    setEditingId(null);
-    setNewImage("");
-    setNewAlbum("");
-    setNewDescription("");
-  };
-
-  const handleInputChange = (e, field) => {
-    if (field === "album") {
-      setNewAlbum(e.target.value);
-    } else if (field === "description") {
-      setNewDescription(e.target.value);
+  // edit dan tambah data
+  const handleSave = () => {
+    if (editMode) {
+      const updatedData = data.map((item) =>
+        item.id === editingId
+          ? {
+              id: editingId,
+              image: [newImage],
+              album: newAlbum,
+              description: newDescription,
+            }
+          : item
+      );
+      setData(updatedData);
+      setEditMode(false);
+    } else {
+      const newData = {
+        id: data.length + 1,
+        image: [newImage],
+        album: newAlbum,
+        description: newDescription,
+      };
+      setData([...data, newData]);
     }
-  };
 
-  const handleAddData = () => {
-    const newData = {
-      id: data.length + 1,
-      image: newImage,
-      album: newAlbum,
-      description: newDescription,
-    };
-    setData([...data, newData]);
-
+    setEditingId(null);
     setNewImage("");
     setNewAlbum("");
     setNewDescription("");
     setOpenDrawer(false);
     setIsModalOpen(true);
   };
-
+// image
   const handleImageChange = (e) => {
-    const imageFile = e.target.files[0];
-    if (imageFile) {
+    const selectedImage = e.target.files[0];
+    if (selectedImage) {
       const reader = new FileReader();
-      reader.onload = (event) => {
-        setEditingId({ ...editingId, image: event.target.result });
+      reader.onload = () => {
+        setNewImage(reader.result);
       };
-      reader.readAsDataURL(imageFile);
+      reader.readAsDataURL(selectedImage);
     }
+    setSelectedFile(e.target.files[0]);
   };
+
   const handleAlbumChange = (e) => {
     setNewAlbum(e.target.value);
   };
@@ -202,29 +194,28 @@ const Slider = () => {
   const handleDescriptionChange = (e) => {
     setNewDescription(e.target.value);
   };
-
-  const handleFileChange = (event) => {
-    setSelectedFile(event.target.files[0]);
-  };
-
+// delete
   const handleDeleteFile = () => {
     setSelectedFile(null);
   };
-
+// tombol input image
   const handleChooseFileClick = () => {
     document.querySelector('input[type="file"]').click();
   };
-
-  const toggleDrawer = (open) => () => {
-    setOpenDrawer(open);
-  };
+// drawer
+  const toggleDrawer =
+    (open, isEditMode = false) =>
+    () => {
+      setOpenDrawer(open);
+      setEditMode(isEditMode);
+    };
 
   const classes = useStyles();
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
   };
-
+// menampilkan item perpage
   const handleChangeItemsPerPage = (event) => {
     setItemsPerPage(event.target.value);
     setPage(1);
@@ -233,7 +224,7 @@ const Slider = () => {
   const handleChangeMenu = (event) => {
     setMenu(event.target.value);
   };
-
+// modal
   const closeModal = () => {
     setIsModalOpen(false);
   };
@@ -258,8 +249,7 @@ const Slider = () => {
       const glide = new Glide(`#glide-${selectedDetail.id}`, {
         type: "carousel",
         startAt: 0,
-        perView: perView, // Menggunakan 'auto' agar mengikuti jumlah gambar
-        // focusAt: "center", // Gambar berada di tengah
+        perView: perView,
         rewind: true,
         animationTimingFunc: "linear",
         animationDuration: 800,
@@ -549,34 +539,9 @@ const Slider = () => {
                               height="111"
                             />
                           </TableCell>
-                          {/* <TableCell sx={{ fontFamily: "Poppins" }}>
-                            {editingId === row.id ? (
-                              <TextField
-                                value={newAlbum}
-                                onChange={(e) => handleInputChange(e, "album")}
-                              />
-                            ) : (
-                              // <OutlinedInput placeholder="Please enter text" />
-                              row.album
-                            )}
-                          </TableCell> */}
-                          {/* edit yg asli */}
                           <TableCell sx={{ fontFamily: "Poppins" }}>
                             {row.album}
                           </TableCell>
-                          {/* <TableCell sx={{ fontFamily: "Poppins" }}>
-                            {editingId === row.id ? (
-                              <TextField
-                                value={newDescription}
-                                onChange={(e) =>
-                                  handleInputChange(e, "description")
-                                }
-                              />
-                            ) : (
-                              row.description
-                            )}
-                          </TableCell> */}
-                          {/* deskripsi asli */}
                           <TableCell sx={{ fontFamily: "Poppins" }}>
                             {row.description}
                           </TableCell>
@@ -706,7 +671,9 @@ const Slider = () => {
                   type="file"
                   accept="image/*"
                   style={{ display: "none" }}
-                  onChange={handleFileChange}
+                  // onChange={handleFileChange}
+                  onChange={handleImageChange}
+                  // value={newImage}
                 />
                 <ButtonYellow
                   sx={{
@@ -720,7 +687,7 @@ const Slider = () => {
                   color="primary"
                   onClick={handleChooseFileClick}
                   value={newImage}
-                  onChange={handleImageChange}
+                  // onChange={handleImageChange}
                 >
                   Pilih File
                 </ButtonYellow>
@@ -731,10 +698,7 @@ const Slider = () => {
                 Upload Files
               </Typography>
               {selectedFile && (
-                <Stack
-                  sx={{ display: "flex", flexDirection: "row" }}
-                  // gap={"2px"}
-                >
+                <Stack sx={{ display: "flex", flexDirection: "row" }}>
                   <ImageIcon
                     sx={{ color: "#576974", pt: 1, fontSize: "30px" }}
                   />
@@ -796,8 +760,7 @@ const Slider = () => {
             }}
           >
             <ButtonYellow
-              // onClick={toggleDrawer(false)}
-              onClick={handleAddData}
+              onClick={handleSave}
               sx={{
                 width: "130px",
                 py: 1,
@@ -806,7 +769,7 @@ const Slider = () => {
               }}
               startIcon={<CreateIcon />}
             >
-              Simpan
+              {editMode ? "Save" : "Simpan"}
             </ButtonYellow>
             <ButtonPink
               onClick={toggleDrawer(false)}
@@ -840,11 +803,6 @@ const Slider = () => {
             >
               Kegiatan
             </Typography>
-            {/* <Typography sx={{ mt: "4px", ml: "-4px" }}>
-              <ArrowForwardIosIcon
-                sx={{ color: "#576974", fontSize: "18px" }}
-              />{" "}
-            </Typography> */}
             <FormControl
               variant="standard"
               style={{ border: "none" }}
