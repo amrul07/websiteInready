@@ -116,22 +116,21 @@ const dataAnggota = [
 ];
 
 const dataAngkatan = [
-  { id: 1, label: "pendiri" },
-  { id: 2, label: "1" },
-  { id: 3, label: "2" },
-  { id: 4, label: "3" },
-  { id: 5, label: "4" },
-  { id: 6, label: "5" },
-  { id: 7, label: "6" },
-  { id: 8, label: "7" },
-  { id: 9, label: "8" },
-  { id: 10, label: "9" },
-  { id: 11, label: "10" },
-  { id: 12, label: "11" },
-  { id: 13, label: "12" },
-  { id: 14, label: "13" },
-  { id: 15, label: "14" },
-  { id: 16, label: "15" },
+  "pendiri",
+  "1",
+  "2",
+  "3",
+  "4",
+  "5",
+  "6",
+  "7",
+  "8",
+  "9",
+  "10",
+  "11",
+  "12",
+  "13",
+  "14",
 ];
 
 const dataBlog = [

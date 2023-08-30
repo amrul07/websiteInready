@@ -12,7 +12,6 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  TextField,
   Typography,
   Grid,
   Input,
@@ -75,6 +74,7 @@ const Blog = () => {
   const currentDate = new Date().toLocaleDateString();
   const [selectedDetail, setSelectedDetail] = useState(null);
   const [showFullText, setShowFullText] = useState(false);
+  const [editMode, setEditMode] = useState(false);
 
   // membatasi text
   const toggleText = () => {
@@ -131,38 +131,68 @@ const Blog = () => {
     XLSX.writeFile(wb, "dataExcel.xlsx");
   };
   // export excel end
-
+  // edit
   const handleEdit = (id) => {
     setEditingId(id);
     const selectedItem = data.find((item) => item.id === id);
     setNewImage(selectedItem.image);
-    setNewAlbum(selectedItem.album);
-    // setNewDescription(selectedItem.description);
+    setNewJudul(selectedItem.judul);
+    setNewKategori(selectedItem.kategori);
+    setNewPenulis(selectedItem.penulis);
+    setNewTanggalPost(selectedItem.tanggalPost);
+    setNewTanggalUpdate(selectedItem.tanggalUpdate);
+    setNewIsiBerita(selectedItem.isiBerita);
+    setOpenDrawer(true);
+    setEditMode(true);
   };
-
+  // delete
   const handleDelete = (id) => {
     const updatedData = data.filter((item) => item.id !== id);
     setData(updatedData);
   };
+  // // tombol save atau simpan data
+  const handleSave = () => {
+    if (editMode) {
+      const updatedData = data.map((item) =>
+        item.id === editingId
+          ? {
+              id: editingId,
+              image: [newImage],
+              judul: newJudul,
+              kategori: newKategori,
+              penulis: newPenulis,
+              tanggalPost: newTanggalPost,
+              tanggalUpdate: currentDate,
+              isiBerita: newIsiBerita,
+            }
+          : item
+      );
+      setData(updatedData);
+      setEditMode(false);
+    } else {
+      const newData = {
+        id: data.length + 1,
+        image: [newImage],
+        judul: newJudul,
+        kategori: newKategori,
+        penulis: newPenulis,
+        tanggalPost: currentDate,
+        tanggalUpdate: currentDate,
+        isiBerita: newIsiBerita,
+      };
+      setData([...data, newData]);
+    }
 
-  const handleSaveEdit = () => {
-    const updatedData = data.map((item) =>
-      item.id === editingId
-        ? {
-            id: editingId,
-            image: newImage,
-            album: newAlbum,
-            tanggalUpdate: currentDate,
-            // description: newDescription,
-          }
-        : item
-    );
-    setData(updatedData);
     setEditingId(null);
-    setNewImage("");
-    setNewAlbum("");
+    setNewJudul("");
+    setNewKategori("");
+    setNewPenulis("");
+    setNewTanggalPost("");
     setNewTanggalUpdate("");
-    // setNewDescription("");
+    setNewIsiBerita("");
+    setNewImage("");
+    setOpenDrawer(false);
+    setIsModalOpen(true);
   };
 
   const handleAddChange = (e, field) => {
@@ -185,30 +215,19 @@ const Blog = () => {
     }
   };
 
-  const handleAddData = () => {
-    const newData = {
-      id: data.length + 1,
-      judul: newJudul,
-      kategori: newKategori,
-      penulis: newPenulis,
-      tanggalPost: currentDate,
-      tanggalUpdate: currentDate,
-      isiBerita: newIsiBerita,
-      image: newImage,
-    };
-    setData([...data, newData]);
-
-    setNewJudul("");
-    setNewKategori("");
-    setNewPenulis("");
-    setNewTanggalPost("");
-    setNewTanggalUpdate("");
-    setNewIsiBerita("");
-    setNewImage("");
-    setOpenDrawer(false);
-    setIsModalOpen(true);
+   // image
+   const handleImageChange = (e) => {
+    const selectedImage = e.target.files[0];
+    if (selectedImage) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        setNewImage(reader.result);
+      };
+      reader.readAsDataURL(selectedImage);
+    }
+    setSelectedFile(e.target.files[0]);
   };
-
+  // delete
   const handleDeleteFile = () => {
     setSelectedFile(null);
   };
@@ -217,9 +236,13 @@ const Blog = () => {
     document.querySelector('input[type="file"]').click();
   };
 
-  const toggleDrawer = (open) => () => {
-    setOpenDrawer(open);
-  };
+   // drawer
+   const toggleDrawer =
+   (open, isEditMode = false) =>
+   () => {
+     setOpenDrawer(open);
+     setEditMode(isEditMode);
+   };
 
   const classes = useStyles();
 
@@ -440,12 +463,21 @@ const Blog = () => {
                     <Typography
                       sx={{ fontFamily: "Poppins", fontSize: "16px" }}
                     >
-                      
                       {showFullText
                         ? selectedDetail.isiBerita
                         : selectedDetail.isiBerita.slice(0, 450) + "..."}
-                      <Typography sx={{mt: 1,fontFamily: "Poppins",color: "#FFC400",cursor: "pointer"}} onClick={toggleText}>
-                        {showFullText ? "Lihat lebih sedikit" : "Lihat lebih banyak..."}
+                      <Typography
+                        sx={{
+                          mt: 1,
+                          fontFamily: "Poppins",
+                          color: "#FFC400",
+                          cursor: "pointer",
+                        }}
+                        onClick={toggleText}
+                      >
+                        {showFullText
+                          ? "Lihat lebih sedikit"
+                          : "Lihat lebih banyak..."}
                       </Typography>
                     </Typography>
                   </Card>
@@ -557,10 +589,6 @@ const Blog = () => {
                           <TableCell sx={{ fontFamily: "Poppins" }}>
                             {row.tanggalPost}
                           </TableCell>
-                          {/* deskripsi asli */}
-                          {/* <TableCell sx={{ fontFamily: "Poppins" }}>
-                        {row.description}
-                      </TableCell> */}
                           <TableCell>
                             <Stack
                               direction={"row"}
@@ -718,7 +746,7 @@ const Blog = () => {
                   type="file"
                   accept="image/*"
                   style={{ display: "none" }}
-                  onChange={(e) => handleAddChange(e, "file")}
+                  onChange={handleImageChange}
                 />
                 <ButtonYellow
                   sx={{
@@ -732,7 +760,6 @@ const Blog = () => {
                   color="primary"
                   onClick={handleChooseFileClick}
                   value={newImage}
-                  onChange={(e) => handleAddChange(e, "image")}
                 >
                   Pilih File
                 </ButtonYellow>
@@ -815,7 +842,7 @@ const Blog = () => {
           >
             <ButtonYellow
               // onClick={toggleDrawer(false)}
-              onClick={handleAddData}
+              onClick={handleSave}
               sx={{
                 width: "130px",
                 py: 1,
@@ -824,7 +851,7 @@ const Blog = () => {
               }}
               startIcon={<CreateIcon />}
             >
-              Simpan
+              {editMode ? "Save" : "Simpan"}
             </ButtonYellow>
             <ButtonPink
               onClick={toggleDrawer(false)}

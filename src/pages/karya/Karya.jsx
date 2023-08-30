@@ -1,259 +1,292 @@
 import {
-    Box,
-    Card,
-    FormControl,
-    MenuItem,
-    Paper,
-    Select,
-    Stack,
-    Table,
-    TableBody,
-    TableCell,
-    TableContainer,
-    TableHead,
-    TableRow,
-    Typography,
-    Grid,
-    Input,
-    Pagination,
-    OutlinedInput,
-    TextField,
-    Autocomplete,
-    CardMedia,
-  } from "@mui/material";
-  import Header from "../../components/header/Header";
-  
-  import { makeStyles } from "@mui/styles";
-  import { ThemeProvider } from "@mui/material/styles";
-  import CreateIcon from "@mui/icons-material/Create";
-  import { RiDeleteBin5Fill } from "react-icons/ri";
-  import React, { useRef, useState } from "react";
-  import Drawer from "@mui/material/Drawer";
-  import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternate";
-  import ImageIcon from "@mui/icons-material/Image";
-  import Papa from "papaparse";
-  import * as XLSX from "xlsx";
-  import { ButtonGreen, ButtonPink, ButtonYellow } from "../../components/button/Index";
-  import { ModalSlider } from "../../components/modal/Index";
-  import { dataKarya } from "../../utils/InitialData";
-  import { themePagination } from "../../components/paginations/Index";
-  import Footer from "../../components/footer/Footer";
-  import IconKegiatan from "../../assets/detailKegiatan.svg";
+  Box,
+  Card,
+  FormControl,
+  MenuItem,
+  Paper,
+  Select,
+  Stack,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Typography,
+  Grid,
+  Input,
+  Pagination,
+  OutlinedInput,
+  TextField,
+  Autocomplete,
+  CardMedia,
+} from "@mui/material";
+import Header from "../../components/header/Header";
+
+import { makeStyles } from "@mui/styles";
+import { ThemeProvider } from "@mui/material/styles";
+import CreateIcon from "@mui/icons-material/Create";
+import { RiDeleteBin5Fill } from "react-icons/ri";
+import React, { useRef, useState } from "react";
+import Drawer from "@mui/material/Drawer";
+import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternate";
+import ImageIcon from "@mui/icons-material/Image";
+import Papa from "papaparse";
+import * as XLSX from "xlsx";
+import {
+  ButtonGreen,
+  ButtonPink,
+  ButtonYellow,
+} from "../../components/button/Index";
+import { ModalSlider } from "../../components/modal/Index";
+import { dataKarya } from "../../utils/InitialData";
+import { themePagination } from "../../components/paginations/Index";
+import Footer from "../../components/footer/Footer";
+import IconKegiatan from "../../assets/detailKegiatan.svg";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import VisibilityIcon from "@mui/icons-material/Visibility";
-  
-  const useStyles = makeStyles({
-    blueRow: {
-      "&:nth-of-type(odd)": {
-        backgroundColor: "rgba(255, 196, 0, 0.10)",
-      },
+
+const useStyles = makeStyles({
+  blueRow: {
+    "&:nth-of-type(odd)": {
+      backgroundColor: "rgba(255, 196, 0, 0.10)",
     },
-  });
+  },
+});
 
 const Karya = () => {
-    const [data, setData] = useState(dataKarya);
-    const [itemsPerPage, setItemsPerPage] = useState(5);
-    const [page, setPage] = useState(1);
-    const [openDrawer, setOpenDrawer] = useState(false);
-    const [selectedFile, setSelectedFile] = useState(null);
-    const [newImage, setNewImage] = useState("");
-    const [newJudulKarya, setNewJudulKarya] = useState("");
-    const [newKreator, setNewKreator] = useState("");
-    const [newLink, setNewLink] = useState("");
-    const [newKonsentrasi, setNewKonsentrasi] = useState("");
-    const [newTanggalPost, setNewTanggalPost] = useState("");
-    const [newTanggalUpdate, setNewTanggalUpdate] = useState("");
-    const [newDeskripsi, setNewDeskripsi] = useState("");
-    const [editingId, setEditingId] = useState(null);
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const csvFileRef = useRef(null);
-    const [category, setCategory] = useState("filterByAlbum");
-    const currentDate = new Date().toLocaleDateString();
-    const [selectedDetail, setSelectedDetail] = useState(null);
-    const [showFullText, setShowFullText] = useState(false);
-  
-    // membatasi text
-    const toggleText = () => {
-      setShowFullText(!showFullText);
-    };
-  
-    // detail
-    const handleDetailClick = (detail) => {
-      setSelectedDetail(detail);
-    };
-  
-    const handleCloseDetail = () => {
-      setSelectedDetail(null);
-    };
-  
-    // category
-    const handleCategoryChange = (event) => {
-      setCategory(event.target.value);
-    };
-  
-    // import csv
-    const handleFileCsvChange = (event) => {
-      const file = event.target.files[0];
-      if (file) {
-        parseCsvFile(file);
-      }
-    };
-  
-    const parseCsvFile = (file) => {
-      Papa.parse(file, {
-        complete: (result) => {
-          const filteredData = result.data.filter(
-            (row) => row.album && row.description && row.image
-          );
-          setData(filteredData);
-        },
-        header: true,
-        skipEmptyLines: true,
-      });
-    };
-    // import csv end
-  
-    // export excel
-    const exportData = dataKarya.map((item) => ({
-      image: item.image,
-      album: item.album,
-      description: item.description,
-    }));
-  
-    const exportToExcel = () => {
-      const ws = XLSX.utils.json_to_sheet(exportData);
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
-      XLSX.writeFile(wb, "dataExcel.xlsx");
-    };
-    // export excel end
-  
-    const handleEdit = (id) => {
-      setEditingId(id);
-      const selectedItem = data.find((item) => item.id === id);
-      setNewImage(selectedItem.image);
-      // setNewAlbum(selectedItem.album);
-      // setNewDescription(selectedItem.description);
-    };
-  
-    const handleDelete = (id) => {
-      const updatedData = data.filter((item) => item.id !== id);
-      setData(updatedData);
-    };
-  
-    const handleSaveEdit = () => {
+  const [data, setData] = useState(dataKarya);
+  const [itemsPerPage, setItemsPerPage] = useState(5);
+  const [page, setPage] = useState(1);
+  const [openDrawer, setOpenDrawer] = useState(false);
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [newImage, setNewImage] = useState("");
+  const [newJudulKarya, setNewJudulKarya] = useState("");
+  const [newKreator, setNewKreator] = useState("");
+  const [newLink, setNewLink] = useState("");
+  const [newKonsentrasi, setNewKonsentrasi] = useState("");
+  const [newTanggalPost, setNewTanggalPost] = useState("");
+  const [newTanggalUpdate, setNewTanggalUpdate] = useState("");
+  const [newDeskripsi, setNewDeskripsi] = useState("");
+  const [editingId, setEditingId] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const csvFileRef = useRef(null);
+  const [category, setCategory] = useState("filterByAlbum");
+  const currentDate = new Date().toLocaleDateString();
+  const [selectedDetail, setSelectedDetail] = useState(null);
+  const [showFullText, setShowFullText] = useState(false);
+  const [editMode, setEditMode] = useState(false);
+
+  // membatasi text
+  const toggleText = () => {
+    setShowFullText(!showFullText);
+  };
+
+  // detail
+  const handleDetailClick = (detail) => {
+    setSelectedDetail(detail);
+  };
+
+  const handleCloseDetail = () => {
+    setSelectedDetail(null);
+  };
+
+  // category
+  const handleCategoryChange = (event) => {
+    setCategory(event.target.value);
+  };
+
+  // import csv
+  const handleFileCsvChange = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      parseCsvFile(file);
+    }
+  };
+
+  const parseCsvFile = (file) => {
+    Papa.parse(file, {
+      complete: (result) => {
+        const filteredData = result.data.filter(
+          (row) => row.album && row.description && row.image
+        );
+        setData(filteredData);
+      },
+      header: true,
+      skipEmptyLines: true,
+    });
+  };
+  // import csv end
+
+  // export excel
+  const exportData = dataKarya.map((item) => ({
+    image: item.image,
+    album: item.album,
+    description: item.description,
+  }));
+
+  const exportToExcel = () => {
+    const ws = XLSX.utils.json_to_sheet(exportData);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
+    XLSX.writeFile(wb, "dataExcel.xlsx");
+  };
+  // export excel end
+
+  // edit
+  const handleEdit = (id) => {
+    setEditingId(id);
+    const selectedItem = data.find((item) => item.id === id);
+    setNewImage(selectedItem.image);
+    setNewJudulKarya(selectedItem.judulKarya);
+    setNewKreator(selectedItem.kreator);
+    setNewLink(selectedItem.link);
+    setNewKonsentrasi(selectedItem.konsentrasi);
+    setNewTanggalPost(selectedItem.tanggalPost);
+    setNewTanggalUpdate(selectedItem.tanggalUpdate);
+    setNewDeskripsi(selectedItem.deskripsi);
+    setOpenDrawer(true);
+    setEditMode(true);
+  };
+
+  const handleDelete = (id) => {
+    const updatedData = data.filter((item) => item.id !== id);
+    setData(updatedData);
+  };
+
+  // // tombol save atau simpan data
+  const handleSave = () => {
+    if (editMode) {
       const updatedData = data.map((item) =>
         item.id === editingId
           ? {
               id: editingId,
-              image: newImage,
+              image: [newImage],
+              judulKarya: newJudulKarya,
+              kreator: newKreator,
+              link: newLink,
+              konsentrasi: newKonsentrasi,
+              tanggalPost: newTanggalPost,
               tanggalUpdate: currentDate,
-              // description: newDescription,
+              deskripsi: newDeskripsi,
             }
           : item
       );
       setData(updatedData);
-      setEditingId(null);
-      setNewImage("");
-      setNewTanggalUpdate("");
-      // setNewDescription("");
-    };
-  
-    const handleAddChange = (e, field) => {
-      if (field === "judul") {
-        setNewJudulKarya(e.target.value);
-      } else if (field === "kreator") {
-        setNewKreator(e.target.value);
-      } else if (field === "konsentrasi") {
-        setNewKonsentrasi(e.target.value);
-      }  else if (field === "tanggalPost") {
-        setNewTanggalPost(e.target.value);
-      } else if (field === "tanggalUpdate") {
-        setNewTanggalUpdate(e.target.value);
-      } else if (field === "deskripsi") {
-        setNewDeskripsi(e.target.value);
-      } else if (field === "file") {
-        setSelectedFile(e.target.files[0]);
-      } else if (field === "image") {
-        setNewImage(e.target.value);
-      } else if (field === "link") {
-        setNewLink(e.target.value)
-      }
-    };
-  
-    const handleAddData = () => {
+      setEditMode(false);
+    } else {
       const newData = {
         id: data.length + 1,
+        image: [newImage],
         judulKarya: newJudulKarya,
         kreator: newKreator,
-        konsentrasi: newKonsentrasi,
         link: newLink,
+        konsentrasi: newKonsentrasi,
         tanggalPost: currentDate,
         tanggalUpdate: currentDate,
-        image: newImage,
         deskripsi: newDeskripsi,
       };
       setData([...data, newData]);
-  
-      setNewJudulKarya("");
-      setNewKreator("");
-      setNewLink("");
-      setNewTanggalPost("");
-      setNewTanggalUpdate("");
-      setNewKonsentrasi("");
-      setNewDeskripsi("");
-      setNewImage("");
-      setOpenDrawer(false);
-      setIsModalOpen(true);
-    };
-  
-    const handleDeleteFile = () => {
-      setSelectedFile(null);
-    };
-  
-    const handleChooseFileClick = () => {
-      document.querySelector('input[type="file"]').click();
-    };
-  
-    const toggleDrawer = (open) => () => {
+    }
+
+    setEditingId(null);
+    setNewJudulKarya("");
+    setNewKreator("");
+    setNewLink("");
+    setNewTanggalPost("");
+    setNewTanggalUpdate("");
+    setNewKonsentrasi("");
+    setNewDeskripsi("");
+    setNewImage("");
+    setOpenDrawer(false);
+    setIsModalOpen(true);
+  };
+
+  const handleAddChange = (e, field) => {
+    if (field === "judul") {
+      setNewJudulKarya(e.target.value);
+    } else if (field === "kreator") {
+      setNewKreator(e.target.value);
+    } else if (field === "konsentrasi") {
+      setNewKonsentrasi(e.target.value);
+    } else if (field === "tanggalPost") {
+      setNewTanggalPost(e.target.value);
+    } else if (field === "tanggalUpdate") {
+      setNewTanggalUpdate(e.target.value);
+    } else if (field === "deskripsi") {
+      setNewDeskripsi(e.target.value);
+    } else if (field === "file") {
+      setSelectedFile(e.target.files[0]);
+    } else if (field === "image") {
+      setNewImage(e.target.value);
+    } else if (field === "link") {
+      setNewLink(e.target.value);
+    }
+  };
+   // image
+   const handleImageChange = (e) => {
+    const selectedImage = e.target.files[0];
+    if (selectedImage) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        setNewImage(reader.result);
+      };
+      reader.readAsDataURL(selectedImage);
+    }
+    setSelectedFile(e.target.files[0]);
+  };
+// delete
+  const handleDeleteFile = () => {
+    setSelectedFile(null);
+  };
+// tombol input image
+  const handleChooseFileClick = () => {
+    document.querySelector('input[type="file"]').click();
+  };
+
+  // drawer
+  const toggleDrawer =
+    (open, isEditMode = false) =>
+    () => {
       setOpenDrawer(open);
+      setEditMode(isEditMode);
     };
-  
-    const classes = useStyles();
-  
-    const handleChangePage = (event, newPage) => {
-      setPage(newPage);
-    };
-  
-    const handleChangeItemsPerPage = (event) => {
-      setItemsPerPage(event.target.value);
-      setPage(1);
-    };
-  
-    const closeModal = () => {
-      setIsModalOpen(false);
-    };
-  
-    // print
-    const handlePrint = () => {
-      const printContent = document.getElementById("print-content");
-      const originalContents = document.body.innerHTML;
-  
-      document.body.innerHTML = printContent.outerHTML;
-      window.print();
-  
-      document.body.innerHTML = originalContents;
-    };
-    return (
-      <Box sx={{ fontFamily: "Poppins", mt: "-23px" }}>
-        <Header
-          title={"Karya"}
-          onClickTambahData={toggleDrawer(true)}
-          onClickCsv={() => csvFileRef.current.click()}
-          onClickCetak={handlePrint}
-          onClickExcel={exportToExcel}
-        />
-        <Box my={3}>
+
+  const classes = useStyles();
+
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleChangeItemsPerPage = (event) => {
+    setItemsPerPage(event.target.value);
+    setPage(1);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+  };
+
+  // print
+  const handlePrint = () => {
+    const printContent = document.getElementById("print-content");
+    const originalContents = document.body.innerHTML;
+
+    document.body.innerHTML = printContent.outerHTML;
+    window.print();
+
+    document.body.innerHTML = originalContents;
+  };
+  return (
+    <Box sx={{ fontFamily: "Poppins", mt: "-23px" }}>
+      <Header
+        title={"Karya"}
+        onClickTambahData={toggleDrawer(true)}
+        onClickCsv={() => csvFileRef.current.click()}
+        onClickCetak={handlePrint}
+        onClickExcel={exportToExcel}
+      />
+      <Box my={3}>
         {selectedDetail ? (
           // halaman detail
           <Box>
@@ -457,12 +490,21 @@ const Karya = () => {
                     <Typography
                       sx={{ fontFamily: "Poppins", fontSize: "16px" }}
                     >
-                      
                       {showFullText
                         ? selectedDetail.deskripsi
                         : selectedDetail.deskripsi.slice(0, 450) + "..."}
-                      <Typography sx={{mt: 1,fontFamily: "Poppins",color: "#FFC400",cursor: "pointer"}} onClick={toggleText}>
-                        {showFullText ? "Lihat lebih sedikit" : "Lihat lebih banyak..."}
+                      <Typography
+                        sx={{
+                          mt: 1,
+                          fontFamily: "Poppins",
+                          color: "#FFC400",
+                          cursor: "pointer",
+                        }}
+                        onClick={toggleText}
+                      >
+                        {showFullText
+                          ? "Lihat lebih sedikit"
+                          : "Lihat lebih banyak..."}
                       </Typography>
                     </Typography>
                   </Card>
@@ -568,7 +610,7 @@ const Karya = () => {
                           <TableCell sx={{ fontFamily: "Poppins" }}>
                             {row.link}
                           </TableCell>
-  
+
                           <TableCell>
                             <Stack
                               direction={"row"}
@@ -587,15 +629,6 @@ const Karya = () => {
                               >
                                 <VisibilityIcon />
                               </ButtonGreen>
-                              {editingId === row.id ? (
-                                <ButtonYellow
-                                  sx={{ color: "white" }}
-                                  variant="contained"
-                                  onClick={handleSaveEdit}
-                                >
-                                  Save
-                                </ButtonYellow>
-                              ) : (
                                 <ButtonYellow
                                   sx={{ color: "white" }}
                                   variant="Contained"
@@ -603,7 +636,6 @@ const Karya = () => {
                                 >
                                   <CreateIcon />
                                 </ButtonYellow>
-                              )}
                               <ButtonPink
                                 sx={{ fontSize: "20px", color: "#FF2E00" }}
                                 variant="Contained"
@@ -643,59 +675,59 @@ const Karya = () => {
               </Stack>
             </Card>
           </Card>
-          )}
-        </Box>
-        {/* Drawer */}
-        <Drawer anchor="right" open={openDrawer} sx={{ width: 700 }}>
-          <Box
-            sx={{ width: 550, px: 4, fontFamily: "Poppins", pb: 3 }}
-            role="presentation"
+        )}
+      </Box>
+      {/* Drawer */}
+      <Drawer anchor="right" open={openDrawer} sx={{ width: 700 }}>
+        <Box
+          sx={{ width: 550, px: 4, fontFamily: "Poppins", pb: 3 }}
+          role="presentation"
+        >
+          <Typography
+            sx={{
+              fontFamily: "Poppins",
+              pt: 4,
+              fontWeight: 500,
+              fontSize: "20px",
+            }}
           >
-            <Typography
+            Karya
+          </Typography>
+
+          <Stack sx={{ mt: 4 }}>
+            {/* judul */}
+            <Typography sx={{ fontFamily: "Poppins", fontWeight: 500 }}>
+              * Judul karya
+            </Typography>
+
+            <OutlinedInput
               sx={{
                 fontFamily: "Poppins",
-                pt: 4,
-                fontWeight: 500,
-                fontSize: "20px",
+                height: "44px",
+                borderRadius: "7px",
+                mt: 1,
               }}
-            >
-              Karya
+              placeholder="Masukkan Judul Karya"
+              value={newJudulKarya}
+              onChange={(e) => handleAddChange(e, "judul")}
+            ></OutlinedInput>
+            {/* kreator */}
+            <Typography sx={{ fontFamily: "Poppins", fontWeight: 500, mt: 2 }}>
+              * Kreator
             </Typography>
-  
-            <Stack sx={{ mt: 4 }}>
-              {/* judul */}
-              <Typography sx={{ fontFamily: "Poppins", fontWeight: 500 }}>
-                * Judul karya
-              </Typography>
-  
-              <OutlinedInput
-                sx={{
-                  fontFamily: "Poppins",
-                  height: "44px",
-                  borderRadius: "7px",
-                  mt: 1,
-                }}
-                placeholder="Masukkan Judul Karya"
-                value={newJudulKarya}
-                onChange={(e) => handleAddChange(e, "judul")}
-              ></OutlinedInput>
-              {/* kreator */}
-              <Typography sx={{ fontFamily: "Poppins", fontWeight: 500,mt: 2 }}>
-                * Kreator
-              </Typography>
-  
-              <OutlinedInput
-                sx={{
-                  fontFamily: "Poppins",
-                  height: "44px",
-                  borderRadius: "7px",
-                  mt: 1,
-                }}
-                placeholder="Masukkan Kreator"
-                value={newKreator}
-                onChange={(e) => handleAddChange(e, "kreator")}
-              ></OutlinedInput>
-              {/* Konsentrasi */}
+
+            <OutlinedInput
+              sx={{
+                fontFamily: "Poppins",
+                height: "44px",
+                borderRadius: "7px",
+                mt: 1,
+              }}
+              placeholder="Masukkan Kreator"
+              value={newKreator}
+              onChange={(e) => handleAddChange(e, "kreator")}
+            ></OutlinedInput>
+            {/* Konsentrasi */}
             <Typography sx={{ fontFamily: "Poppins", fontWeight: 500, mt: 2 }}>
               * Konsentrasi
             </Typography>
@@ -705,7 +737,7 @@ const Karya = () => {
               options={["Website", "Desain", "Mobile"]}
               size="small"
               sx={{ mt: "5px" }}
-              value={newKonsentrasi} 
+              value={newKonsentrasi}
               onChange={(event, value) => {
                 setNewKonsentrasi(value);
               }}
@@ -717,164 +749,161 @@ const Karya = () => {
                 />
               )}
             />
-              <Typography
-                sx={{
-                  fontFamily: "Poppins",
-                  fontWeight: 500,
-                  fontSize: "14px",
-                  display: "flex",
-                  flexDirection: "column",
-                  mt: 2,
-                }}
-              >
-                Foto
-              </Typography>
-            </Stack>
-            <Grid container gap={3} mt={1}>
-              <Grid xs={4}>
-                <Stack sx={{ border: "1px dashed #576974", borderRadius: "8px" }}>
-                  <AddPhotoAlternateIcon
-                    sx={{
-                      color: "#576974",
-                      fontSize: "60px",
-                      margin: "0 auto",
-                      mt: 3,
-                    }}
-                  />
-                  <Typography
-                    sx={{
-                      mt: 1,
-                      width: "80%",
-                      alignSelf: "center",
-                      fontFamily: "Poppins",
-                      color: "#576974",
-                      textAlign: "center",
-                    }}
-                  >
-                    Tarik dan lepas foto di sini
-                  </Typography>
-                  <Input
-                    type="file"
-                    accept="image/*"
-                    style={{ display: "none" }}
-                    onChange={(e) => handleAddChange(e, "file")}
-                  />
-                  <ButtonYellow
-                    sx={{
-                      my: 2,
-                      alignSelf: "center",
-                      color: "white",
-                      width: "80%",
-                      borderRadius: "8px",
-                    }}
-                    variant="contained"
-                    color="primary"
-                    onClick={handleChooseFileClick}
-                    value={newImage}
-                    onChange={(e) => handleAddChange(e, "image")}
-                  >
-                    Pilih File
-                  </ButtonYellow>
-                </Stack>
-              </Grid>
-              <Grid xs={5}>
-                <Typography sx={{ fontFamily: "Poppins", fontWeight: 500 }}>
-                  Upload Files
-                </Typography>
-                {selectedFile && (
-                  <Stack
-                    sx={{ display: "flex", flexDirection: "row" }}
-                    // gap={"2px"}
-                  >
-                    <ImageIcon
-                      sx={{ color: "#576974", pt: 1, fontSize: "30px" }}
-                    />
-                    <Typography
-                      sx={{ mt: 1, fontFamily: "Poppins", fontSize: "14px" }}
-                    >
-                      {selectedFile.name}
-                    </Typography>
-                  </Stack>
-                )}
-              </Grid>
-              <Grid xs={1} pt={5}>
-                {selectedFile && (
-                  <Typography
-                    sx={{
-                      fontSize: "20px",
-                      cursor: "pointer",
-                      textAlign: "end",
-                    }}
-                    color="#576974"
-                    onClick={handleDeleteFile}
-                  >
-                    <RiDeleteBin5Fill />
-                  </Typography>
-                )}
-              </Grid>
-            </Grid>
-            <Stack mt={2}>
-              {/* link*/}
-              <Typography sx={{ fontFamily: "Poppins", fontWeight: 500 }}>
-                * Link
-              </Typography>
-  
-              <OutlinedInput
-                sx={{
-                  fontFamily: "Poppins",
-                  height: "44px",
-                  borderRadius: "7px",
-                  mt: 1,
-                }}
-                placeholder="Masukkan Link Karya"
-                value={newLink}
-                onChange={(e) => handleAddChange(e, "link")}
-              ></OutlinedInput>
-             
-            </Stack>
-            <Stack
-              mt={3}
-              gap={2}
+            <Typography
               sx={{
+                fontFamily: "Poppins",
+                fontWeight: 500,
+                fontSize: "14px",
                 display: "flex",
-                flexDirection: "row",
-                justifyContent: "flex-end",
+                flexDirection: "column",
+                mt: 2,
               }}
             >
-              <ButtonYellow
-                // onClick={toggleDrawer(false)}
-                onClick={handleAddData}
-                sx={{
-                  width: "130px",
-                  py: 1,
-                  color: "white",
-                  borderRadius: "8px",
-                }}
-                startIcon={<CreateIcon />}
-              >
-                Simpan
-              </ButtonYellow>
-              <ButtonPink
-                onClick={toggleDrawer(false)}
-                sx={{
-                  width: "130px",
-                  py: 1,
-                  color: "#FF2E00",
-                  borderRadius: "8px",
-                }}
-                startIcon={<RiDeleteBin5Fill />}
-              >
-                Batal
-              </ButtonPink>
-            </Stack>
-          </Box>
-        </Drawer>
-  
-        {/* Modal */}
-        <ModalSlider open={isModalOpen} onClick={closeModal} />
-        <Footer />
-      </Box>
-    );
-}
- 
+              Foto
+            </Typography>
+          </Stack>
+          <Grid container gap={3} mt={1}>
+            <Grid xs={4}>
+              <Stack sx={{ border: "1px dashed #576974", borderRadius: "8px" }}>
+                <AddPhotoAlternateIcon
+                  sx={{
+                    color: "#576974",
+                    fontSize: "60px",
+                    margin: "0 auto",
+                    mt: 3,
+                  }}
+                />
+                <Typography
+                  sx={{
+                    mt: 1,
+                    width: "80%",
+                    alignSelf: "center",
+                    fontFamily: "Poppins",
+                    color: "#576974",
+                    textAlign: "center",
+                  }}
+                >
+                  Tarik dan lepas foto di sini
+                </Typography>
+                <Input
+                  type="file"
+                  accept="image/*"
+                  style={{ display: "none" }}
+                  onChange={handleImageChange}
+                />
+                <ButtonYellow
+                  sx={{
+                    my: 2,
+                    alignSelf: "center",
+                    color: "white",
+                    width: "80%",
+                    borderRadius: "8px",
+                  }}
+                  variant="contained"
+                  color="primary"
+                  onClick={handleChooseFileClick}
+                  value={newImage}
+                >
+                  Pilih File
+                </ButtonYellow>
+              </Stack>
+            </Grid>
+            <Grid xs={5}>
+              <Typography sx={{ fontFamily: "Poppins", fontWeight: 500 }}>
+                Upload Files
+              </Typography>
+              {selectedFile && (
+                <Stack
+                  sx={{ display: "flex", flexDirection: "row" }}
+                  // gap={"2px"}
+                >
+                  <ImageIcon
+                    sx={{ color: "#576974", pt: 1, fontSize: "30px" }}
+                  />
+                  <Typography
+                    sx={{ mt: 1, fontFamily: "Poppins", fontSize: "14px" }}
+                  >
+                    {selectedFile.name}
+                  </Typography>
+                </Stack>
+              )}
+            </Grid>
+            <Grid xs={1} pt={5}>
+              {selectedFile && (
+                <Typography
+                  sx={{
+                    fontSize: "20px",
+                    cursor: "pointer",
+                    textAlign: "end",
+                  }}
+                  color="#576974"
+                  onClick={handleDeleteFile}
+                >
+                  <RiDeleteBin5Fill />
+                </Typography>
+              )}
+            </Grid>
+          </Grid>
+          <Stack mt={2}>
+            {/* link*/}
+            <Typography sx={{ fontFamily: "Poppins", fontWeight: 500 }}>
+              * Link
+            </Typography>
+
+            <OutlinedInput
+              sx={{
+                fontFamily: "Poppins",
+                height: "44px",
+                borderRadius: "7px",
+                mt: 1,
+              }}
+              placeholder="Masukkan Link Karya"
+              value={newLink}
+              onChange={(e) => handleAddChange(e, "link")}
+            ></OutlinedInput>
+          </Stack>
+          <Stack
+            mt={3}
+            gap={2}
+            sx={{
+              display: "flex",
+              flexDirection: "row",
+              justifyContent: "flex-end",
+            }}
+          >
+            <ButtonYellow
+              onClick={handleSave}
+              sx={{
+                width: "130px",
+                py: 1,
+                color: "white",
+                borderRadius: "8px",
+              }}
+              startIcon={<CreateIcon />}
+            >
+              {editMode ? "Save" : "Simpan"}
+            </ButtonYellow>
+            <ButtonPink
+              onClick={toggleDrawer(false)}
+              sx={{
+                width: "130px",
+                py: 1,
+                color: "#FF2E00",
+                borderRadius: "8px",
+              }}
+              startIcon={<RiDeleteBin5Fill />}
+            >
+              Batal
+            </ButtonPink>
+          </Stack>
+        </Box>
+      </Drawer>
+
+      {/* Modal */}
+      <ModalSlider open={isModalOpen} onClick={closeModal} />
+      <Footer />
+    </Box>
+  );
+};
+
 export default Karya;

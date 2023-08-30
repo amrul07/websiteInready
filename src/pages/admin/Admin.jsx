@@ -14,7 +14,6 @@ import {
   TableRow,
   Typography,
   Grid,
-  Input,
   Pagination,
   OutlinedInput,
   TextField,
@@ -22,18 +21,19 @@ import {
   CardMedia,
 } from "@mui/material";
 import Header from "../../components/header/Header";
-
 import { makeStyles } from "@mui/styles";
 import { ThemeProvider } from "@mui/material/styles";
 import CreateIcon from "@mui/icons-material/Create";
 import { RiDeleteBin5Fill } from "react-icons/ri";
 import React, { useRef, useState } from "react";
 import Drawer from "@mui/material/Drawer";
-import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternate";
-import ImageIcon from "@mui/icons-material/Image";
 import Papa from "papaparse";
 import * as XLSX from "xlsx";
-import { ButtonGreen, ButtonPink, ButtonYellow } from "../../components/button/Index";
+import {
+  ButtonGreen,
+  ButtonPink,
+  ButtonYellow,
+} from "../../components/button/Index";
 import { ModalSlider } from "../../components/modal/Index";
 import { dataAdmin } from "../../utils/InitialData";
 import { themePagination } from "../../components/paginations/Index";
@@ -65,6 +65,7 @@ const Admin = () => {
   const [category, setCategory] = useState("filterByAlbum");
   const currentDate = new Date().toLocaleDateString();
   const [selectedDetail, setSelectedDetail] = useState(null);
+  const [editMode, setEditMode] = useState(false);
 
   // detail
   const handleDetailClick = (detail) => {
@@ -121,12 +122,17 @@ const Admin = () => {
     const updatedData = data.filter((item) => item.id !== id);
     setData(updatedData);
   };
+  // edit
   const handleEdit = (id) => {
     setEditingId(id);
     const selectedItem = data.find((item) => item.id === id);
-    // setNewImage(selectedItem.image);
-    // setNewAlbum(selectedItem.album);
-    // setNewDescription(selectedItem.description);
+    setNewUser(selectedItem.username);
+    setNewPassword(selectedItem.password);
+    setNewLevel(selectedItem.level);
+    setNewTanggalPost(selectedItem.tanggalPost);
+    setNewTanggalUpdate(selectedItem.tanggalUpdate);
+    setOpenDrawer(true);
+    setEditMode(true);
   };
   const handleAddChange = (e, field) => {
     if (field === "username") {
@@ -140,17 +146,37 @@ const Admin = () => {
     }
   };
 
-  const handleAddData = () => {
-    const newData = {
-      id: data.length + 1,
-      username: newUser,
-      level: newLevel,
-      tanggalPost: currentDate,
-      tanggalUpdate: currentDate,
-    };
-    setData([...data, newData]);
+  // // tombol save atau simpan data
+  const handleSave = () => {
+    if (editMode) {
+      const updatedData = data.map((item) =>
+        item.id === editingId
+          ? {
+              id: editingId,
+              username: newUser,
+              password: newPassword,
+              level: newLevel,
+              tanggalPost: newTanggalPost,
+              tanggalUpdate: currentDate,
+            }
+          : item
+      );
+      setData(updatedData);
+      setEditMode(false);
+    } else {
+      const newData = {
+        id: data.length + 1,
+        username: newUser,
+        password: newPassword,
+        level: newLevel,
+        tanggalPost: currentDate,
+        tanggalUpdate: currentDate,
+      };
+      setData([...data, newData]);
+    }
 
     setNewUser("");
+    setNewPassword("");
     setNewLevel("");
     setNewTanggalPost("");
     setNewTanggalUpdate("");
@@ -158,9 +184,13 @@ const Admin = () => {
     setIsModalOpen(true);
   };
 
-  const toggleDrawer = (open) => () => {
-    setOpenDrawer(open);
-  };
+  // drawer
+  const toggleDrawer =
+    (open, isEditMode = false) =>
+    () => {
+      setOpenDrawer(open);
+      setEditMode(isEditMode);
+    };
 
   const classes = useStyles();
 
@@ -197,7 +227,7 @@ const Admin = () => {
         onClickExcel={exportToExcel}
       />
       <Box my={3}>
-      {selectedDetail ? (
+        {selectedDetail ? (
           // halaman detail
           <Box>
             <Card>
@@ -348,109 +378,109 @@ const Admin = () => {
             </Box>
           </Box>
         ) : (
-        <Card>
-          <Stack
-            display={"flex"}
-            direction={"row"}
-            sx={{
-              py: 3,
-              justifyContent: "space-between",
-              borderBottom: "1px solid rgba(232, 232, 232, 0.87)",
-              width: "95%",
-              alignItems: "center",
-              margin: "auto",
-            }}
-          >
-            <FormControl sx={{ fontFamily: "Poppins" }}>
-              <Stack display={"flex"} direction={"row"}>
-                <Typography sx={{ fontFamily: "Poppins" }}>
-                  Tampilkan
-                </Typography>
-                <Select
-                  sx={{ height: 25, width: 62, mx: 1, fontFamily: "Poppins" }}
-                  value={itemsPerPage}
-                  onChange={handleChangeItemsPerPage}
-                >
-                  <MenuItem value={5}>5</MenuItem>
-                  <MenuItem value={10}>10</MenuItem>
-                  <MenuItem value={15}>15</MenuItem>
-                  <MenuItem value={data.length}>All</MenuItem>
-                </Select>
-                <Typography sx={{ fontFamily: "Poppins" }}>Data</Typography>
-              </Stack>
-            </FormControl>
-            {/* menu */}
-            <FormControl sx={{ fontFamily: "Poppins" }}>
-              <Stack>
-                <Select
-                  sx={{ height: 30, width: 230, fontFamily: "Poppins" }}
-                  value={category}
-                  onChange={handleCategoryChange}
-                >
-                  <MenuItem
-                    sx={{ fontFamily: "Poppins" }}
-                    value={"filterByAlbum"}
-                  >
-                    Filter By Judul Karya
-                  </MenuItem>
-                  <MenuItem
-                    sx={{ fontFamily: "Poppins" }}
-                    value={"detailKegiatan"}
-                  >
-                    Detail Kegiatan
-                  </MenuItem>
-                </Select>
-              </Stack>
-            </FormControl>
-          </Stack>
-          <div id="print-content">
-            <TableContainer
-              sx={{ px: 5, fontFamily: "Poppins" }}
-              component={Paper}
+          <Card>
+            <Stack
+              display={"flex"}
+              direction={"row"}
+              sx={{
+                py: 3,
+                justifyContent: "space-between",
+                borderBottom: "1px solid rgba(232, 232, 232, 0.87)",
+                width: "95%",
+                alignItems: "center",
+                margin: "auto",
+              }}
             >
-              <Table>
-                <TableHead sx={{ fontFamily: "Poppins" }}>
-                  <TableRow>
-                    <TableCell sx={{ fontFamily: "Poppins", width: "350px" }}>
-                      Username
-                    </TableCell>
-                    <TableCell sx={{ fontFamily: "Poppins", width: "350px" }}>
-                      Level
-                    </TableCell>
-                    <TableCell
-                      sx={{
-                        fontFamily: "Poppins",
-                        width: "40px",
-                        textAlign: "center",
-                      }}
+              <FormControl sx={{ fontFamily: "Poppins" }}>
+                <Stack display={"flex"} direction={"row"}>
+                  <Typography sx={{ fontFamily: "Poppins" }}>
+                    Tampilkan
+                  </Typography>
+                  <Select
+                    sx={{ height: 25, width: 62, mx: 1, fontFamily: "Poppins" }}
+                    value={itemsPerPage}
+                    onChange={handleChangeItemsPerPage}
+                  >
+                    <MenuItem value={5}>5</MenuItem>
+                    <MenuItem value={10}>10</MenuItem>
+                    <MenuItem value={15}>15</MenuItem>
+                    <MenuItem value={data.length}>All</MenuItem>
+                  </Select>
+                  <Typography sx={{ fontFamily: "Poppins" }}>Data</Typography>
+                </Stack>
+              </FormControl>
+              {/* menu */}
+              <FormControl sx={{ fontFamily: "Poppins" }}>
+                <Stack>
+                  <Select
+                    sx={{ height: 30, width: 230, fontFamily: "Poppins" }}
+                    value={category}
+                    onChange={handleCategoryChange}
+                  >
+                    <MenuItem
+                      sx={{ fontFamily: "Poppins" }}
+                      value={"filterByAlbum"}
                     >
-                      Aksi
-                    </TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody sx={{ fontFamily: "Poppins" }}>
-                  {data
-                    .slice((page - 1) * itemsPerPage, page * itemsPerPage)
-                    .map((row) => (
-                      <TableRow key={row.id} className={classes.blueRow}>
-                        <TableCell sx={{ fontFamily: "Poppins" }}>
-                          {row.username}
-                        </TableCell>
-                        <TableCell sx={{ fontFamily: "Poppins" }}>
-                          {row.level}
-                        </TableCell>
-                        <TableCell>
-                          <Stack
-                            direction={"row"}
-                            spacing={1}
-                            sx={{
-                              // display: "flex",
-                              alignItems: "center",
-                              alignSelf: "center",
-                              justifyContent: "end",
-                            }}
-                          >
-                            <ButtonGreen
+                      Filter By Judul Karya
+                    </MenuItem>
+                    <MenuItem
+                      sx={{ fontFamily: "Poppins" }}
+                      value={"detailKegiatan"}
+                    >
+                      Detail Kegiatan
+                    </MenuItem>
+                  </Select>
+                </Stack>
+              </FormControl>
+            </Stack>
+            <div id="print-content">
+              <TableContainer
+                sx={{ px: 5, fontFamily: "Poppins" }}
+                component={Paper}
+              >
+                <Table>
+                  <TableHead sx={{ fontFamily: "Poppins" }}>
+                    <TableRow>
+                      <TableCell sx={{ fontFamily: "Poppins", width: "350px" }}>
+                        Username
+                      </TableCell>
+                      <TableCell sx={{ fontFamily: "Poppins", width: "350px" }}>
+                        Level
+                      </TableCell>
+                      <TableCell
+                        sx={{
+                          fontFamily: "Poppins",
+                          width: "40px",
+                          textAlign: "center",
+                        }}
+                      >
+                        Aksi
+                      </TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody sx={{ fontFamily: "Poppins" }}>
+                    {data
+                      .slice((page - 1) * itemsPerPage, page * itemsPerPage)
+                      .map((row) => (
+                        <TableRow key={row.id} className={classes.blueRow}>
+                          <TableCell sx={{ fontFamily: "Poppins" }}>
+                            {row.username}
+                          </TableCell>
+                          <TableCell sx={{ fontFamily: "Poppins" }}>
+                            {row.level}
+                          </TableCell>
+                          <TableCell>
+                            <Stack
+                              direction={"row"}
+                              spacing={1}
+                              sx={{
+                                // display: "flex",
+                                alignItems: "center",
+                                alignSelf: "center",
+                                justifyContent: "end",
+                              }}
+                            >
+                              <ButtonGreen
                                 variant="Contained"
                                 sx={{ color: "white" }}
                                 style={{ width: "-10px" }}
@@ -458,53 +488,53 @@ const Admin = () => {
                               >
                                 <VisibilityIcon />
                               </ButtonGreen>
-                            <ButtonYellow
-                              sx={{ color: "white" }}
-                              variant="Contained"
-                              onClick={() => handleEdit(row.id)}
-                            >
-                              <CreateIcon />
-                            </ButtonYellow>
-                            <ButtonPink
-                              sx={{ fontSize: "20px", color: "#FF2E00" }}
-                              variant="Contained"
-                              size="small"
-                              onClick={() => handleDelete(row.id)}
-                            >
-                              <RiDeleteBin5Fill
-                                sx={{ color: "#FF2E00", fontSize: "20px" }}
-                              />
-                            </ButtonPink>
-                          </Stack>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          </div>
-          <Card sx={{ px: 4, py: 4 }}>
-            <Stack
-              display={"flex"}
-              direction={"row"}
-              sx={{ justifyContent: "space-between" }}
-            >
-              <Typography sx={{ fontFamily: "Poppins" }}>
-                Menampilkan 1 - {itemsPerPage} dari {data.length} Data
-              </Typography>
-              {/* pagination */}
-              <ThemeProvider theme={themePagination}>
-                <Pagination
-                  sx={{ color: "#FFC400" }}
-                  count={Math.ceil(data.length / itemsPerPage)}
-                  page={page}
-                  onChange={handleChangePage}
-                />
-              </ThemeProvider>
-            </Stack>
+                              <ButtonYellow
+                                sx={{ color: "white" }}
+                                variant="Contained"
+                                onClick={() => handleEdit(row.id)}
+                              >
+                                <CreateIcon />
+                              </ButtonYellow>
+                              <ButtonPink
+                                sx={{ fontSize: "20px", color: "#FF2E00" }}
+                                variant="Contained"
+                                size="small"
+                                onClick={() => handleDelete(row.id)}
+                              >
+                                <RiDeleteBin5Fill
+                                  sx={{ color: "#FF2E00", fontSize: "20px" }}
+                                />
+                              </ButtonPink>
+                            </Stack>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </div>
+            <Card sx={{ px: 4, py: 4 }}>
+              <Stack
+                display={"flex"}
+                direction={"row"}
+                sx={{ justifyContent: "space-between" }}
+              >
+                <Typography sx={{ fontFamily: "Poppins" }}>
+                  Menampilkan 1 - {itemsPerPage} dari {data.length} Data
+                </Typography>
+                {/* pagination */}
+                <ThemeProvider theme={themePagination}>
+                  <Pagination
+                    sx={{ color: "#FFC400" }}
+                    count={Math.ceil(data.length / itemsPerPage)}
+                    page={page}
+                    onChange={handleChangePage}
+                  />
+                </ThemeProvider>
+              </Stack>
+            </Card>
           </Card>
-        </Card>
-         )}
+        )}
       </Box>
       {/* Drawer */}
       <Drawer anchor="right" open={openDrawer} sx={{ width: 700 }}>
@@ -547,10 +577,10 @@ const Admin = () => {
             <Autocomplete
               disablePortal
               id="combo-box-demo"
-              options={['user','admin']}
+              options={["user", "admin"]}
               size="small"
               sx={{ mt: "5px" }}
-              value={newLevel} 
+              value={newLevel}
               onChange={(event, value) => {
                 setNewLevel(value);
               }}
@@ -559,8 +589,6 @@ const Admin = () => {
                   {...params}
                   sx={{ fontFamily: "Poppins" }}
                   placeholder={"Pilih Level"}
-                  
-                  
                 />
               )}
             />
@@ -575,8 +603,7 @@ const Admin = () => {
             }}
           >
             <ButtonYellow
-              // onClick={toggleDrawer(false)}
-              onClick={handleAddData}
+              onClick={handleSave}
               sx={{
                 width: "130px",
                 py: 1,
@@ -585,7 +612,7 @@ const Admin = () => {
               }}
               startIcon={<CreateIcon />}
             >
-              Simpan
+              {editMode ? "Save" : "Simpan"}
             </ButtonYellow>
             <ButtonPink
               onClick={toggleDrawer(false)}

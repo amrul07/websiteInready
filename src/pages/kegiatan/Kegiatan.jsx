@@ -72,6 +72,7 @@ const Kegiatan = () => {
   const [category, setCategory] = useState("filterByAlbum");
   const currentDate = new Date().toLocaleDateString();
   const [selectedDetail, setSelectedDetail] = useState(null);
+  const [editMode, setEditMode] = useState(false);
 
   // detail
   const handleDetailClick = (detail) => {
@@ -124,35 +125,73 @@ const Kegiatan = () => {
   };
   // export excel end
 
+  // edit
   const handleEdit = (id) => {
     setEditingId(id);
     const selectedItem = data.find((item) => item.id === id);
     setNewImage(selectedItem.image);
-    // setNewAlbum(selectedItem.album);
-    // setNewDescription(selectedItem.description);
+    setNewJudulKegiatan(selectedItem.judulKegiatan);
+    setNewLokasi(selectedItem.lokasi);
+    setNewLink(selectedItem.linkDaftar);
+    setNewWaktu(selectedItem.waktu);
+    setNewTanggalPost(selectedItem.tanggalPost);
+    setNewTanggalUpdate(selectedItem.tanggalUpdate);
+    setNewDeskripsi(selectedItem.deskripsi);
+    setOpenDrawer(true);
+    setEditMode(true);
   };
-
+  // delete
   const handleDelete = (id) => {
     const updatedData = data.filter((item) => item.id !== id);
     setData(updatedData);
   };
 
-  const handleSaveEdit = () => {
-    const updatedData = data.map((item) =>
-      item.id === editingId
-        ? {
-            id: editingId,
-            image: newImage,
-            tanggalUpdate: currentDate,
-            // description: newDescription,
-          }
-        : item
-    );
-    setData(updatedData);
+  // // tombol save atau simpan data
+  const handleSave = () => {
+    if (editMode) {
+      const updatedData = data.map((item) =>
+        item.id === editingId
+          ? {
+              id: editingId,
+              image: [newImage],
+              judulKegiatan: newJudulKegiatan,
+              lokasi: newLokasi,
+              linkDaftar: newLink,
+              waktu: newWaktu,
+              tanggalPost: newTanggalPost,
+              tanggalUpdate: currentDate,
+              deskripsi: newDeskripsi,
+            }
+          : item
+      );
+      setData(updatedData);
+      setEditMode(false);
+    } else {
+      const newData = {
+        id: data.length + 1,
+        image: [newImage],
+        judulKegiatan: newJudulKegiatan,
+        lokasi: newLokasi,
+        linkDaftar: newLink,
+        waktu: newWaktu,
+        tanggalPost: currentDate,
+        tanggalUpdate: currentDate,
+        deskripsi: newDeskripsi,
+      };
+      setData([...data, newData]);
+    }
+
     setEditingId(null);
-    setNewImage("");
+    setNewJudulKegiatan("");
+    setNewLokasi("");
+    setNewLink("");
+    setNewTanggalPost("");
     setNewTanggalUpdate("");
-    // setNewDescription("");
+    setNewWaktu("");
+    setNewDeskripsi("");
+    setNewImage("");
+    setOpenDrawer(false);
+    setIsModalOpen(true);
   };
 
   const handleAddChange = (e, field) => {
@@ -175,43 +214,34 @@ const Kegiatan = () => {
     }
   };
 
-  const handleAddData = () => {
-    const newData = {
-      id: data.length + 1,
-      judulKegiatan: newJudulKegiatan,
-      lokasi: newLokasi,
-      linkDaftar: newLink,
-      tanggalPost: currentDate,
-      tanggalUpdate: currentDate,
-      waktu: newWaktu,
-      image: newImage,
-      deskripsi: newDeskripsi,
-    };
-    setData([...data, newData]);
-
-    setNewJudulKegiatan("");
-    setNewLokasi("");
-    setNewLink("");
-    setNewTanggalPost("");
-    setNewTanggalUpdate("");
-    setNewWaktu("");
-    setNewDeskripsi("");
-    setNewImage("");
-    setOpenDrawer(false);
-    setIsModalOpen(true);
+  // image
+  const handleImageChange = (e) => {
+    const selectedImage = e.target.files[0];
+    if (selectedImage) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        setNewImage(reader.result);
+      };
+      reader.readAsDataURL(selectedImage);
+    }
+    setSelectedFile(e.target.files[0]);
   };
-
+  // delete
   const handleDeleteFile = () => {
     setSelectedFile(null);
   };
-
+  // tombol input image
   const handleChooseFileClick = () => {
     document.querySelector('input[type="file"]').click();
   };
 
-  const toggleDrawer = (open) => () => {
-    setOpenDrawer(open);
-  };
+  // drawer
+  const toggleDrawer =
+    (open, isEditMode = false) =>
+    () => {
+      setOpenDrawer(open);
+      setEditMode(isEditMode);
+    };
 
   const classes = useStyles();
 
@@ -582,23 +612,15 @@ const Kegiatan = () => {
                               >
                                 <VisibilityIcon />
                               </ButtonGreen>
-                              {editingId === row.id ? (
-                                <ButtonYellow
-                                  sx={{ color: "white" }}
-                                  variant="contained"
-                                  onClick={handleSaveEdit}
-                                >
-                                  Save
-                                </ButtonYellow>
-                              ) : (
-                                <ButtonYellow
-                                  sx={{ color: "white" }}
-                                  variant="Contained"
-                                  onClick={() => handleEdit(row.id)}
-                                >
-                                  <CreateIcon />
-                                </ButtonYellow>
-                              )}
+
+                              <ButtonYellow
+                                sx={{ color: "white" }}
+                                variant="Contained"
+                                onClick={() => handleEdit(row.id)}
+                              >
+                                <CreateIcon />
+                              </ButtonYellow>
+
                               <ButtonPink
                                 sx={{ fontSize: "20px", color: "#FF2E00" }}
                                 variant="Contained"
@@ -714,7 +736,7 @@ const Kegiatan = () => {
                   type="file"
                   accept="image/*"
                   style={{ display: "none" }}
-                  onChange={(e) => handleAddChange(e, "file")}
+                  onChange={handleImageChange}
                 />
                 <ButtonYellow
                   sx={{
@@ -728,7 +750,6 @@ const Kegiatan = () => {
                   color="primary"
                   onClick={handleChooseFileClick}
                   value={newImage}
-                  onChange={(e) => handleAddChange(e, "image")}
                 >
                   Pilih File
                 </ButtonYellow>
@@ -829,7 +850,7 @@ const Kegiatan = () => {
           >
             <ButtonYellow
               // onClick={toggleDrawer(false)}
-              onClick={handleAddData}
+              onClick={handleSave}
               sx={{
                 width: "130px",
                 py: 1,
@@ -838,7 +859,7 @@ const Kegiatan = () => {
               }}
               startIcon={<CreateIcon />}
             >
-              Simpan
+              {editMode ? "Save" : "Simpan"}
             </ButtonYellow>
             <ButtonPink
               onClick={toggleDrawer(false)}

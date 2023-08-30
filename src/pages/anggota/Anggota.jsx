@@ -91,7 +91,7 @@ const Anggota = () => {
   const handleDetailClick = (detail) => {
     setSelectedDetail(detail);
   };
-
+// close detail
   const handleCloseDetail = () => {
     setSelectedDetail(null);
   };
@@ -164,7 +164,7 @@ const Anggota = () => {
     const updatedData = data.filter((item) => item.id !== id);
     setData(updatedData);
   };
-
+// tombol save atau simpan data
   const handleSave = () => {
     if (editMode) {
       const updatedData = data.map((item) =>
@@ -248,7 +248,7 @@ const Anggota = () => {
     } else if (field === "jenisKelamin") {
       setNewJenisKelamin(e.target.value);
     } else if (field === "angkatan") {
-      setNewAngkatan(e.target.value);
+      setNewAngkatan(e.target.value[0]);
     } else if (field === "jurusan") {
       setNewJurusan(e.target.value);
     } else if (field === "konsentrasi") {
@@ -278,49 +278,11 @@ const Anggota = () => {
     }
     setSelectedFile(e.target.files[0]);
   };
-
-  const handleAddData = () => {
-    const newData = {
-      id: data.length + 1,
-      nama: newName,
-      nri: newNri,
-      image: newImage,
-      alamat: newAlamat,
-      tempatLahir: newTempatLahir,
-      tanggalLahir: newTanggalLahir,
-      jenisKelamin: newJenisKelamin,
-      angkatan: newAngkatan,
-      jurusan: newJurusan,
-      konsentrasi: newKonsentrasi,
-      jabatan: newJabatan,
-      noWa: newNoWa,
-      instagram: newIg,
-      facebook: newFb,
-    };
-    setData([...data, newData]);
-
-    setNewName("");
-    setNewNri("");
-    setNewImage("");
-    setNewAlamat("");
-    setNewTempatLahir("");
-    setNewTanggalLahir("");
-    setNewJenisKelamin("");
-    setNewAngkatan("");
-    setNewJurusan("");
-    setNewKonsentrasi("");
-    setNewJabatan("");
-    setNewNoWa("");
-    setNewIg("");
-    setNewFb("");
-    setOpenDrawer(false);
-    setIsModalOpen(true);
-  };
-
+// delete file
   const handleDeleteFile = () => {
     setSelectedFile(null);
   };
-
+// tombol input image
   const handleChooseFileClick = () => {
     document.querySelector('input[type="file"]').click();
   };
@@ -939,7 +901,6 @@ const Anggota = () => {
                   color="primary"
                   onClick={handleChooseFileClick}
                   value={newImage}
-                  // onChange={(e) => handleAddChange(e, "image")}
                 >
                   Pilih File
                 </ButtonYellow>

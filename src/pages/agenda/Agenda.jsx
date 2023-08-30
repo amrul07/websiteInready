@@ -14,23 +14,17 @@ import {
   TableRow,
   Typography,
   Grid,
-  Input,
   Pagination,
   OutlinedInput,
-  TextField,
-  Autocomplete,
   CardMedia,
 } from "@mui/material";
 import Header from "../../components/header/Header";
-
 import { makeStyles } from "@mui/styles";
 import { ThemeProvider } from "@mui/material/styles";
 import CreateIcon from "@mui/icons-material/Create";
 import { RiDeleteBin5Fill } from "react-icons/ri";
 import React, { useRef, useState } from "react";
 import Drawer from "@mui/material/Drawer";
-import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternate";
-import ImageIcon from "@mui/icons-material/Image";
 import Papa from "papaparse";
 import * as XLSX from "xlsx";
 import {
@@ -70,6 +64,7 @@ const Agenda = () => {
   const [category, setCategory] = useState("filterByAlbum");
   const currentDate = new Date().toLocaleDateString();
   const [selectedDetail, setSelectedDetail] = useState(null);
+  const [editMode, setEditMode] = useState(false);
 
   // detail
   const handleDetailClick = (detail) => {
@@ -126,12 +121,17 @@ const Agenda = () => {
     const updatedData = data.filter((item) => item.id !== id);
     setData(updatedData);
   };
+  // edit
   const handleEdit = (id) => {
     setEditingId(id);
     const selectedItem = data.find((item) => item.id === id);
-    // setNewImage(selectedItem.image);
-    // setNewAlbum(selectedItem.album);
-    // setNewDescription(selectedItem.description);
+    setNewJudulAgenda(selectedItem.judulAgenda);
+    setNewLokasi(selectedItem.lokasi);
+    setNewWaktu(selectedItem.waktu);
+    setNewTanggalPost(selectedItem.tanggalPost);
+    setNewTanggalUpdate(selectedItem.tanggalUpdate);
+    setOpenDrawer(true);
+    setEditMode(true);
   };
   const handleAddChange = (e, field) => {
     if (field === "judul") {
@@ -146,18 +146,36 @@ const Agenda = () => {
       setNewTanggalUpdate(e.target.value);
     }
   };
+  // // tombol save atau simpan data
+  const handleSave = () => {
+    if (editMode) {
+      const updatedData = data.map((item) =>
+        item.id === editingId
+          ? {
+              id: editingId,
+              judulAgenda: newJudulAgenda,
+              lokasi: newLokasi,
+              waktu: newWaktu,
+              tanggalPost: newTanggalPost,
+              tanggalUpdate: currentDate,
+            }
+          : item
+      );
+      setData(updatedData);
+      setEditMode(false);
+    } else {
+      const newData = {
+        id: data.length + 1,
+        judulAgenda: newJudulAgenda,
+        lokasi: newLokasi,
+        waktu: newWaktu,
+        tanggalPost: currentDate,
+        tanggalUpdate: currentDate,
+      };
+      setData([...data, newData]);
+    }
 
-  const handleAddData = () => {
-    const newData = {
-      id: data.length + 1,
-      judulAgenda: newJudulAgenda,
-      lokasi: newLokasi,
-      waktu: newWaktu,
-      tanggalPost: currentDate,
-      tanggalUpdate: currentDate,
-    };
-    setData([...data, newData]);
-
+    setEditingId(null);
     setNewJudulAgenda("");
     setNewLokasi("");
     setNewWaktu("");
@@ -167,13 +185,13 @@ const Agenda = () => {
     setIsModalOpen(true);
   };
 
-  const handleChooseFileClick = () => {
-    document.querySelector('input[type="file"]').click();
-  };
-
-  const toggleDrawer = (open) => () => {
-    setOpenDrawer(open);
-  };
+// drawer
+const toggleDrawer =
+(open, isEditMode = false) =>
+() => {
+  setOpenDrawer(open);
+  setEditMode(isEditMode);
+};
 
   const classes = useStyles();
 
@@ -603,8 +621,7 @@ const Agenda = () => {
             }}
           >
             <ButtonYellow
-              // onClick={toggleDrawer(false)}
-              onClick={handleAddData}
+             onClick={handleSave}
               sx={{
                 width: "130px",
                 py: 1,
@@ -613,7 +630,7 @@ const Agenda = () => {
               }}
               startIcon={<CreateIcon />}
             >
-              Simpan
+              {editMode ? "Save" : "Simpan"}
             </ButtonYellow>
             <ButtonPink
               onClick={toggleDrawer(false)}
