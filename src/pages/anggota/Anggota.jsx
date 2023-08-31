@@ -26,7 +26,6 @@ import {
   CardMedia,
 } from "@mui/material";
 import Header from "../../components/header/Header";
-
 import { makeStyles } from "@mui/styles";
 import { ThemeProvider } from "@mui/material/styles";
 import CreateIcon from "@mui/icons-material/Create";
@@ -49,7 +48,7 @@ import Footer from "../../components/footer/Footer";
 import IconKegiatan from "../../assets/detailKegiatan.svg";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import VisibilityIcon from "@mui/icons-material/Visibility";
-import Foto from "../../assets/navbar/Logo.png";
+import Image from "../../assets/image.svg"
 
 const useStyles = makeStyles({
   blueRow: {
@@ -91,7 +90,7 @@ const Anggota = () => {
   const handleDetailClick = (detail) => {
     setSelectedDetail(detail);
   };
-// close detail
+  // close detail
   const handleCloseDetail = () => {
     setSelectedDetail(null);
   };
@@ -164,7 +163,7 @@ const Anggota = () => {
     const updatedData = data.filter((item) => item.id !== id);
     setData(updatedData);
   };
-// tombol save atau simpan data
+  // tombol save atau simpan data
   const handleSave = () => {
     if (editMode) {
       const updatedData = data.map((item) =>
@@ -278,11 +277,11 @@ const Anggota = () => {
     }
     setSelectedFile(e.target.files[0]);
   };
-// delete file
+  // delete file
   const handleDeleteFile = () => {
     setSelectedFile(null);
   };
-// tombol input image
+  // tombol input image
   const handleChooseFileClick = () => {
     document.querySelector('input[type="file"]').click();
   };
@@ -304,6 +303,10 @@ const Anggota = () => {
   const handleChangeItemsPerPage = (event) => {
     setItemsPerPage(event.target.value);
     setPage(1);
+  };
+  // modal
+  const closeModal = () => {
+    setIsModalOpen(false);
   };
 
   // print
@@ -863,14 +866,7 @@ const Anggota = () => {
           <Grid container gap={3} mt={1}>
             <Grid xs={4}>
               <Stack sx={{ border: "1px dashed #576974", borderRadius: "8px" }}>
-                <AddPhotoAlternateIcon
-                  sx={{
-                    color: "#576974",
-                    fontSize: "60px",
-                    margin: "0 auto",
-                    mt: 3,
-                  }}
-                />
+              <img src={Image} style={{width: "50px",margin: "0 auto",marginTop: "22px"}} alt="" />
                 <Typography
                   sx={{
                     mt: 1,
@@ -1224,6 +1220,9 @@ const Anggota = () => {
           </Stack>
         </Box>
       </Drawer>
+
+      {/* Modal */}
+      <ModalSlider open={isModalOpen} onClick={closeModal} />
       <Footer />
     </Box>
   );

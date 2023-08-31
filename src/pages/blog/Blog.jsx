@@ -20,7 +20,7 @@ import {
   CardMedia,
 } from "@mui/material";
 import Header from "../../components/header/Header";
-
+import Image from "../../assets/image.svg"
 import { makeStyles } from "@mui/styles";
 import { ThemeProvider } from "@mui/material/styles";
 import CreateIcon from "@mui/icons-material/Create";
@@ -722,14 +722,7 @@ const Blog = () => {
           <Grid container gap={3} mt={1}>
             <Grid xs={4}>
               <Stack sx={{ border: "1px dashed #576974", borderRadius: "8px" }}>
-                <AddPhotoAlternateIcon
-                  sx={{
-                    color: "#576974",
-                    fontSize: "60px",
-                    margin: "0 auto",
-                    mt: 3,
-                  }}
-                />
+              <img src={Image} style={{width: "50px",margin: "0 auto",marginTop: "22px"}} alt="" />
                 <Typography
                   sx={{
                     mt: 1,

@@ -26,7 +26,6 @@ import CreateIcon from "@mui/icons-material/Create";
 import { RiDeleteBin5Fill } from "react-icons/ri";
 import React, { useRef, useState, useEffect } from "react";
 import Drawer from "@mui/material/Drawer";
-import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternate";
 import ImageIcon from "@mui/icons-material/Image";
 import Papa from "papaparse";
 import * as XLSX from "xlsx";
@@ -43,7 +42,7 @@ import Footer from "../../components/footer/Footer";
 import IconKegiatan from "../../assets/detailKegiatan.svg";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import VisibilityIcon from "@mui/icons-material/Visibility";
-
+import Image from "../../assets/image.svg"
 import Glide from "@glidejs/glide";
 import "@glidejs/glide/dist/css/glide.core.min.css";
 import "@glidejs/glide/dist/css/glide.theme.min.css";
@@ -647,17 +646,9 @@ const Slider = () => {
           <Grid container gap={3} mt={1}>
             <Grid xs={4}>
               <Stack sx={{ border: "1px dashed #576974", borderRadius: "8px" }}>
-                <AddPhotoAlternateIcon
-                  sx={{
-                    color: "#576974",
-                    fontSize: "60px",
-                    margin: "0 auto",
-                    mt: 3,
-                  }}
-                />
+                <img src={Image} style={{width: "50px",margin: "0 auto",marginTop: "22px"}} alt="" />
                 <Typography
                   sx={{
-                    mt: 1,
                     width: "80%",
                     alignSelf: "center",
                     fontFamily: "Poppins",
