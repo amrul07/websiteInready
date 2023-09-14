@@ -1,7 +1,4 @@
-import { Home, Person } from "@mui/icons-material";
 import { ReactComponent as Dashboard } from "../assets/navbar/dashboard.svg";
-import { FaHome } from "react-icons/fa";
-import { IoImageSharp } from "react-icons/io5";
 import { ReactComponent as Blog } from "../assets/navbar/blog.svg";
 import { ReactComponent as Slider } from "../assets/navbar/slider.svg";
 import { ReactComponent as Anggota } from "../assets/navbar/anggota.svg";
@@ -14,7 +11,7 @@ import { ReactComponent as Karya } from "../assets/navbar/karya.svg";
 export const menu = [
   {
     title: "Dashboard",
-    router: "/dashboard",
+    router: "/",
     icon: <Dashboard width={"20px"} />,
   },
   {

@@ -10,9 +10,6 @@ const drawerWidth = 240;
 
 function Index() {
   const navigate = useNavigate();
-  React.useEffect(() => {
-    // navigate("/");
-  }, []);
 
   return (
     <Box sx={{ display: "flex" }}>

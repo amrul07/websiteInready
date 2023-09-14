@@ -41,6 +41,8 @@ import Footer from "../../components/footer/Footer";
 import IconKegiatan from "../../assets/detailKegiatan.svg";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import VisibilityIcon from "@mui/icons-material/Visibility";
+import { fetchData, postData, putData, deleteData } from "../../service/api";
+import { useEffect } from "react";
 
 const useStyles = makeStyles({
   blueRow: {
@@ -50,15 +52,17 @@ const useStyles = makeStyles({
   },
 });
 const Admin = () => {
-  const [data, setData] = useState(dataAdmin);
-  const [itemsPerPage, setItemsPerPage] = useState(5);
-  const [page, setPage] = useState(1);
+  const [data, setData] = useState();
+  const [itemsPerPage, setItemsPerPage] = useState(0);
+  const [page, setPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const [totalItems, setTotalItems] = useState(0);
   const [openDrawer, setOpenDrawer] = useState(false);
-  const [newUser, setNewUser] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [newLevel, setNewLevel] = useState([0]);
-  const [newTanggalPost, setNewTanggalPost] = useState("");
-  const [newTanggalUpdate, setNewTanggalUpdate] = useState("");
+  const [newName, setNewName] = useState("");
+  const [newUserName, setNewUserName] = useState("");
+  const [newLevel, setNewLevel] = useState([]);
+  const [newCreatedAt, setNewCreatedAt] = useState("");
+  const [newUpdateAt, setNewUpdateAt] = useState("");
   const [editingId, setEditingId] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const csvFileRef = useRef(null);
@@ -68,8 +72,10 @@ const Admin = () => {
   const [editMode, setEditMode] = useState(false);
 
   // detail
-  const handleDetailClick = (detail) => {
-    setSelectedDetail(detail);
+  const handleDetailClick = (id) => {
+    fetchData(`/user/${id}`).then((res) => {
+      setSelectedDetail(res.data);
+    });
   };
 
   const handleCloseDetail = () => {
@@ -119,67 +125,86 @@ const Admin = () => {
   // export excel end
 
   const handleDelete = (id) => {
-    const updatedData = data.filter((item) => item.id !== id);
-    setData(updatedData);
+    deleteData(`/user/${id}`)
+      .then((res) => {
+        const updatedData = data.filter((item) => item.id !== id);
+        setData(updatedData);
+      })
+      .catch((error) => {
+        console.error("Gagal menghapus data:", error);
+      });
   };
   // edit
   const handleEdit = (id) => {
     setEditingId(id);
     const selectedItem = data.find((item) => item.id === id);
-    setNewUser(selectedItem.username);
-    setNewPassword(selectedItem.password);
+    setNewName(selectedItem.name);
+    setNewUserName(selectedItem.username);
     setNewLevel(selectedItem.level);
-    setNewTanggalPost(selectedItem.tanggalPost);
-    setNewTanggalUpdate(selectedItem.tanggalUpdate);
+    setNewCreatedAt(selectedItem.created_at);
+    setNewUpdateAt(selectedItem.updated_at);
     setOpenDrawer(true);
     setEditMode(true);
   };
   const handleAddChange = (e, field) => {
-    if (field === "username") {
-      setNewUser(e.target.value);
+    if (field === "name") {
+      setNewName(e.target.value);
+    } else if (field === "username") {
+      setNewUserName(e.target.value);
     } else if (field === "level") {
       setNewLevel(e.target.value);
     } else if (field === "tanggalPost") {
-      setNewTanggalPost(e.target.value);
+      setNewCreatedAt(e.target.value);
     } else if (field === "tanggalUpdate") {
-      setNewTanggalUpdate(e.target.value);
+      setNewUpdateAt(e.target.value);
     }
   };
 
   // // tombol save atau simpan data
   const handleSave = () => {
     if (editMode) {
-      const updatedData = data.map((item) =>
-        item.id === editingId
-          ? {
-              id: editingId,
-              username: newUser,
-              password: newPassword,
-              level: newLevel,
-              tanggalPost: newTanggalPost,
-              tanggalUpdate: currentDate,
-            }
-          : item
-      );
-      setData(updatedData);
-      setEditMode(false);
+      putData(`/user/${editingId}`, {
+        name: newName,
+        username: newUserName,
+        level: newLevel,
+        created_at: newCreatedAt,
+        updated_at: newUpdateAt,
+        
+      })
+        .then((res) => {
+          const updatedData = data.map((item) =>
+            item.id === editingId ? res : item
+          );
+          setData(updatedData);
+          setEditMode(false);
+        })
+        .catch((error) => {
+          console.error("Gagal mengedit data:", error);
+        });
     } else {
       const newData = {
-        id: data.length + 1,
-        username: newUser,
-        password: newPassword,
+        name: newName,
+        username: newUserName,
         level: newLevel,
-        tanggalPost: currentDate,
-        tanggalUpdate: currentDate,
+        created_at: newCreatedAt,
+        updated_at: newUpdateAt,
       };
-      setData([...data, newData]);
+      postData(`/user`, newData)
+        .then((res) => {
+          setData([...data, res]);
+          setOpenDrawer(false);
+          setIsModalOpen(true);
+        })
+        .catch((error) => {
+          console.error("Gagal menambahkan data:", error);
+        });
     }
 
-    setNewUser("");
-    setNewPassword("");
+    setNewName("");
+    setNewUserName("");
     setNewLevel("");
-    setNewTanggalPost("");
-    setNewTanggalUpdate("");
+    setNewCreatedAt("");
+    setNewUpdateAt("");
     setOpenDrawer(false);
     setIsModalOpen(true);
   };
@@ -217,6 +242,17 @@ const Admin = () => {
 
     document.body.innerHTML = originalContents;
   };
+
+  useEffect(() => {
+    fetchData(`/user?page=${page}&per_page=${itemsPerPage}`).then((res) => {
+      setData(res.data);
+      setTotalPages(res.meta.total_page);
+      setTotalItems(res.meta.total_item);
+      setItemsPerPage(res.meta.perpage);
+      console.log(res.data);
+    });
+  }, [page, itemsPerPage, totalItems, totalPages]);
+
   return (
     <Box sx={{ fontFamily: "Poppins", mt: "-23px" }}>
       <Header
@@ -287,14 +323,14 @@ const Admin = () => {
                     <Typography
                       sx={{ fontFamily: "Poppins", fontSize: "16px" }}
                     >
-                      Username
+                      Name
                     </Typography>
                   </Grid>
                   <Grid item xs={8}>
                     <Typography
                       sx={{ fontFamily: "Poppins", fontSize: "16px" }}
                     >
-                      : {selectedDetail.username}
+                      : {selectedDetail.name}
                     </Typography>
                   </Grid>
                 </Grid>
@@ -306,14 +342,14 @@ const Admin = () => {
                     <Typography
                       sx={{ fontFamily: "Poppins", fontSize: "16px" }}
                     >
-                      Password
+                      Username
                     </Typography>
                   </Grid>
                   <Grid item xs={8}>
                     <Typography
                       sx={{ fontFamily: "Poppins", fontSize: "16px" }}
                     >
-                      : {selectedDetail.password}
+                      : {selectedDetail.username}
                     </Typography>
                   </Grid>
                 </Grid>
@@ -351,7 +387,7 @@ const Admin = () => {
                     <Typography
                       sx={{ fontFamily: "Poppins", fontSize: "16px" }}
                     >
-                      : {selectedDetail.tanggalPost}
+                      : {selectedDetail.created_at}
                     </Typography>
                   </Grid>
                 </Grid>
@@ -370,7 +406,7 @@ const Admin = () => {
                     <Typography
                       sx={{ fontFamily: "Poppins", fontSize: "16px" }}
                     >
-                      : {selectedDetail.tanggalUpdate}
+                      : {selectedDetail.updated_at}
                     </Typography>
                   </Grid>
                 </Grid>
@@ -404,7 +440,7 @@ const Admin = () => {
                     <MenuItem value={5}>5</MenuItem>
                     <MenuItem value={10}>10</MenuItem>
                     <MenuItem value={15}>15</MenuItem>
-                    <MenuItem value={data.length}>All</MenuItem>
+                    {/* <MenuItem value={data.length}>All</MenuItem> */}
                   </Select>
                   <Typography sx={{ fontFamily: "Poppins" }}>Data</Typography>
                 </Stack>
@@ -442,6 +478,9 @@ const Admin = () => {
                   <TableHead sx={{ fontFamily: "Poppins" }}>
                     <TableRow>
                       <TableCell sx={{ fontFamily: "Poppins", width: "350px" }}>
+                        Name
+                      </TableCell>
+                      <TableCell sx={{ fontFamily: "Poppins", width: "350px" }}>
                         Username
                       </TableCell>
                       <TableCell sx={{ fontFamily: "Poppins", width: "350px" }}>
@@ -459,10 +498,12 @@ const Admin = () => {
                     </TableRow>
                   </TableHead>
                   <TableBody sx={{ fontFamily: "Poppins" }}>
-                    {data
-                      .slice((page - 1) * itemsPerPage, page * itemsPerPage)
-                      .map((row) => (
+                    {data &&
+                      data.map((row) => (
                         <TableRow key={row.id} className={classes.blueRow}>
+                          <TableCell sx={{ fontFamily: "Poppins" }}>
+                            {row.name}
+                          </TableCell>
                           <TableCell sx={{ fontFamily: "Poppins" }}>
                             {row.username}
                           </TableCell>
@@ -484,7 +525,7 @@ const Admin = () => {
                                 variant="Contained"
                                 sx={{ color: "white" }}
                                 style={{ width: "-10px" }}
-                                onClick={() => handleDetailClick(row)}
+                                onClick={() => handleDetailClick(row.id)}
                               >
                                 <VisibilityIcon />
                               </ButtonGreen>
@@ -520,13 +561,13 @@ const Admin = () => {
                 sx={{ justifyContent: "space-between" }}
               >
                 <Typography sx={{ fontFamily: "Poppins" }}>
-                  Menampilkan 1 - {itemsPerPage} dari {data.length} Data
+                  Menampilkan 1 - {itemsPerPage} dari {totalItems} Data
                 </Typography>
                 {/* pagination */}
                 <ThemeProvider theme={themePagination}>
                   <Pagination
                     sx={{ color: "#FFC400" }}
-                    count={Math.ceil(data.length / itemsPerPage)}
+                    count={Math.ceil(totalItems / itemsPerPage)}
                     page={page}
                     onChange={handleChangePage}
                   />
@@ -554,6 +595,22 @@ const Admin = () => {
           </Typography>
 
           <Stack sx={{ mt: 4 }}>
+            {/* name */}
+            <Typography sx={{ fontFamily: "Poppins", fontWeight: 500 }}>
+              * Username
+            </Typography>
+
+            <OutlinedInput
+              sx={{
+                fontFamily: "Poppins",
+                height: "44px",
+                borderRadius: "7px",
+                mt: 1,
+              }}
+              placeholder="Masukkan Judul Agenda"
+              value={newName}
+              onChange={(e) => handleAddChange(e, "name")}
+            ></OutlinedInput>
             {/* username */}
             <Typography sx={{ fontFamily: "Poppins", fontWeight: 500 }}>
               * Username
@@ -567,7 +624,7 @@ const Admin = () => {
                 mt: 1,
               }}
               placeholder="Masukkan Judul Agenda"
-              value={newUser}
+              value={newUserName}
               onChange={(e) => handleAddChange(e, "username")}
             ></OutlinedInput>
             {/* level */}

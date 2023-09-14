@@ -765,7 +765,7 @@ const Karya = () => {
           <Grid container gap={3} mt={1}>
             <Grid xs={4}>
               <Stack sx={{ border: "1px dashed #576974", borderRadius: "8px" }}>
-              <img src={Image} style={{width: "50px",margin: "0 auto",marginTop: "22px"}} alt="" />
+              <img src={Image} style={{width: "50px",margin: "0 auto",marginTop: "22px"}} alt="" /> 
                 <Typography
                   sx={{
                     mt: 1,

@@ -23,7 +23,7 @@ import { makeStyles } from "@mui/styles";
 import { ThemeProvider } from "@mui/material/styles";
 import CreateIcon from "@mui/icons-material/Create";
 import { RiDeleteBin5Fill } from "react-icons/ri";
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Drawer from "@mui/material/Drawer";
 import Papa from "papaparse";
 import * as XLSX from "xlsx";
@@ -39,6 +39,8 @@ import Footer from "../../components/footer/Footer";
 import IconKegiatan from "../../assets/detailKegiatan.svg";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import VisibilityIcon from "@mui/icons-material/Visibility";
+import axios from "axios";
+import { fetchData, postData, putData, deleteData } from "../../service/api";
 
 const useStyles = makeStyles({
   blueRow: {
@@ -49,16 +51,18 @@ const useStyles = makeStyles({
 });
 
 const Agenda = () => {
-  const [data, setData] = useState(dataAgenda);
-  const [itemsPerPage, setItemsPerPage] = useState(5);
+  const [data, setData] = useState();
+  const [itemsPerPage, setItemsPerPage] = useState(0);
   const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(0);
+  const [totalItems, setTotalItems] = useState();
   const [openDrawer, setOpenDrawer] = useState(false);
-  const [newJudulAgenda, setNewJudulAgenda] = useState("");
-  const [newLokasi, setNewLokasi] = useState("");
-  const [newWaktu, setNewWaktu] = useState("");
-  const [newTanggalPost, setNewTanggalPost] = useState("");
-  const [newTanggalUpdate, setNewTanggalUpdate] = useState("");
-  const [editingId, setEditingId] = useState(null);
+  const [newTitle, setNewTitle] = useState("");
+  const [newLocation, setNewLocation] = useState("");
+  const [newTime, setNewTime] = useState("");
+  const [newCreatedAt, setNewCreatedAt] = useState("");
+  const [newUpdateAt, setNewUpdateAt] = useState("");
+  const [editingSlug, setEditingSlug] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const csvFileRef = useRef(null);
   const [category, setCategory] = useState("filterByAlbum");
@@ -67,8 +71,10 @@ const Agenda = () => {
   const [editMode, setEditMode] = useState(false);
 
   // detail
-  const handleDetailClick = (detail) => {
-    setSelectedDetail(detail);
+  const handleDetailClick = (slug) => {
+    fetchData(`/agenda/${slug}`).then((res) => {
+      setSelectedDetail(res.data);
+    });
   };
 
   const handleCloseDetail = () => {
@@ -117,81 +123,99 @@ const Agenda = () => {
   };
   // export excel end
 
-  const handleDelete = (id) => {
-    const updatedData = data.filter((item) => item.id !== id);
-    setData(updatedData);
+  const handleDelete = (slug) => {
+    deleteData(`/agenda/${slug}`)
+      .then((res) => {
+        console.log("Data berhasil dihapus");
+        const updatedData = data.filter((item) => item.slug !== slug);
+        setData(updatedData);
+      })
+      .catch((error) => {
+        console.error("Gagal menghapus data:", error);
+      });
   };
   // edit
-  const handleEdit = (id) => {
-    setEditingId(id);
-    const selectedItem = data.find((item) => item.id === id);
-    setNewJudulAgenda(selectedItem.judulAgenda);
-    setNewLokasi(selectedItem.lokasi);
-    setNewWaktu(selectedItem.waktu);
-    setNewTanggalPost(selectedItem.tanggalPost);
-    setNewTanggalUpdate(selectedItem.tanggalUpdate);
+  const handleEdit = (slug) => {
+    setEditingSlug(slug);
+    const selectedItem = data.find((item) => item.slug === slug);
+    setNewTitle(selectedItem.title);
+    setNewLocation(selectedItem.location);
+    setNewTime(selectedItem.time);
+    setNewCreatedAt(selectedItem.created_at);
+    setNewUpdateAt(selectedItem.updated_at);
     setOpenDrawer(true);
     setEditMode(true);
   };
   const handleAddChange = (e, field) => {
     if (field === "judul") {
-      setNewJudulAgenda(e.target.value);
+      setNewTitle(e.target.value);
     } else if (field === "lokasi") {
-      setNewLokasi(e.target.value);
+      setNewLocation(e.target.value);
     } else if (field === "waktu") {
-      setNewWaktu(e.target.value);
+      setNewTime(e.target.value);
     } else if (field === "tanggalPost") {
-      setNewTanggalPost(e.target.value);
+      setNewCreatedAt(e.target.value);
     } else if (field === "tanggalUpdate") {
-      setNewTanggalUpdate(e.target.value);
+      setNewUpdateAt(e.target.value);
     }
   };
   // // tombol save atau simpan data
   const handleSave = () => {
     if (editMode) {
-      const updatedData = data.map((item) =>
-        item.id === editingId
-          ? {
-              id: editingId,
-              judulAgenda: newJudulAgenda,
-              lokasi: newLokasi,
-              waktu: newWaktu,
-              tanggalPost: newTanggalPost,
-              tanggalUpdate: currentDate,
-            }
-          : item
-      );
-      setData(updatedData);
-      setEditMode(false);
+      putData(`/agenda/${editingSlug}`, {
+        title: newTitle,
+        location: newLocation,
+        time: newTime,
+        created_at: newCreatedAt,
+        updated_at: newUpdateAt,
+      })
+        .then((res) => {
+          const updatedData = data.map((item) =>
+            item.slug === editingSlug ? res.data : item
+          );
+          setData(updatedData);
+          setEditMode(false);
+        })
+        .catch((error) => {
+          console.error("Gagal mengedit data:", error);
+        });
     } else {
       const newData = {
-        id: data.length + 1,
-        judulAgenda: newJudulAgenda,
-        lokasi: newLokasi,
-        waktu: newWaktu,
-        tanggalPost: currentDate,
-        tanggalUpdate: currentDate,
+        title: newTitle,
+        location: newLocation,
+        time: newTime,
+        created_at: newCreatedAt,
+        updated_at: newUpdateAt,
       };
-      setData([...data, newData]);
+
+      postData(`/agenda`, newData)
+        .then((res) => {
+          setData([...data, res]);
+          setOpenDrawer(false);
+          setIsModalOpen(true);
+        })
+        .catch((error) => {
+          console.error("Gagal menambahkan data:", error);
+        });
     }
 
-    setEditingId(null);
-    setNewJudulAgenda("");
-    setNewLokasi("");
-    setNewWaktu("");
-    setNewTanggalPost("");
-    setNewTanggalUpdate("");
+    setEditingSlug(null);
+    setNewTitle("");
+    setNewLocation("");
+    setNewTime("");
+    setNewCreatedAt("");
+    setNewUpdateAt("");
     setOpenDrawer(false);
     setIsModalOpen(true);
   };
 
-// drawer
-const toggleDrawer =
-(open, isEditMode = false) =>
-() => {
-  setOpenDrawer(open);
-  setEditMode(isEditMode);
-};
+  // drawer
+  const toggleDrawer =
+    (open, isEditMode = false) =>
+    () => {
+      setOpenDrawer(open);
+      setEditMode(isEditMode);
+    };
 
   const classes = useStyles();
 
@@ -199,10 +223,10 @@ const toggleDrawer =
     setPage(newPage);
   };
 
-  const handleChangeItemsPerPage = (event) => {
-    setItemsPerPage(event.target.value);
-    setPage(1);
-  };
+  // const handleChangeItemsPerPage = (event) => {
+  //   setItemsPerPage(event.target.value);
+  //   setPage(1);
+  // };
 
   const closeModal = () => {
     setIsModalOpen(false);
@@ -218,6 +242,16 @@ const toggleDrawer =
 
     document.body.innerHTML = originalContents;
   };
+
+  useEffect(() => {
+    fetchData(`/agenda?page=${page}&per_page=${itemsPerPage}`).then((res) => {
+      setData(res.data);
+      setTotalPages(res.meta.total_page);
+      setTotalItems(res.meta.total_item);
+      setItemsPerPage(res.meta.perpage);
+      console.log(res.data);
+    });
+  }, [page, itemsPerPage, totalItems, totalPages]);
   return (
     <Box sx={{ fontFamily: "Poppins", mt: "-23px" }}>
       <Header
@@ -295,7 +329,7 @@ const toggleDrawer =
                     <Typography
                       sx={{ fontFamily: "Poppins", fontSize: "16px" }}
                     >
-                      : {selectedDetail.judulAgenda}
+                      : {selectedDetail.title}
                     </Typography>
                   </Grid>
                 </Grid>
@@ -314,7 +348,7 @@ const toggleDrawer =
                     <Typography
                       sx={{ fontFamily: "Poppins", fontSize: "16px" }}
                     >
-                      : {selectedDetail.lokasi}
+                      : {selectedDetail.location}
                     </Typography>
                   </Grid>
                 </Grid>
@@ -333,7 +367,7 @@ const toggleDrawer =
                     <Typography
                       sx={{ fontFamily: "Poppins", fontSize: "16px" }}
                     >
-                      : {selectedDetail.waktu}
+                      : {selectedDetail.time}
                     </Typography>
                   </Grid>
                 </Grid>
@@ -352,7 +386,7 @@ const toggleDrawer =
                     <Typography
                       sx={{ fontFamily: "Poppins", fontSize: "16px" }}
                     >
-                      : {selectedDetail.tanggalPost}
+                      : {selectedDetail.created_at}
                     </Typography>
                   </Grid>
                 </Grid>
@@ -371,7 +405,7 @@ const toggleDrawer =
                     <Typography
                       sx={{ fontFamily: "Poppins", fontSize: "16px" }}
                     >
-                      : {selectedDetail.tanggalUpdate}
+                      : {selectedDetail.updated_at}
                     </Typography>
                   </Grid>
                 </Grid>
@@ -400,12 +434,12 @@ const toggleDrawer =
                   <Select
                     sx={{ height: 25, width: 62, mx: 1, fontFamily: "Poppins" }}
                     value={itemsPerPage}
-                    onChange={handleChangeItemsPerPage}
+                    // onChange={handleChangeItemsPerPage}
                   >
                     <MenuItem value={5}>5</MenuItem>
                     <MenuItem value={10}>10</MenuItem>
                     <MenuItem value={15}>15</MenuItem>
-                    <MenuItem value={data.length}>All</MenuItem>
+                    {/* <MenuItem value={data.length}>All</MenuItem> */}
                   </Select>
                   <Typography sx={{ fontFamily: "Poppins" }}>Data</Typography>
                 </Stack>
@@ -463,18 +497,17 @@ const toggleDrawer =
                     </TableRow>
                   </TableHead>
                   <TableBody sx={{ fontFamily: "Poppins" }}>
-                    {data
-                      .slice((page - 1) * itemsPerPage, page * itemsPerPage)
-                      .map((row) => (
-                        <TableRow key={row.id} className={classes.blueRow}>
+                    {data &&
+                      data.map((row) => (
+                        <TableRow key={row.slug} className={classes.blueRow}>
                           <TableCell sx={{ fontFamily: "Poppins" }}>
-                            {row.judulAgenda}
+                            {row.title}
                           </TableCell>
                           <TableCell sx={{ fontFamily: "Poppins" }}>
-                            {row.lokasi}
+                            {row.location}
                           </TableCell>
                           <TableCell sx={{ fontFamily: "Poppins" }}>
-                            {row.waktu}
+                            {row.time}
                           </TableCell>
 
                           <TableCell>
@@ -491,14 +524,14 @@ const toggleDrawer =
                                 variant="Contained"
                                 sx={{ color: "white" }}
                                 style={{ width: "-10px" }}
-                                onClick={() => handleDetailClick(row)}
+                                onClick={() => handleDetailClick(row.slug)}
                               >
                                 <VisibilityIcon />
                               </ButtonGreen>
                               <ButtonYellow
                                 sx={{ color: "white" }}
                                 variant="Contained"
-                                onClick={() => handleEdit(row.id)}
+                                onClick={() => handleEdit(row.slug)}
                               >
                                 <CreateIcon />
                               </ButtonYellow>
@@ -506,7 +539,7 @@ const toggleDrawer =
                                 sx={{ fontSize: "20px", color: "#FF2E00" }}
                                 variant="Contained"
                                 size="small"
-                                onClick={() => handleDelete(row.id)}
+                                onClick={() => handleDelete(row.slug)}
                               >
                                 <RiDeleteBin5Fill
                                   sx={{ color: "#FF2E00", fontSize: "20px" }}
@@ -527,13 +560,13 @@ const toggleDrawer =
                 sx={{ justifyContent: "space-between" }}
               >
                 <Typography sx={{ fontFamily: "Poppins" }}>
-                  Menampilkan 1 - {itemsPerPage} dari {data.length} Data
+                  Menampilkan 1 - {itemsPerPage} dari {totalItems} Data
                 </Typography>
                 {/* pagination */}
                 <ThemeProvider theme={themePagination}>
                   <Pagination
                     sx={{ color: "#FFC400" }}
-                    count={Math.ceil(data.length / itemsPerPage)}
+                    count={Math.ceil(totalItems / itemsPerPage)}
                     page={page}
                     onChange={handleChangePage}
                   />
@@ -574,7 +607,7 @@ const toggleDrawer =
                 mt: 1,
               }}
               placeholder="Masukkan Judul Agenda"
-              value={newJudulAgenda}
+              value={newTitle}
               onChange={(e) => handleAddChange(e, "judul")}
             ></OutlinedInput>
             {/* kreator */}
@@ -590,7 +623,7 @@ const toggleDrawer =
                 mt: 1,
               }}
               placeholder="Masukkan Kreator"
-              value={newLokasi}
+              value={newLocation}
               onChange={(e) => handleAddChange(e, "lokasi")}
             ></OutlinedInput>
             {/* waktu */}
@@ -607,7 +640,7 @@ const toggleDrawer =
               }}
               type="date"
               placeholder="Masukkan Kategori"
-              value={newWaktu}
+              value={newTime}
               onChange={(e) => handleAddChange(e, "waktu")}
             ></OutlinedInput>
           </Stack>
@@ -621,7 +654,7 @@ const toggleDrawer =
             }}
           >
             <ButtonYellow
-             onClick={handleSave}
+              onClick={handleSave}
               sx={{
                 width: "130px",
                 py: 1,

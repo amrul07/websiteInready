@@ -43,6 +43,8 @@ import Footer from "../../components/footer/Footer";
 import IconKegiatan from "../../assets/detailKegiatan.svg";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import VisibilityIcon from "@mui/icons-material/Visibility";
+import { fetchData, postData, putData, deleteData } from "../../service/api";
+import { useEffect } from "react";
 
 const useStyles = makeStyles({
   blueRow: {
@@ -53,19 +55,21 @@ const useStyles = makeStyles({
 });
 
 const Kegiatan = () => {
-  const [data, setData] = useState(dataKegiatan);
-  const [itemsPerPage, setItemsPerPage] = useState(5);
-  const [page, setPage] = useState(1);
+  const [data, setData] = useState();
+  const [itemsPerPage, setItemsPerPage] = useState(0);
+  const [page, setPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const [totalItems, setTotalItems] = useState();
   const [openDrawer, setOpenDrawer] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
   const [newImage, setNewImage] = useState("");
-  const [newJudulKegiatan, setNewJudulKegiatan] = useState("");
-  const [newLokasi, setNewLokasi] = useState("");
+  const [newTitle, setNewTitle] = useState("");
+  const [newLocation, setNewLocation] = useState("");
   const [newLink, setNewLink] = useState("");
-  const [newWaktu, setNewWaktu] = useState("");
-  const [newTanggalPost, setNewTanggalPost] = useState("");
-  const [newTanggalUpdate, setNewTanggalUpdate] = useState("");
-  const [newDeskripsi, setNewDeskripsi] = useState("");
+  const [newTime, setNewTime] = useState("");
+  const [newCreatedAt, setNewCreatedAt] = useState("");
+  const [newUpdateAt, setNewUpdateAt] = useState("");
+  const [newDescription, setNewDescription] = useState("");
   const [editingId, setEditingId] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const csvFileRef = useRef(null);
@@ -75,8 +79,10 @@ const Kegiatan = () => {
   const [editMode, setEditMode] = useState(false);
 
   // detail
-  const handleDetailClick = (detail) => {
-    setSelectedDetail(detail);
+  const handleDetailClick = (id) => {
+    fetchData(`/activity/${id}`).then((res) => {
+      setSelectedDetail(res.data);
+    });
   };
 
   const handleCloseDetail = () => {
@@ -129,66 +135,86 @@ const Kegiatan = () => {
   const handleEdit = (id) => {
     setEditingId(id);
     const selectedItem = data.find((item) => item.id === id);
-    setNewImage(selectedItem.image);
-    setNewJudulKegiatan(selectedItem.judulKegiatan);
-    setNewLokasi(selectedItem.lokasi);
-    setNewLink(selectedItem.linkDaftar);
-    setNewWaktu(selectedItem.waktu);
-    setNewTanggalPost(selectedItem.tanggalPost);
-    setNewTanggalUpdate(selectedItem.tanggalUpdate);
-    setNewDeskripsi(selectedItem.deskripsi);
+    setNewImage(selectedItem.flayer_image);
+    setNewTitle(selectedItem.title);
+    setNewLocation(selectedItem.location);
+    setNewLink(selectedItem.registration_link);
+    setNewTime(selectedItem.time);
+    setNewCreatedAt(selectedItem.created_at);
+    setNewUpdateAt(selectedItem.updated_at);
+    setNewDescription(selectedItem.description);
     setOpenDrawer(true);
     setEditMode(true);
   };
   // delete
   const handleDelete = (id) => {
-    const updatedData = data.filter((item) => item.id !== id);
-    setData(updatedData);
+    deleteData(`/activity/${id}`)
+      .then((res) => {
+        console.log("Data berhasil dihapus");
+        const updatedData = data.filter((item) => item.id !== id);
+        setData(updatedData);
+      })
+      .catch((error) => {
+        console.error("Gagal menghapus data:", error);
+      });
   };
 
   // // tombol save atau simpan data
   const handleSave = () => {
     if (editMode) {
-      const updatedData = data.map((item) =>
-        item.id === editingId
-          ? {
-              id: editingId,
-              image: [newImage],
-              judulKegiatan: newJudulKegiatan,
-              lokasi: newLokasi,
-              linkDaftar: newLink,
-              waktu: newWaktu,
-              tanggalPost: newTanggalPost,
-              tanggalUpdate: currentDate,
-              deskripsi: newDeskripsi,
-            }
-          : item
-      );
-      setData(updatedData);
-      setEditMode(false);
+      putData(`/activity/${editingId}`, {
+        // id: editingId,
+        flayer_image: [newImage],
+        title: newTitle,
+        location: newLocation,
+        registration_link: newLink,
+        time: newTime,
+        created_at: newCreatedAt,
+        updated_at: newUpdateAt,
+        description: newDescription,
+      })
+        .then((res) => {
+          const updatedData = data.map((item) =>
+            item.id === editingId ? res : item
+          );
+          setData(updatedData);
+          setEditMode(false);
+        })
+        .catch((error) => {
+          console.error("Gagal mengedit data:", error);
+        });
     } else {
       const newData = {
         id: data.length + 1,
-        image: [newImage],
-        judulKegiatan: newJudulKegiatan,
-        lokasi: newLokasi,
-        linkDaftar: newLink,
-        waktu: newWaktu,
-        tanggalPost: currentDate,
-        tanggalUpdate: currentDate,
-        deskripsi: newDeskripsi,
+        flayer_image: [newImage],
+        title: newTitle,
+        location: newLocation,
+        registration_link: newLink,
+        time: newTime,
+        created_at: newCreatedAt,
+        updated_at: newUpdateAt,
+        description: newDescription,
       };
-      setData([...data, newData]);
+
+      postData(`/activity`, newData)
+        .then((res) => {
+          setData([...data, res]);
+          setOpenDrawer(false);
+          setIsModalOpen(true);
+        })
+        .catch((error) => {
+          console.error("Gagal menambahkan data:", error);
+        });
     }
 
     setEditingId(null);
-    setNewJudulKegiatan("");
-    setNewLokasi("");
+    setNewTitle("");
+    setNewLocation("");
     setNewLink("");
-    setNewTanggalPost("");
-    setNewTanggalUpdate("");
-    setNewWaktu("");
-    setNewDeskripsi("");
+    setNewCreatedAt("");
+    setNewUpdateAt("");
+    setNewTime("");
+    setNewDescription("");
     setNewImage("");
     setOpenDrawer(false);
     setIsModalOpen(true);
@@ -196,17 +222,17 @@ const Kegiatan = () => {
 
   const handleAddChange = (e, field) => {
     if (field === "judul") {
-      setNewJudulKegiatan(e.target.value);
+      setNewTitle(e.target.value);
     } else if (field === "lokasi") {
-      setNewLokasi(e.target.value);
+      setNewLocation(e.target.value);
     } else if (field === "waktu") {
-      setNewWaktu(e.target.value);
+      setNewTime(e.target.value);
     } else if (field === "tanggalPost") {
-      setNewTanggalPost(e.target.value);
+      setNewCreatedAt(e.target.value);
     } else if (field === "tanggalUpdate") {
-      setNewTanggalUpdate(e.target.value);
+      setNewUpdateAt(e.target.value);
     } else if (field === "deskripsi") {
-      setNewDeskripsi(e.target.value);
+      setNewDescription(e.target.value);
     } else if (field === "file") {
       setSelectedFile(e.target.files[0]);
     } else if (field === "image") {
@@ -268,12 +294,23 @@ const Kegiatan = () => {
 
     document.body.innerHTML = originalContents;
   };
+
+  useEffect(() => {
+    fetchData(`/activity?page=${page}&per_page=${itemsPerPage}`).then((res) => {
+      setData(res.data);
+      setTotalPages(res.meta.total_page);
+      setTotalItems(res.meta.total_item);
+      setItemsPerPage(res.meta.perpage);
+      console.log(res.data);
+    });
+  }, [page, itemsPerPage, totalItems, totalPages]);
+
   return (
     <Box sx={{ fontFamily: "Poppins", mt: "-23px" }}>
       <Header
         title={"Kegiatan"}
         onClickTambahData={toggleDrawer(true)}
-        onClickCsv={() => csvFileRef.current.click()}
+        // onClickCsv={() => csvFileRef.current.click()}
         onClickCetak={handlePrint}
         onClickExcel={exportToExcel}
       />
@@ -329,7 +366,7 @@ const Kegiatan = () => {
               <Grid container spacing={2}>
                 <Grid item xs={4}>
                   <img
-                    src={selectedDetail.image}
+                    src={selectedDetail.flayer_image[0]}
                     alt="jgugu"
                     style={{
                       width: "80%",
@@ -360,7 +397,7 @@ const Kegiatan = () => {
                         <Typography
                           sx={{ fontFamily: "Poppins", fontSize: "16px" }}
                         >
-                          : {selectedDetail.judulKegiatan}
+                          : {selectedDetail.title}
                         </Typography>
                       </Grid>
                     </Grid>
@@ -379,7 +416,7 @@ const Kegiatan = () => {
                         <Typography
                           sx={{ fontFamily: "Poppins", fontSize: "16px" }}
                         >
-                          : {selectedDetail.lokasi}
+                          : {selectedDetail.location}
                         </Typography>
                       </Grid>
                     </Grid>
@@ -398,7 +435,7 @@ const Kegiatan = () => {
                         <Typography
                           sx={{ fontFamily: "Poppins", fontSize: "16px" }}
                         >
-                          : {selectedDetail.linkDaftar}
+                          : {selectedDetail.registration_link}
                         </Typography>
                       </Grid>
                     </Grid>
@@ -417,7 +454,7 @@ const Kegiatan = () => {
                         <Typography
                           sx={{ fontFamily: "Poppins", fontSize: "16px" }}
                         >
-                          : {selectedDetail.waktu}
+                          : {selectedDetail.time}
                         </Typography>
                       </Grid>
                     </Grid>
@@ -436,7 +473,7 @@ const Kegiatan = () => {
                         <Typography
                           sx={{ fontFamily: "Poppins", fontSize: "16px" }}
                         >
-                          : {selectedDetail.tanggalPost}
+                          : {selectedDetail.created_at}
                         </Typography>
                       </Grid>
                     </Grid>
@@ -455,7 +492,7 @@ const Kegiatan = () => {
                         <Typography
                           sx={{ fontFamily: "Poppins", fontSize: "16px" }}
                         >
-                          : {selectedDetail.tanggalUpdate}
+                          : {selectedDetail.updated_at}
                         </Typography>
                       </Grid>
                     </Grid>
@@ -481,7 +518,7 @@ const Kegiatan = () => {
                     <Typography
                       sx={{ fontFamily: "Poppins", fontSize: "16px" }}
                     >
-                      {selectedDetail.deskripsi}
+                      {selectedDetail.description}
                     </Typography>
                   </Card>
                 </Grid>
@@ -515,7 +552,7 @@ const Kegiatan = () => {
                     <MenuItem value={5}>5</MenuItem>
                     <MenuItem value={10}>10</MenuItem>
                     <MenuItem value={15}>15</MenuItem>
-                    <MenuItem value={data.length}>All</MenuItem>
+                    {/* <MenuItem value={data.length}>All</MenuItem> */}
                   </Select>
                   <Typography sx={{ fontFamily: "Poppins" }}>Data</Typography>
                 </Stack>
@@ -576,22 +613,21 @@ const Kegiatan = () => {
                     </TableRow>
                   </TableHead>
                   <TableBody sx={{ fontFamily: "Poppins" }}>
-                    {data
-                      .slice((page - 1) * itemsPerPage, page * itemsPerPage)
-                      .map((row) => (
+                    {data &&
+                      data.map((row) => (
                         <TableRow key={row.id} className={classes.blueRow}>
                           <TableCell sx={{ fontFamily: "Poppins" }}>
-                            {row.judulKegiatan}
+                            {row.title}
                           </TableCell>
                           <TableCell sx={{ fontFamily: "Poppins" }}>
-                            {row.lokasi}
+                            {row.location}
                           </TableCell>
                           <TableCell sx={{ fontFamily: "Poppins" }}>
-                            {row.waktu}
+                            {row.time}
                             {/* {bulans[parseInt(row.waktu)-1]} */}
                           </TableCell>
                           <TableCell sx={{ fontFamily: "Poppins" }}>
-                            {row.linkDaftar}
+                            {row.registration_link}
                           </TableCell>
 
                           <TableCell>
@@ -608,7 +644,7 @@ const Kegiatan = () => {
                                 variant="Contained"
                                 sx={{ color: "white" }}
                                 style={{ width: "-10px" }}
-                                onClick={() => handleDetailClick(row)}
+                                onClick={() => handleDetailClick(row.id)}
                               >
                                 <VisibilityIcon />
                               </ButtonGreen>
@@ -646,13 +682,13 @@ const Kegiatan = () => {
                 sx={{ justifyContent: "space-between" }}
               >
                 <Typography sx={{ fontFamily: "Poppins" }}>
-                  Menampilkan 1 - {itemsPerPage} dari {data.length} Data
+                  Menampilkan 1 - {itemsPerPage} dari {totalItems} Data
                 </Typography>
                 {/* pagination */}
                 <ThemeProvider theme={themePagination}>
                   <Pagination
                     sx={{ color: "#FFC400" }}
-                    count={Math.ceil(data.length / itemsPerPage)}
+                    count={Math.ceil(totalItems / itemsPerPage)}
                     page={page}
                     onChange={handleChangePage}
                   />
@@ -693,7 +729,7 @@ const Kegiatan = () => {
                 mt: 1,
               }}
               placeholder="Masukkan Judul Kegiatan"
-              value={newJudulKegiatan}
+              value={newTitle}
               onChange={(e) => handleAddChange(e, "judul")}
             ></OutlinedInput>
             <Typography
@@ -802,7 +838,7 @@ const Kegiatan = () => {
                 mt: 1,
               }}
               placeholder="Masukkan Kategori"
-              value={newLokasi}
+              value={newLocation}
               onChange={(e) => handleAddChange(e, "lokasi")}
             ></OutlinedInput>
             {/* waktu */}
@@ -819,7 +855,7 @@ const Kegiatan = () => {
               }}
               type="date"
               placeholder="Masukkan Kategori"
-              value={newWaktu}
+              value={newTime}
               onChange={(e) => handleAddChange(e, "waktu")}
             ></OutlinedInput>
             {/* deskripsi */}
@@ -832,7 +868,7 @@ const Kegiatan = () => {
               placeholder="Masukkan Isi Berita"
               multiline
               rows={4}
-              value={newDeskripsi}
+              value={newDescription}
               onChange={(e) => handleAddChange(e, "deskripsi")}
             />
           </Stack>

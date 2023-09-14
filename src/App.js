@@ -10,13 +10,12 @@ import Slider from "./pages/slider/Slider";
 import Login from "./pages/login/Login";
 import Testing from "./pages/Testing";
 import Coba from "./pages/Coba";
-import Anggota from "./pages/anggota/Anggota"
+import Anggota from "./pages/anggota/Anggota";
 import Blog from "./pages/blog/Blog";
 import Kegiatan from "./pages/kegiatan/Kegiatan";
 import Karya from "./pages/karya/Karya";
 import Agenda from "./pages/agenda/Agenda";
 import Admin from "./pages/admin/Admin";
-
 
 function App() {
   return (
@@ -24,9 +23,9 @@ function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />}>
-            <Route path="/dashboard" element={<Dashboard />} />
+            <Route index element={<Dashboard />} />
             <Route path="/slider" element={<Slider />} />
-            <Route path="/anggota" element={<Anggota /> } />
+            <Route path="/anggota" element={<Anggota />} />
             <Route path="/blog" element={<Blog />} />
             <Route path="/kegiatan" element={<Kegiatan />} />
             <Route path="/karya" element={<Karya />} />
@@ -36,7 +35,6 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/testing" element={<Testing />} />
           <Route path="/coba" element={<Coba />} />
-
 
           {/* <Route path="/about" element={<About />} />
           <Route path="/setting" element={<Setting />} />
