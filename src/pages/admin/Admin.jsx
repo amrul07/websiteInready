@@ -60,7 +60,7 @@ const Admin = () => {
   const [openDrawer, setOpenDrawer] = useState(false);
   const [newName, setNewName] = useState("");
   const [newUserName, setNewUserName] = useState("");
-  const [newLevel, setNewLevel] = useState([]);
+  const [newLevel, setNewLevel] = useState("");
   const [newCreatedAt, setNewCreatedAt] = useState("");
   const [newUpdateAt, setNewUpdateAt] = useState("");
   const [editingId, setEditingId] = useState(null);
@@ -169,7 +169,6 @@ const Admin = () => {
         level: newLevel,
         created_at: newCreatedAt,
         updated_at: newUpdateAt,
-        
       })
         .then((res) => {
           const updatedData = data.map((item) =>
@@ -200,6 +199,7 @@ const Admin = () => {
         });
     }
 
+    setEditingId(null);
     setNewName("");
     setNewUserName("");
     setNewLevel("");
@@ -223,10 +223,10 @@ const Admin = () => {
     setPage(newPage);
   };
 
-  const handleChangeItemsPerPage = (event) => {
-    setItemsPerPage(event.target.value);
-    setPage(1);
-  };
+  // const handleChangeItemsPerPage = (event) => {
+  //   setItemsPerPage(event.target.value);
+  //   setPage(1);
+  // };
 
   const closeModal = () => {
     setIsModalOpen(false);
@@ -435,7 +435,7 @@ const Admin = () => {
                   <Select
                     sx={{ height: 25, width: 62, mx: 1, fontFamily: "Poppins" }}
                     value={itemsPerPage}
-                    onChange={handleChangeItemsPerPage}
+                    // onChange={handleChangeItemsPerPage}
                   >
                     <MenuItem value={5}>5</MenuItem>
                     <MenuItem value={10}>10</MenuItem>
@@ -597,7 +597,7 @@ const Admin = () => {
           <Stack sx={{ mt: 4 }}>
             {/* name */}
             <Typography sx={{ fontFamily: "Poppins", fontWeight: 500 }}>
-              * Username
+              * Name
             </Typography>
 
             <OutlinedInput

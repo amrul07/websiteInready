@@ -30,7 +30,7 @@ import { makeStyles } from "@mui/styles";
 import { ThemeProvider } from "@mui/material/styles";
 import CreateIcon from "@mui/icons-material/Create";
 import { RiDeleteBin5Fill } from "react-icons/ri";
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Drawer from "@mui/material/Drawer";
 import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternate";
 import ImageIcon from "@mui/icons-material/Image";
@@ -48,8 +48,8 @@ import Footer from "../../components/footer/Footer";
 import IconKegiatan from "../../assets/detailKegiatan.svg";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import VisibilityIcon from "@mui/icons-material/Visibility";
-import Image from "../../assets/image.svg"
-
+import Image from "../../assets/image.svg";
+import { fetchData, postData, putData, deleteData } from "../../service/api";
 const useStyles = makeStyles({
   blueRow: {
     "&:nth-of-type(odd)": {
@@ -58,9 +58,11 @@ const useStyles = makeStyles({
   },
 });
 const Anggota = () => {
-  const [data, setData] = useState(dataAnggota);
-  const [itemsPerPage, setItemsPerPage] = useState(5);
-  const [page, setPage] = useState(1);
+  const [data, setData] = useState();
+  const [itemsPerPage, setItemsPerPage] = useState(0);
+  const [page, setPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const [totalItems, setTotalItems] = useState(0);
   const [menu, setMenu] = useState(1);
   const [openDrawer, setOpenDrawer] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
@@ -87,8 +89,10 @@ const Anggota = () => {
   const [editMode, setEditMode] = useState(false);
 
   // detail
-  const handleDetailClick = (detail) => {
-    setSelectedDetail(detail);
+  const handleDetailClick = (id) => {
+    fetchData(`/member/${id}`).then((res) => {
+      setSelectedDetail(res.data);
+    });
   };
   // close detail
   const handleCloseDetail = () => {
@@ -141,18 +145,19 @@ const Anggota = () => {
   const handleEdit = (id) => {
     setEditingId(id);
     const selectedItem = data.find((item) => item.id === id);
-    setNewImage(selectedItem.image);
-    setNewName(selectedItem.nama);
+    setNewImage(selectedItem.photo);
+    setNewName(selectedItem.name);
     setNewNri(selectedItem.nri);
-    setNewAlamat(selectedItem.alamat);
-    setNewTempatLahir(selectedItem.tempatLahir);
-    setNewTanggalLahir(selectedItem.tanggalLahir);
-    setNewJenisKelamin(selectedItem.jenisKelamin);
-    setNewAngkatan(selectedItem.angkatan);
-    setNewJurusan(selectedItem.jurusan);
-    setNewKonsentrasi(selectedItem.konsentrasi);
-    setNewJabatan(selectedItem.jabatan);
-    setNewNoWa(selectedItem.noWa);
+    setNewAlamat(selectedItem.address);
+    setNewTempatLahir(selectedItem.pob);
+    setNewTanggalLahir(selectedItem.dob);
+    setNewJenisKelamin(selectedItem.gender);
+    setNewAngkatan(selectedItem.generation);
+    setNewJurusan(selectedItem.major);
+    setNewKonsentrasi(selectedItem.concentration);
+    setNewJabatan(selectedItem.position);
+    setNewNoWa(selectedItem.phone);
+    setNewEmail(selectedItem.email);
     setNewIg(selectedItem.instagram);
     setNewFb(selectedItem.facebook);
     setOpenDrawer(true);
@@ -160,54 +165,75 @@ const Anggota = () => {
   };
   // delete
   const handleDelete = (id) => {
-    const updatedData = data.filter((item) => item.id !== id);
-    setData(updatedData);
+    deleteData(`/member/${id}`)
+      .then((res) => {
+        console.log("Data berhasil dihapus");
+        const updatedData = data.filter((item) => item.id !== id);
+        setData(updatedData);
+      })
+      .catch((error) => {
+        console.error("Gagal menghapus data:", error);
+      });
   };
   // tombol save atau simpan data
-  const handleSave = () => {
+  const handleSave = (id) => {
     if (editMode) {
-      const updatedData = data.map((item) =>
-        item.id === editingId
-          ? {
-              id: editingId,
-              image: [newImage],
-              nama: newName,
-              nri: newNri,
-              alamat: newAlamat,
-              tempatLahir: newTempatLahir,
-              tanggalLahir: newTanggalLahir,
-              jenisKelamin: newJenisKelamin,
-              angkatan: newAngkatan,
-              jurusan: newJurusan,
-              konsentrasi: newKonsentrasi,
-              jabatan: newJabatan,
-              noWa: newNoWa,
-              instagram: newIg,
-              facebook: newFb,
-            }
-          : item
-      );
-      setData(updatedData);
-      setEditMode(false);
+      putData(`/member/${editingId}`, {
+        id: editingId,
+        photo: [newImage],
+        name: newName,
+        nri: newNri,
+        address: newAlamat,
+        pob: newTempatLahir,
+        dob: newTanggalLahir,
+        gender: newJenisKelamin,
+        generation: newAngkatan,
+        major: newJurusan,
+        concentration: newKonsentrasi,
+        position: newJabatan,
+        phone: newNoWa,
+        email: newEmail,
+        instagram: newIg,
+        facebook: newFb,
+      })
+        .then((res) => {
+          const updatedData = data.map((item) =>
+            item.id === editingId ? res : item
+          );
+          setData(updatedData);
+          setEditMode(false);
+        })
+        .catch((error) => {
+          console.error("Gagal mengedit data:", error);
+        });
     } else {
       const newData = {
         id: data.length + 1,
-        image: [newImage],
-        nama: newName,
+        photo: [newImage],
+        name: newName,
         nri: newNri,
-        alamat: newAlamat,
-        tempatLahir: newTempatLahir,
-        tanggalLahir: newTanggalLahir,
-        jenisKelamin: newJenisKelamin,
-        angkatan: newAngkatan,
-        jurusan: newJurusan,
-        konsentrasi: newKonsentrasi,
-        jabatan: newJabatan,
-        noWa: newNoWa,
+        address: newAlamat,
+        pob: newTempatLahir,
+        dob: newTanggalLahir,
+        gender: newJenisKelamin,
+        generation: newAngkatan,
+        major: newJurusan,
+        concentration: newKonsentrasi,
+        position: newJabatan,
+        phone: newNoWa,
+        email: newEmail,
         instagram: newIg,
         facebook: newFb,
       };
-      setData([...data, newData]);
+      postData(`/member`, newData)
+        .then((res) => {
+          setData([...data, res]);
+          setOpenDrawer(false);
+          setIsModalOpen(true);
+        })
+        .catch((error) => {
+          console.error("Gagal menambahkan data:", error);
+        });
     }
 
     setEditingId(null);
@@ -223,6 +249,7 @@ const Anggota = () => {
     setNewKonsentrasi("");
     setNewJabatan("");
     setNewNoWa("");
+    setNewEmail("");
     setNewIg("");
     setNewFb("");
     setOpenDrawer(false);
@@ -320,6 +347,16 @@ const Anggota = () => {
     document.body.innerHTML = originalContents;
   };
 
+  useEffect(() => {
+    fetchData(`/member?page=${page}&per_page=${itemsPerPage}`).then((res) => {
+      setData(res.data);
+      setTotalPages(res.meta.total_page);
+      setTotalItems(res.meta.total_item);
+      setItemsPerPage(res.meta.perpage);
+      console.log(res.data);
+    });
+  }, [page, itemsPerPage, totalItems, totalPages]);
+
   return (
     <Box sx={{ fontFamily: "Poppins", mt: "-23px" }}>
       <Header
@@ -381,7 +418,7 @@ const Anggota = () => {
               <Grid container spacing={2}>
                 <Grid item xs={4}>
                   <img
-                    src={selectedDetail.image}
+                    src={selectedDetail.photo}
                     alt="jgugu"
                     style={{
                       width: "80%",
@@ -412,7 +449,7 @@ const Anggota = () => {
                         <Typography
                           sx={{ fontFamily: "Poppins", fontSize: "16px" }}
                         >
-                          : {selectedDetail.nama}
+                          : {selectedDetail.name}
                         </Typography>
                       </Grid>
                     </Grid>
@@ -450,7 +487,7 @@ const Anggota = () => {
                         <Typography
                           sx={{ fontFamily: "Poppins", fontSize: "16px" }}
                         >
-                          : {selectedDetail.alamat}
+                          : {selectedDetail.address}
                         </Typography>
                       </Grid>
                     </Grid>
@@ -469,8 +506,7 @@ const Anggota = () => {
                         <Typography
                           sx={{ fontFamily: "Poppins", fontSize: "16px" }}
                         >
-                          : {selectedDetail.tempatLahir},
-                          {selectedDetail.tanggalLahir}
+                          : {selectedDetail.pob},{selectedDetail.dob}
                         </Typography>
                       </Grid>
                     </Grid>
@@ -489,7 +525,7 @@ const Anggota = () => {
                         <Typography
                           sx={{ fontFamily: "Poppins", fontSize: "16px" }}
                         >
-                          : {selectedDetail.jenisKelamin}
+                          : {selectedDetail.gender}
                         </Typography>
                       </Grid>
                     </Grid>
@@ -508,7 +544,7 @@ const Anggota = () => {
                         <Typography
                           sx={{ fontFamily: "Poppins", fontSize: "16px" }}
                         >
-                          : {selectedDetail.angkatan}
+                          : {selectedDetail.generation}
                         </Typography>
                       </Grid>
                     </Grid>
@@ -527,7 +563,7 @@ const Anggota = () => {
                         <Typography
                           sx={{ fontFamily: "Poppins", fontSize: "16px" }}
                         >
-                          : {selectedDetail.jurusan}
+                          : {selectedDetail.major}
                         </Typography>
                       </Grid>
                     </Grid>
@@ -546,7 +582,7 @@ const Anggota = () => {
                         <Typography
                           sx={{ fontFamily: "Poppins", fontSize: "16px" }}
                         >
-                          : {selectedDetail.konsentrasi}
+                          : {selectedDetail.concentration}
                         </Typography>
                       </Grid>
                     </Grid>
@@ -565,7 +601,7 @@ const Anggota = () => {
                         <Typography
                           sx={{ fontFamily: "Poppins", fontSize: "16px" }}
                         >
-                          : {selectedDetail.jabatan}
+                          : {selectedDetail.position}
                         </Typography>
                       </Grid>
                     </Grid>
@@ -584,7 +620,26 @@ const Anggota = () => {
                         <Typography
                           sx={{ fontFamily: "Poppins", fontSize: "16px" }}
                         >
-                          : {selectedDetail.noWa}
+                          : {selectedDetail.phone}
+                        </Typography>
+                      </Grid>
+                    </Grid>
+                    <Grid
+                      container
+                      sx={{ display: "flex", flexDirection: "row", my: 1 }}
+                    >
+                      <Grid item xs={4}>
+                        <Typography
+                          sx={{ fontFamily: "Poppins", fontSize: "16px" }}
+                        >
+                          Email
+                        </Typography>
+                      </Grid>
+                      <Grid item xs={8}>
+                        <Typography
+                          sx={{ fontFamily: "Poppins", fontSize: "16px" }}
+                        >
+                          : {selectedDetail.email}
                         </Typography>
                       </Grid>
                     </Grid>
@@ -658,7 +713,7 @@ const Anggota = () => {
                     <MenuItem value={5}>5</MenuItem>
                     <MenuItem value={10}>10</MenuItem>
                     <MenuItem value={15}>15</MenuItem>
-                    <MenuItem value={data.length}>All</MenuItem>
+                    {/* <MenuItem value={data.length}>All</MenuItem> */}
                   </Select>
                   <Typography sx={{ fontFamily: "Poppins" }}>Data</Typography>
                 </Stack>
@@ -695,13 +750,9 @@ const Anggota = () => {
                 <Table>
                   <TableHead sx={{ fontFamily: "Poppins" }}>
                     <TableRow>
-                      <TableCell sx={{ fontFamily: "Poppins", width: "200px" }}>
-                        Nri
-                      </TableCell>
-                      <TableCell sx={{ fontFamily: "Poppins", width: "250px" }}>
-                        Nama
-                      </TableCell>
-                      <TableCell sx={{ fontFamily: "Poppins", width: "250px" }}>
+                      <TableCell sx={{ fontFamily: "Poppins" }}>Nri</TableCell>
+                      <TableCell sx={{ fontFamily: "Poppins" }}>Nama</TableCell>
+                      <TableCell sx={{ fontFamily: "Poppins" }}>
                         Alamat
                       </TableCell>
                       <TableCell sx={{ fontFamily: "Poppins" }}>
@@ -710,7 +761,6 @@ const Anggota = () => {
                       <TableCell
                         sx={{
                           fontFamily: "Poppins",
-                          width: "100px",
                           textAlign: "center",
                         }}
                       >
@@ -719,23 +769,22 @@ const Anggota = () => {
                     </TableRow>
                   </TableHead>
                   <TableBody sx={{ fontFamily: "Poppins" }}>
-                    {data
-                      .slice((page - 1) * itemsPerPage, page * itemsPerPage)
-                      .map((row) => (
+                    {data &&
+                      data.map((row) => (
                         <TableRow key={row.id} className={classes.blueRow}>
                           <TableCell sx={{ fontFamily: "Poppins" }}>
                             {row.nri}
                           </TableCell>
                           <TableCell sx={{ fontFamily: "Poppins" }}>
-                            {row.nama}
+                            {row.name}
                           </TableCell>
 
                           <TableCell sx={{ fontFamily: "Poppins" }}>
-                            {row.alamat}
+                            {row.address}
                           </TableCell>
 
                           <TableCell sx={{ fontFamily: "Poppins" }}>
-                            {row.noWa}
+                            {row.phone}
                           </TableCell>
                           <TableCell>
                             <Stack
@@ -751,7 +800,7 @@ const Anggota = () => {
                                 variant="Contained"
                                 sx={{ color: "white" }}
                                 style={{ width: "-10px" }}
-                                onClick={() => handleDetailClick(row)}
+                                onClick={() => handleDetailClick(row.id)}
                               >
                                 <VisibilityIcon />
                               </ButtonGreen>
@@ -788,13 +837,13 @@ const Anggota = () => {
                 sx={{ justifyContent: "space-between" }}
               >
                 <Typography sx={{ fontFamily: "Poppins" }}>
-                  Menampilkan 1 - {itemsPerPage} dari {data.length} Data
+                  Menampilkan 1 - {itemsPerPage} dari {totalItems} Data
                 </Typography>
                 {/* pagination */}
                 <ThemeProvider theme={themePagination}>
                   <Pagination
                     sx={{ color: "#FFC400" }}
-                    count={Math.ceil(data.length / itemsPerPage)}
+                    count={Math.ceil(totalItems / itemsPerPage)}
                     page={page}
                     onChange={handleChangePage}
                   />
@@ -866,7 +915,11 @@ const Anggota = () => {
           <Grid container gap={3} mt={1}>
             <Grid xs={4}>
               <Stack sx={{ border: "1px dashed #576974", borderRadius: "8px" }}>
-              <img src={Image} style={{width: "50px",margin: "0 auto",marginTop: "22px"}} alt="" />
+                <img
+                  src={Image}
+                  style={{ width: "50px", margin: "0 auto", marginTop: "22px" }}
+                  alt=""
+                />
                 <Typography
                   sx={{
                     mt: 1,

@@ -53,7 +53,7 @@ const useStyles = makeStyles({
 const Agenda = () => {
   const [data, setData] = useState();
   const [itemsPerPage, setItemsPerPage] = useState(0);
-  const [page, setPage] = useState(1);
+  const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [totalItems, setTotalItems] = useState();
   const [openDrawer, setOpenDrawer] = useState(false);
@@ -171,7 +171,7 @@ const Agenda = () => {
       })
         .then((res) => {
           const updatedData = data.map((item) =>
-            item.slug === editingSlug ? res.data : item
+            item.slug === editingSlug ? res : item
           );
           setData(updatedData);
           setEditMode(false);
@@ -501,7 +501,7 @@ const Agenda = () => {
                       data.map((row) => (
                         <TableRow key={row.slug} className={classes.blueRow}>
                           <TableCell sx={{ fontFamily: "Poppins" }}>
-                            {row.title}
+                            {row?.title}
                           </TableCell>
                           <TableCell sx={{ fontFamily: "Poppins" }}>
                             {row.location}

@@ -22,12 +22,12 @@ import {
   CardMedia,
 } from "@mui/material";
 import Header from "../../components/header/Header";
-import Image from "../../assets/image.svg"
+import Image from "../../assets/image.svg";
 import { makeStyles } from "@mui/styles";
 import { ThemeProvider } from "@mui/material/styles";
 import CreateIcon from "@mui/icons-material/Create";
 import { RiDeleteBin5Fill } from "react-icons/ri";
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import Drawer from "@mui/material/Drawer";
 import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternate";
 import ImageIcon from "@mui/icons-material/Image";
@@ -45,6 +45,7 @@ import Footer from "../../components/footer/Footer";
 import IconKegiatan from "../../assets/detailKegiatan.svg";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import VisibilityIcon from "@mui/icons-material/Visibility";
+import { fetchData, postData, putData, deleteData } from "../../service/api";
 
 const useStyles = makeStyles({
   blueRow: {
@@ -55,19 +56,21 @@ const useStyles = makeStyles({
 });
 
 const Karya = () => {
-  const [data, setData] = useState(dataKarya);
-  const [itemsPerPage, setItemsPerPage] = useState(5);
-  const [page, setPage] = useState(1);
+  const [data, setData] = useState();
+  const [itemsPerPage, setItemsPerPage] = useState(0);
+  const [page, setPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const [totalItems, setTotalItems] = useState(0);
   const [openDrawer, setOpenDrawer] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
   const [newImage, setNewImage] = useState("");
-  const [newJudulKarya, setNewJudulKarya] = useState("");
-  const [newKreator, setNewKreator] = useState("");
+  const [newTitle, setNewTitle] = useState("");
+  const [newCreator, setNewCreator] = useState("");
   const [newLink, setNewLink] = useState("");
-  const [newKonsentrasi, setNewKonsentrasi] = useState("");
-  const [newTanggalPost, setNewTanggalPost] = useState("");
-  const [newTanggalUpdate, setNewTanggalUpdate] = useState("");
-  const [newDeskripsi, setNewDeskripsi] = useState("");
+  const [newConcentration, setNewConcentration] = useState("");
+  const [newCreatedAt, setNewCreatedAt] = useState("");
+  const [newUpdateAt, setNewUpdateAt] = useState("");
+  const [newDescription, setNewDescription] = useState("");
   const [editingId, setEditingId] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const csvFileRef = useRef(null);
@@ -83,8 +86,10 @@ const Karya = () => {
   };
 
   // detail
-  const handleDetailClick = (detail) => {
-    setSelectedDetail(detail);
+  const handleDetailClick = (id) => {
+    fetchData(`/work/${id}`).then((res) => {
+      setSelectedDetail(res.data);
+    });
   };
 
   const handleCloseDetail = () => {
@@ -138,65 +143,83 @@ const Karya = () => {
     setEditingId(id);
     const selectedItem = data.find((item) => item.id === id);
     setNewImage(selectedItem.image);
-    setNewJudulKarya(selectedItem.judulKarya);
-    setNewKreator(selectedItem.kreator);
+    setNewTitle(selectedItem.title);
+    setNewCreator(selectedItem.creator);
     setNewLink(selectedItem.link);
-    setNewKonsentrasi(selectedItem.konsentrasi);
-    setNewTanggalPost(selectedItem.tanggalPost);
-    setNewTanggalUpdate(selectedItem.tanggalUpdate);
-    setNewDeskripsi(selectedItem.deskripsi);
+    setNewConcentration(selectedItem.concentration);
+    setNewCreatedAt(selectedItem.created_at);
+    setNewUpdateAt(selectedItem.updated_at);
+    setNewDescription(selectedItem.description);
     setOpenDrawer(true);
     setEditMode(true);
   };
 
   const handleDelete = (id) => {
-    const updatedData = data.filter((item) => item.id !== id);
-    setData(updatedData);
+    deleteData(`/work/${id}`)
+      .then((res) => {
+        console.log("Data berhasil dihapus");
+        const updatedData = data.filter((item) => item.id !== id);
+        setData(updatedData);
+      })
+      .catch((error) => {
+        console.error("Gagal menghapus data:", error);
+      });
   };
 
   // // tombol save atau simpan data
   const handleSave = () => {
     if (editMode) {
-      const updatedData = data.map((item) =>
-        item.id === editingId
-          ? {
-              id: editingId,
-              image: [newImage],
-              judulKarya: newJudulKarya,
-              kreator: newKreator,
-              link: newLink,
-              konsentrasi: newKonsentrasi,
-              tanggalPost: newTanggalPost,
-              tanggalUpdate: currentDate,
-              deskripsi: newDeskripsi,
-            }
-          : item
-      );
-      setData(updatedData);
-      setEditMode(false);
+      putData(`/work/${editingId}`, {
+        image: [newImage],
+        title: newTitle,
+        creator: newCreator,
+        link: newLink,
+        concentration: newConcentration,
+        created_at: newCreatedAt,
+        updated_at: newUpdateAt,
+        description: newDescription,
+      })
+        .then((res) => {
+          const updatedData = data.map((item) =>
+            item.id === editingId ? res : item
+          );
+          setData(updatedData);
+          setEditMode(false);
+        })
+        .catch((error) => {
+          console.error("Gagal mengedit data:", error);
+        });
     } else {
       const newData = {
         id: data.length + 1,
         image: [newImage],
-        judulKarya: newJudulKarya,
-        kreator: newKreator,
+        title: newTitle,
+        creator: newCreator,
         link: newLink,
-        konsentrasi: newKonsentrasi,
-        tanggalPost: currentDate,
-        tanggalUpdate: currentDate,
-        deskripsi: newDeskripsi,
+        concentration: newConcentration,
+        created_at: newCreatedAt,
+        updated_at: newUpdateAt,
+        description: newDescription,
       };
-      setData([...data, newData]);
+      postData(`/work`, newData)
+      .then((res) => {
+        setData([...data, res]);
+        setOpenDrawer(false);
+        setIsModalOpen(true);
+      })
+      .catch((error) => {
+        console.error("Gagal menambahkan data:", error);
+      });
     }
 
     setEditingId(null);
-    setNewJudulKarya("");
-    setNewKreator("");
+    setNewTitle("");
+    setNewCreator("");
     setNewLink("");
-    setNewTanggalPost("");
-    setNewTanggalUpdate("");
-    setNewKonsentrasi("");
-    setNewDeskripsi("");
+    setNewCreatedAt("");
+    setNewUpdateAt("");
+    setNewConcentration("");
+    setNewDescription("");
     setNewImage("");
     setOpenDrawer(false);
     setIsModalOpen(true);
@@ -204,17 +227,17 @@ const Karya = () => {
 
   const handleAddChange = (e, field) => {
     if (field === "judul") {
-      setNewJudulKarya(e.target.value);
+      setNewTitle(e.target.value);
     } else if (field === "kreator") {
-      setNewKreator(e.target.value);
+      setNewCreator(e.target.value);
     } else if (field === "konsentrasi") {
-      setNewKonsentrasi(e.target.value);
+      setNewConcentration(e.target.value);
     } else if (field === "tanggalPost") {
-      setNewTanggalPost(e.target.value);
+      setNewCreatedAt(e.target.value);
     } else if (field === "tanggalUpdate") {
-      setNewTanggalUpdate(e.target.value);
+      setNewUpdateAt(e.target.value);
     } else if (field === "deskripsi") {
-      setNewDeskripsi(e.target.value);
+      setNewDescription(e.target.value);
     } else if (field === "file") {
       setSelectedFile(e.target.files[0]);
     } else if (field === "image") {
@@ -223,8 +246,8 @@ const Karya = () => {
       setNewLink(e.target.value);
     }
   };
-   // image
-   const handleImageChange = (e) => {
+  // image
+  const handleImageChange = (e) => {
     const selectedImage = e.target.files[0];
     if (selectedImage) {
       const reader = new FileReader();
@@ -235,11 +258,11 @@ const Karya = () => {
     }
     setSelectedFile(e.target.files[0]);
   };
-// delete
+  // delete
   const handleDeleteFile = () => {
     setSelectedFile(null);
   };
-// tombol input image
+  // tombol input image
   const handleChooseFileClick = () => {
     document.querySelector('input[type="file"]').click();
   };
@@ -277,6 +300,17 @@ const Karya = () => {
 
     document.body.innerHTML = originalContents;
   };
+
+  useEffect(() => {
+    fetchData(`/work?page=${page}&per_page=${itemsPerPage}`).then((res) => {
+      setData(res.data);
+      setTotalPages(res.meta.total_page);
+      setTotalItems(res.meta.total_item);
+      setItemsPerPage(res.meta.perpage);
+      console.log(res.data);
+    });
+  }, [page, itemsPerPage, totalItems, totalPages]);
+
   return (
     <Box sx={{ fontFamily: "Poppins", mt: "-23px" }}>
       <Header
@@ -369,7 +403,7 @@ const Karya = () => {
                         <Typography
                           sx={{ fontFamily: "Poppins", fontSize: "16px" }}
                         >
-                          : {selectedDetail.judulKarya}
+                          : {selectedDetail.title}
                         </Typography>
                       </Grid>
                     </Grid>
@@ -388,7 +422,7 @@ const Karya = () => {
                         <Typography
                           sx={{ fontFamily: "Poppins", fontSize: "16px" }}
                         >
-                          : {selectedDetail.kreator}
+                          : {selectedDetail.creator}
                         </Typography>
                       </Grid>
                     </Grid>
@@ -407,7 +441,7 @@ const Karya = () => {
                         <Typography
                           sx={{ fontFamily: "Poppins", fontSize: "16px" }}
                         >
-                          : {selectedDetail.konsentrasi}
+                          : {selectedDetail.concentration}
                         </Typography>
                       </Grid>
                     </Grid>
@@ -445,7 +479,7 @@ const Karya = () => {
                         <Typography
                           sx={{ fontFamily: "Poppins", fontSize: "16px" }}
                         >
-                          : {selectedDetail.tanggalPost}
+                          : {selectedDetail.created_at}
                         </Typography>
                       </Grid>
                     </Grid>
@@ -464,7 +498,7 @@ const Karya = () => {
                         <Typography
                           sx={{ fontFamily: "Poppins", fontSize: "16px" }}
                         >
-                          : {selectedDetail.tanggalUpdate}
+                          : {selectedDetail.updated_at}
                         </Typography>
                       </Grid>
                     </Grid>
@@ -491,8 +525,8 @@ const Karya = () => {
                       sx={{ fontFamily: "Poppins", fontSize: "16px" }}
                     >
                       {showFullText
-                        ? selectedDetail.deskripsi
-                        : selectedDetail.deskripsi.slice(0, 450) + "..."}
+                        ? selectedDetail.description
+                        : selectedDetail.description.slice(0, 450) + "..."}
                       <Typography
                         sx={{
                           mt: 1,
@@ -539,7 +573,7 @@ const Karya = () => {
                     <MenuItem value={5}>5</MenuItem>
                     <MenuItem value={10}>10</MenuItem>
                     <MenuItem value={15}>15</MenuItem>
-                    <MenuItem value={data.length}>All</MenuItem>
+                    {/* <MenuItem value={data.length}>All</MenuItem> */}
                   </Select>
                   <Typography sx={{ fontFamily: "Poppins" }}>Data</Typography>
                 </Stack>
@@ -597,15 +631,14 @@ const Karya = () => {
                     </TableRow>
                   </TableHead>
                   <TableBody sx={{ fontFamily: "Poppins" }}>
-                    {data
-                      .slice((page - 1) * itemsPerPage, page * itemsPerPage)
-                      .map((row) => (
+                    {data &&
+                      data.map((row) => (
                         <TableRow key={row.id} className={classes.blueRow}>
                           <TableCell sx={{ fontFamily: "Poppins" }}>
-                            {row.judulKarya}
+                            {row.title}
                           </TableCell>
                           <TableCell sx={{ fontFamily: "Poppins" }}>
-                            {row.kreator}
+                            {row.creator}
                           </TableCell>
                           <TableCell sx={{ fontFamily: "Poppins" }}>
                             {row.link}
@@ -625,17 +658,17 @@ const Karya = () => {
                                 variant="Contained"
                                 sx={{ color: "white" }}
                                 style={{ width: "-10px" }}
-                                onClick={() => handleDetailClick(row)}
+                                onClick={() => handleDetailClick(row.id)}
                               >
                                 <VisibilityIcon />
                               </ButtonGreen>
-                                <ButtonYellow
-                                  sx={{ color: "white" }}
-                                  variant="Contained"
-                                  onClick={() => handleEdit(row.id)}
-                                >
-                                  <CreateIcon />
-                                </ButtonYellow>
+                              <ButtonYellow
+                                sx={{ color: "white" }}
+                                variant="Contained"
+                                onClick={() => handleEdit(row.id)}
+                              >
+                                <CreateIcon />
+                              </ButtonYellow>
                               <ButtonPink
                                 sx={{ fontSize: "20px", color: "#FF2E00" }}
                                 variant="Contained"
@@ -661,13 +694,13 @@ const Karya = () => {
                 sx={{ justifyContent: "space-between" }}
               >
                 <Typography sx={{ fontFamily: "Poppins" }}>
-                  Menampilkan 1 - {itemsPerPage} dari {data.length} Data
+                  Menampilkan 1 - {itemsPerPage} dari {totalItems} Data
                 </Typography>
                 {/* pagination */}
                 <ThemeProvider theme={themePagination}>
                   <Pagination
                     sx={{ color: "#FFC400" }}
-                    count={Math.ceil(data.length / itemsPerPage)}
+                    count={Math.ceil(totalItems / itemsPerPage)}
                     page={page}
                     onChange={handleChangePage}
                   />
@@ -708,7 +741,7 @@ const Karya = () => {
                 mt: 1,
               }}
               placeholder="Masukkan Judul Karya"
-              value={newJudulKarya}
+              value={newTitle}
               onChange={(e) => handleAddChange(e, "judul")}
             ></OutlinedInput>
             {/* kreator */}
@@ -724,7 +757,7 @@ const Karya = () => {
                 mt: 1,
               }}
               placeholder="Masukkan Kreator"
-              value={newKreator}
+              value={newCreator}
               onChange={(e) => handleAddChange(e, "kreator")}
             ></OutlinedInput>
             {/* Konsentrasi */}
@@ -737,9 +770,9 @@ const Karya = () => {
               options={["Website", "Desain", "Mobile"]}
               size="small"
               sx={{ mt: "5px" }}
-              value={newKonsentrasi}
+              value={newConcentration}
               onChange={(event, value) => {
-                setNewKonsentrasi(value);
+                setNewConcentration(value);
               }}
               renderInput={(params) => (
                 <TextField
@@ -765,7 +798,11 @@ const Karya = () => {
           <Grid container gap={3} mt={1}>
             <Grid xs={4}>
               <Stack sx={{ border: "1px dashed #576974", borderRadius: "8px" }}>
-              <img src={Image} style={{width: "50px",margin: "0 auto",marginTop: "22px"}} alt="" /> 
+                <img
+                  src={Image}
+                  style={{ width: "50px", margin: "0 auto", marginTop: "22px" }}
+                  alt=""
+                />
                 <Typography
                   sx={{
                     mt: 1,

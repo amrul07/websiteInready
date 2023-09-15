@@ -20,14 +20,13 @@ import {
   CardMedia,
 } from "@mui/material";
 import Header from "../../components/header/Header";
-import Image from "../../assets/image.svg"
+import Image from "../../assets/image.svg";
 import { makeStyles } from "@mui/styles";
 import { ThemeProvider } from "@mui/material/styles";
 import CreateIcon from "@mui/icons-material/Create";
 import { RiDeleteBin5Fill } from "react-icons/ri";
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import Drawer from "@mui/material/Drawer";
-import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternate";
 import ImageIcon from "@mui/icons-material/Image";
 import Papa from "papaparse";
 import * as XLSX from "xlsx";
@@ -43,6 +42,7 @@ import Footer from "../../components/footer/Footer";
 import IconKegiatan from "../../assets/detailKegiatan.svg";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import VisibilityIcon from "@mui/icons-material/Visibility";
+import { fetchData, postData, putData, deleteData } from "../../service/api";
 
 const useStyles = makeStyles({
   blueRow: {
@@ -53,21 +53,22 @@ const useStyles = makeStyles({
 });
 
 const Blog = () => {
-  const [data, setData] = useState(dataBlog);
-  const [itemsPerPage, setItemsPerPage] = useState(5);
-  const [page, setPage] = useState(1);
+  const [data, setData] = useState();
+  const [itemsPerPage, setItemsPerPage] = useState(0);
+  const [page, setPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const [totalItems, setTotalItems] = useState(0);
   const [menu, setMenu] = useState(1);
   const [openDrawer, setOpenDrawer] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
   const [newImage, setNewImage] = useState("");
-  const [newAlbum, setNewAlbum] = useState("");
-  const [newJudul, setNewJudul] = useState("");
-  const [newKategori, setNewKategori] = useState("");
-  const [newPenulis, setNewPenulis] = useState("");
-  const [newTanggalPost, setNewTanggalPost] = useState("");
-  const [newTanggalUpdate, setNewTanggalUpdate] = useState("");
-  const [newIsiBerita, setNewIsiBerita] = useState("");
-  const [editingId, setEditingId] = useState(null);
+  const [newTitle, setNewTitle] = useState("");
+  const [newCategory, setNewCategory] = useState("");
+  const [newWriter, setNewWriter] = useState("");
+  const [newCreatedAt, setNewCreatedAt] = useState("");
+  const [newUpdateAt, setNewUpdateAt] = useState("");
+  const [newContent, setNewContent] = useState("");
+  const [editingSlug, setEditingSlug] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const csvFileRef = useRef(null);
   const [category, setCategory] = useState("filterByAlbum");
@@ -82,8 +83,10 @@ const Blog = () => {
   };
 
   // detail
-  const handleDetailClick = (detail) => {
-    setSelectedDetail(detail);
+  const handleDetailClick = (slug) => {
+    fetchData(`/article/${slug}`).then((res) => {
+      setSelectedDetail(res.data);
+    });
   };
 
   const handleCloseDetail = () => {
@@ -132,64 +135,81 @@ const Blog = () => {
   };
   // export excel end
   // edit
-  const handleEdit = (id) => {
-    setEditingId(id);
-    const selectedItem = data.find((item) => item.id === id);
-    setNewImage(selectedItem.image);
-    setNewJudul(selectedItem.judul);
-    setNewKategori(selectedItem.kategori);
-    setNewPenulis(selectedItem.penulis);
-    setNewTanggalPost(selectedItem.tanggalPost);
-    setNewTanggalUpdate(selectedItem.tanggalUpdate);
-    setNewIsiBerita(selectedItem.isiBerita);
+  const handleEdit = (slug) => {
+    setEditingSlug(slug);
+    const selectedItem = data.find((item) => item.slug === slug);
+    setNewImage(selectedItem?.image);
+    setNewTitle(selectedItem?.title);
+    setNewCategory(selectedItem?.category);
+    setNewWriter(selectedItem?.writer);
+    setNewCreatedAt(selectedItem?.created_at);
+    setNewUpdateAt(selectedItem?.updated_at);
+    setNewContent(selectedItem?.content);
     setOpenDrawer(true);
     setEditMode(true);
   };
   // delete
-  const handleDelete = (id) => {
-    const updatedData = data.filter((item) => item.id !== id);
-    setData(updatedData);
+  const handleDelete = (slug) => {
+    deleteData(`/article/${slug}`)
+      .then((res) => {
+        console.log("Data berhasil dihapus");
+        const updatedData = data.filter((item) => item.slug !== slug);
+        setData(updatedData);
+      })
+      .catch((error) => {
+        console.error("Gagal menghapus data:", error);
+      });
   };
   // // tombol save atau simpan data
   const handleSave = () => {
     if (editMode) {
-      const updatedData = data.map((item) =>
-        item.id === editingId
-          ? {
-              id: editingId,
-              image: [newImage],
-              judul: newJudul,
-              kategori: newKategori,
-              penulis: newPenulis,
-              tanggalPost: newTanggalPost,
-              tanggalUpdate: currentDate,
-              isiBerita: newIsiBerita,
-            }
-          : item
-      );
-      setData(updatedData);
-      setEditMode(false);
+      putData(`/article/${editingSlug}`, {
+        image: [newImage],
+        title: newTitle,
+        category: newCategory,
+        writer: newWriter,
+        created_at: newCreatedAt,
+        updated_at: newUpdateAt,
+        content: newContent,
+      })
+        .then((res) => {
+          const updatedData = data.map((item) =>
+            item.slug === editingSlug ? res : item
+          );
+          setData(updatedData);
+          setEditMode(false);
+        })
+        .catch((error) => {
+          console.error("Gagal mengedit data:", error);
+        });
     } else {
       const newData = {
-        id: data.length + 1,
         image: [newImage],
-        judul: newJudul,
-        kategori: newKategori,
-        penulis: newPenulis,
-        tanggalPost: currentDate,
-        tanggalUpdate: currentDate,
-        isiBerita: newIsiBerita,
+        title: newTitle,
+        category: newCategory,
+        writer: newWriter,
+        created_at: newCreatedAt,
+        updated_at: newUpdateAt,
+        content: newContent,
       };
-      setData([...data, newData]);
+      postData(`/article`, newData)
+        .then((res) => {
+          setData([...data, res]);
+          setOpenDrawer(false);
+          setIsModalOpen(true);
+        })
+        .catch((error) => {
+          console.error("Gagal menambahkan data:", error);
+        });
     }
 
-    setEditingId(null);
-    setNewJudul("");
-    setNewKategori("");
-    setNewPenulis("");
-    setNewTanggalPost("");
-    setNewTanggalUpdate("");
-    setNewIsiBerita("");
+    setEditingSlug(null);
+    setNewTitle("");
+    setNewCategory("");
+    setNewWriter("");
+    setNewCreatedAt("");
+    setNewUpdateAt("");
+    setNewContent("");
     setNewImage("");
     setOpenDrawer(false);
     setIsModalOpen(true);
@@ -197,17 +217,17 @@ const Blog = () => {
 
   const handleAddChange = (e, field) => {
     if (field === "judul") {
-      setNewJudul(e.target.value);
+      setNewTitle(e.target.value);
     } else if (field === "kategori") {
-      setNewKategori(e.target.value);
+      setNewCategory(e.target.value);
     } else if (field === "penulis") {
-      setNewPenulis(e.target.value);
+      setNewWriter(e.target.value);
     } else if (field === "tanggalPost") {
-      setNewTanggalPost(e.target.value);
+      setNewCreatedAt(e.target.value);
     } else if (field === "tanggalUpdate") {
-      setNewTanggalUpdate(e.target.value);
+      setNewUpdateAt(e.target.value);
     } else if (field === "isiBerita") {
-      setNewIsiBerita(e.target.value);
+      setNewContent(e.target.value);
     } else if (field === "file") {
       setSelectedFile(e.target.files[0]);
     } else if (field === "image") {
@@ -215,8 +235,8 @@ const Blog = () => {
     }
   };
 
-   // image
-   const handleImageChange = (e) => {
+  // image
+  const handleImageChange = (e) => {
     const selectedImage = e.target.files[0];
     if (selectedImage) {
       const reader = new FileReader();
@@ -236,13 +256,13 @@ const Blog = () => {
     document.querySelector('input[type="file"]').click();
   };
 
-   // drawer
-   const toggleDrawer =
-   (open, isEditMode = false) =>
-   () => {
-     setOpenDrawer(open);
-     setEditMode(isEditMode);
-   };
+  // drawer
+  const toggleDrawer =
+    (open, isEditMode = false) =>
+    () => {
+      setOpenDrawer(open);
+      setEditMode(isEditMode);
+    };
 
   const classes = useStyles();
 
@@ -269,6 +289,17 @@ const Blog = () => {
 
     document.body.innerHTML = originalContents;
   };
+
+  useEffect(() => {
+    fetchData(`/article?page=${page}&per_page=${itemsPerPage}`).then((res) => {
+      setData(res.data);
+      setTotalPages(res.meta.total_page);
+      setTotalItems(res.meta.total_item);
+      setItemsPerPage(res.meta.perpage);
+      console.log(res.data);
+    });
+  }, [page, itemsPerPage, totalItems, totalPages]);
+
   return (
     <Box sx={{ fontFamily: "Poppins", mt: "-23px" }}>
       <Header
@@ -330,7 +361,7 @@ const Blog = () => {
               <Grid container spacing={2}>
                 <Grid item xs={4}>
                   <img
-                    src={selectedDetail.image}
+                    src={selectedDetail?.image}
                     alt="jgugu"
                     style={{
                       width: "80%",
@@ -361,7 +392,7 @@ const Blog = () => {
                         <Typography
                           sx={{ fontFamily: "Poppins", fontSize: "16px" }}
                         >
-                          : {selectedDetail.judul}
+                          : {selectedDetail?.title}
                         </Typography>
                       </Grid>
                     </Grid>
@@ -380,7 +411,7 @@ const Blog = () => {
                         <Typography
                           sx={{ fontFamily: "Poppins", fontSize: "16px" }}
                         >
-                          : {selectedDetail.kategori}
+                          : {selectedDetail?.category}
                         </Typography>
                       </Grid>
                     </Grid>
@@ -399,7 +430,7 @@ const Blog = () => {
                         <Typography
                           sx={{ fontFamily: "Poppins", fontSize: "16px" }}
                         >
-                          : {selectedDetail.penulis}
+                          : {selectedDetail?.writer}
                         </Typography>
                       </Grid>
                     </Grid>
@@ -418,7 +449,7 @@ const Blog = () => {
                         <Typography
                           sx={{ fontFamily: "Poppins", fontSize: "16px" }}
                         >
-                          : {selectedDetail.tanggalPost}
+                          : {selectedDetail?.created_at}
                         </Typography>
                       </Grid>
                     </Grid>
@@ -437,7 +468,7 @@ const Blog = () => {
                         <Typography
                           sx={{ fontFamily: "Poppins", fontSize: "16px" }}
                         >
-                          : {selectedDetail.tanggalUpdate}
+                          : {selectedDetail?.updated_at}
                         </Typography>
                       </Grid>
                     </Grid>
@@ -464,8 +495,8 @@ const Blog = () => {
                       sx={{ fontFamily: "Poppins", fontSize: "16px" }}
                     >
                       {showFullText
-                        ? selectedDetail.isiBerita
-                        : selectedDetail.isiBerita.slice(0, 450) + "..."}
+                        ? selectedDetail?.content
+                        : selectedDetail?.content.slice(0, 450) + "..."}
                       <Typography
                         sx={{
                           mt: 1,
@@ -512,7 +543,7 @@ const Blog = () => {
                     <MenuItem value={5}>5</MenuItem>
                     <MenuItem value={10}>10</MenuItem>
                     <MenuItem value={15}>15</MenuItem>
-                    <MenuItem value={data.length}>All</MenuItem>
+                    {/* <MenuItem value={data.length}>All</MenuItem> */}
                   </Select>
                   <Typography sx={{ fontFamily: "Poppins" }}>Data</Typography>
                 </Stack>
@@ -573,21 +604,20 @@ const Blog = () => {
                     </TableRow>
                   </TableHead>
                   <TableBody sx={{ fontFamily: "Poppins" }}>
-                    {data
-                      .slice((page - 1) * itemsPerPage, page * itemsPerPage)
-                      .map((row) => (
-                        <TableRow key={row.id} className={classes.blueRow}>
+                    {data &&
+                      data.map((row) => (
+                        <TableRow key={row.slug} className={classes.blueRow}>
                           <TableCell sx={{ fontFamily: "Poppins" }}>
-                            {row.judul}
+                            {row?.title}
                           </TableCell>
                           <TableCell sx={{ fontFamily: "Poppins" }}>
-                            {row.kategori}
+                            {row?.category}
                           </TableCell>
                           <TableCell sx={{ fontFamily: "Poppins" }}>
-                            {row.penulis}
+                            {row?.writer}
                           </TableCell>
                           <TableCell sx={{ fontFamily: "Poppins" }}>
-                            {row.tanggalPost}
+                            {row?.created_at}
                           </TableCell>
                           <TableCell>
                             <Stack
@@ -603,14 +633,14 @@ const Blog = () => {
                                 variant="Contained"
                                 sx={{ color: "white" }}
                                 style={{ width: "-10px" }}
-                                onClick={() => handleDetailClick(row)}
+                                onClick={() => handleDetailClick(row?.slug)}
                               >
                                 <VisibilityIcon />
                               </ButtonGreen>
                               <ButtonYellow
                                 sx={{ color: "white" }}
                                 variant="Contained"
-                                onClick={() => handleEdit(row.id)}
+                                onClick={() => handleEdit(row?.slug)}
                               >
                                 <CreateIcon />
                               </ButtonYellow>
@@ -619,7 +649,7 @@ const Blog = () => {
                                 sx={{ fontSize: "20px", color: "#FF2E00" }}
                                 variant="Contained"
                                 size="small"
-                                onClick={() => handleDelete(row.id)}
+                                onClick={() => handleDelete(row?.slug)}
                               >
                                 <RiDeleteBin5Fill
                                   sx={{ color: "#FF2E00", fontSize: "20px" }}
@@ -640,13 +670,13 @@ const Blog = () => {
                 sx={{ justifyContent: "space-between" }}
               >
                 <Typography sx={{ fontFamily: "Poppins" }}>
-                  Menampilkan 1 - {itemsPerPage} dari {data.length} Data
+                  Menampilkan 1 - {itemsPerPage} dari {totalItems} Data
                 </Typography>
                 {/* pagination */}
                 <ThemeProvider theme={themePagination}>
                   <Pagination
                     sx={{ color: "#FFC400" }}
-                    count={Math.ceil(data.length / itemsPerPage)}
+                    count={Math.ceil(totalItems / itemsPerPage)}
                     page={page}
                     onChange={handleChangePage}
                   />
@@ -687,7 +717,7 @@ const Blog = () => {
                 mt: 1,
               }}
               placeholder="Masukkan Judul"
-              value={newJudul}
+              value={newTitle}
               onChange={(e) => handleAddChange(e, "judul")}
             ></OutlinedInput>
             {/* kategori */}
@@ -703,7 +733,7 @@ const Blog = () => {
                 mt: 1,
               }}
               placeholder="Masukkan Kategori"
-              value={newKategori}
+              value={newCategory}
               onChange={(e) => handleAddChange(e, "kategori")}
             ></OutlinedInput>
             <Typography
@@ -722,7 +752,11 @@ const Blog = () => {
           <Grid container gap={3} mt={1}>
             <Grid xs={4}>
               <Stack sx={{ border: "1px dashed #576974", borderRadius: "8px" }}>
-              <img src={Image} style={{width: "50px",margin: "0 auto",marginTop: "22px"}} alt="" />
+                <img
+                  src={Image}
+                  style={{ width: "50px", margin: "0 auto", marginTop: "22px" }}
+                  alt=""
+                />
                 <Typography
                   sx={{
                     mt: 1,
@@ -773,7 +807,7 @@ const Blog = () => {
                   <Typography
                     sx={{ mt: 1, fontFamily: "Poppins", fontSize: "14px" }}
                   >
-                    {selectedFile.name}
+                    {selectedFile?.name}
                   </Typography>
                 </Stack>
               )}
@@ -808,7 +842,7 @@ const Blog = () => {
                 mt: 1,
               }}
               placeholder="Masukkan Kategori"
-              value={newPenulis}
+              value={newWriter}
               onChange={(e) => handleAddChange(e, "penulis")}
             ></OutlinedInput>
             <Typography sx={{ fontFamily: "Poppins", fontWeight: 500, mt: 1 }}>
@@ -820,7 +854,7 @@ const Blog = () => {
               placeholder="Masukkan Isi Berita"
               multiline
               rows={4}
-              value={newIsiBerita}
+              value={newContent}
               onChange={(e) => handleAddChange(e, "isiBerita")}
             />
           </Stack>

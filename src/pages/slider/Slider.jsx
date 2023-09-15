@@ -42,11 +42,12 @@ import Footer from "../../components/footer/Footer";
 import IconKegiatan from "../../assets/detailKegiatan.svg";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import VisibilityIcon from "@mui/icons-material/Visibility";
-import Image from "../../assets/image.svg"
+import Image from "../../assets/image.svg";
 import Glide from "@glidejs/glide";
 import "@glidejs/glide/dist/css/glide.core.min.css";
 import "@glidejs/glide/dist/css/glide.theme.min.css";
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
+import { fetchData, postData, putData, deleteData } from "../../service/api";
 
 const useStyles = makeStyles({
   blueRow: {
@@ -57,14 +58,16 @@ const useStyles = makeStyles({
 });
 
 const Slider = () => {
-  const [data, setData] = useState(initialData);
-  const [itemsPerPage, setItemsPerPage] = useState(5);
-  const [page, setPage] = useState(1);
+  const [data, setData] = useState();
+  const [itemsPerPage, setItemsPerPage] = useState(0);
+  const [page, setPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const [totalItems, setTotalItems] = useState(0);
   const [menu, setMenu] = useState(1);
   const [openDrawer, setOpenDrawer] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
   const [newImage, setNewImage] = useState("");
-  const [newAlbum, setNewAlbum] = useState("");
+  const [newTitle, setNewTitle] = useState("");
   const [newDescription, setNewDescription] = useState("");
   const [editingId, setEditingId] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -72,11 +75,12 @@ const Slider = () => {
   const [category, setCategory] = useState("filterByAlbum");
   const [selectedDetail, setSelectedDetail] = useState(null);
   const [editMode, setEditMode] = useState(false);
-  
 
   // detail
-  const handleDetailClick = (detail) => {
-    setSelectedDetail(detail);
+  const handleDetailClick = (id) => {
+    fetchData(`/slider/${id}`).then((res) => {
+      setSelectedDetail(res.data);
+    });
   };
 
   const handleCloseDetail = () => {
@@ -130,50 +134,69 @@ const Slider = () => {
     setEditingId(id);
     const selectedItem = data.find((item) => item.id === id);
     setNewImage(selectedItem.image);
-    setNewAlbum(selectedItem.album);
+    setNewTitle(selectedItem.title);
     setNewDescription(selectedItem.description);
     setOpenDrawer(true);
     setEditMode(true);
   };
-// delete
+  // delete
   const handleDelete = (id) => {
-    const updatedData = data.filter((item) => item.id !== id);
-    setData(updatedData);
+    deleteData(`/slider/${id}`)
+      .then((res) => {
+        console.log("Data berhasil dihapus");
+        const updatedData = data.filter((item) => item.id !== id);
+        setData(updatedData);
+      })
+      .catch((error) => {
+        console.error("Gagal menghapus data:", error);
+      });
   };
 
   // edit dan tambah data
   const handleSave = () => {
     if (editMode) {
-      const updatedData = data.map((item) =>
-        item.id === editingId
-          ? {
-              id: editingId,
-              image: [newImage],
-              album: newAlbum,
-              description: newDescription,
-            }
-          : item
-      );
-      setData(updatedData);
-      setEditMode(false);
+      putData(`/slider/${editingId}`, {
+        id: editingId,
+        image: [newImage],
+        title: newTitle,
+        description: newDescription,
+      })
+        .then((res) => {
+          const updatedData = data.map((item) =>
+            item.slug === editingId ? res : item
+          );
+          setData(updatedData);
+          setEditMode(false);
+        })
+        .catch((error) => {
+          console.error("Gagal mengedit data:", error);
+        });
     } else {
       const newData = {
         id: data.length + 1,
         image: [newImage],
-        album: newAlbum,
+        title: newTitle,
         description: newDescription,
       };
-      setData([...data, newData]);
+      postData(`/slider`, newData)
+        .then((res) => {
+          setData([...data, res]);
+          setOpenDrawer(false);
+          setIsModalOpen(true);
+        })
+        .catch((error) => {
+          console.error("Gagal menambahkan data:", error);
+        });
     }
 
     setEditingId(null);
     setNewImage("");
-    setNewAlbum("");
+    setNewTitle("");
     setNewDescription("");
     setOpenDrawer(false);
     setIsModalOpen(true);
   };
-// image
+  // image
   const handleImageChange = (e) => {
     const selectedImage = e.target.files[0];
     if (selectedImage) {
@@ -187,21 +210,21 @@ const Slider = () => {
   };
 
   const handleAlbumChange = (e) => {
-    setNewAlbum(e.target.value);
+    setNewTitle(e.target.value);
   };
 
   const handleDescriptionChange = (e) => {
     setNewDescription(e.target.value);
   };
-// delete
+  // delete
   const handleDeleteFile = () => {
     setSelectedFile(null);
   };
-// tombol input image
+  // tombol input image
   const handleChooseFileClick = () => {
     document.querySelector('input[type="file"]').click();
   };
-// drawer
+  // drawer
   const toggleDrawer =
     (open, isEditMode = false) =>
     () => {
@@ -214,7 +237,7 @@ const Slider = () => {
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
   };
-// menampilkan item perpage
+  // menampilkan item perpage
   const handleChangeItemsPerPage = (event) => {
     setItemsPerPage(event.target.value);
     setPage(1);
@@ -223,7 +246,7 @@ const Slider = () => {
   const handleChangeMenu = (event) => {
     setMenu(event.target.value);
   };
-// modal
+  // modal
   const closeModal = () => {
     setIsModalOpen(false);
   };
@@ -242,6 +265,14 @@ const Slider = () => {
   // glide js
 
   useEffect(() => {
+    fetchData(`/slider?page=${page}&per_page=${itemsPerPage}`).then((res) => {
+      setData(res.data);
+      setTotalPages(res.meta.total_page);
+      setTotalItems(res.meta.total_item);
+      setItemsPerPage(res.meta.perpage);
+      console.log(res.data);
+    });
+
     if (selectedDetail) {
       const totalImages = selectedDetail.image.length;
       const perView = totalImages <= 5 ? totalImages : 5;
@@ -268,7 +299,7 @@ const Slider = () => {
         glide.destroy();
       };
     }
-  }, [selectedDetail]);
+  }, [selectedDetail, page, itemsPerPage, totalItems, totalPages]);
 
   return (
     <Box sx={{ fontFamily: "Poppins", mt: "-23px" }}>
@@ -392,7 +423,7 @@ const Slider = () => {
                       fontSize: "16px",
                     }}
                   >
-                    Album
+                    Title
                   </Typography>
                   <Typography
                     sx={{
@@ -404,7 +435,7 @@ const Slider = () => {
                     :
                   </Typography>
                   <Typography sx={{ fontFamily: "Poppins", fontSize: "16px" }}>
-                    {selectedDetail.album}
+                    {selectedDetail.title}
                   </Typography>
                 </Stack>
                 <Stack
@@ -467,7 +498,7 @@ const Slider = () => {
                     <MenuItem value={5}>5</MenuItem>
                     <MenuItem value={10}>10</MenuItem>
                     <MenuItem value={15}>15</MenuItem>
-                    <MenuItem value={data.length}>All</MenuItem>
+                    {/* <MenuItem value={data.length}>All</MenuItem> */}
                   </Select>
                   <Typography sx={{ fontFamily: "Poppins" }}>Data</Typography>
                 </Stack>
@@ -525,21 +556,20 @@ const Slider = () => {
                     </TableRow>
                   </TableHead>
                   <TableBody sx={{ fontFamily: "Poppins" }}>
-                    {data
-                      .slice((page - 1) * itemsPerPage, page * itemsPerPage)
-                      .map((row) => (
+                    {data &&
+                      data.map((row) => (
                         <TableRow key={row.id} className={classes.blueRow}>
                           <TableCell>
                             <img
                               style={{ objectFit: "cover" }}
                               src={row.image[0]}
-                              alt={`Gambar ${row.album}`}
+                              alt={`Gambar ${row.title}`}
                               width="99"
                               height="111"
                             />
                           </TableCell>
                           <TableCell sx={{ fontFamily: "Poppins" }}>
-                            {row.album}
+                            {row.title}
                           </TableCell>
                           <TableCell sx={{ fontFamily: "Poppins" }}>
                             {row.description}
@@ -558,7 +588,7 @@ const Slider = () => {
                                 variant="Contained"
                                 sx={{ color: "white" }}
                                 style={{ width: "-10px" }}
-                                onClick={() => handleDetailClick(row)}
+                                onClick={() => handleDetailClick(row.id)}
                               >
                                 <VisibilityIcon />
                               </ButtonGreen>
@@ -595,13 +625,13 @@ const Slider = () => {
                 sx={{ justifyContent: "space-between" }}
               >
                 <Typography sx={{ fontFamily: "Poppins" }}>
-                  Menampilkan 1 - {itemsPerPage} dari {data.length} Data
+                  Menampilkan 1 - {itemsPerPage} dari {totalItems} Data
                 </Typography>
                 {/* pagination */}
                 <ThemeProvider theme={themePagination}>
                   <Pagination
                     sx={{ color: "#FFC400" }}
-                    count={Math.ceil(data.length / itemsPerPage)}
+                    count={Math.ceil(totalItems / itemsPerPage)}
                     page={page}
                     onChange={handleChangePage}
                   />
@@ -646,7 +676,11 @@ const Slider = () => {
           <Grid container gap={3} mt={1}>
             <Grid xs={4}>
               <Stack sx={{ border: "1px dashed #576974", borderRadius: "8px" }}>
-                <img src={Image} style={{width: "50px",margin: "0 auto",marginTop: "22px"}} alt="" />
+                <img
+                  src={Image}
+                  style={{ width: "50px", margin: "0 auto", marginTop: "22px" }}
+                  alt=""
+                />
                 <Typography
                   sx={{
                     width: "80%",
@@ -719,13 +753,13 @@ const Slider = () => {
           </Grid>
           <Stack mt={2}>
             <Typography sx={{ fontFamily: "Poppins", fontWeight: 500 }}>
-              Album
+              Title
             </Typography>
 
             <OutlinedInput
               sx={{ fontFamily: "Poppins" }}
               placeholder="Masukkan nama Album"
-              value={newAlbum}
+              value={newTitle}
               onChange={handleAlbumChange}
             ></OutlinedInput>
             <Typography sx={{ fontFamily: "Poppins", fontWeight: 500, mt: 1 }}>
