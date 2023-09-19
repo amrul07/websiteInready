@@ -58,7 +58,9 @@ const useStyles = makeStyles({
   },
 });
 const Anggota = () => {
-  const [data, setData] = useState();
+  const [data, setData] = useState([]);
+  const [dataMajor, setDataMajor] = useState([]);
+  const [dataConcentration, setDataConcentration] = useState([]);
   const [itemsPerPage, setItemsPerPage] = useState(0);
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
@@ -207,25 +209,23 @@ const Anggota = () => {
           console.error("Gagal mengedit data:", error);
         });
     } else {
-      const newData = {
-        id: data.length + 1,
-        photo: [newImage],
-        name: newName,
-        nri: newNri,
-        address: newAlamat,
-        pob: newTempatLahir,
-        dob: newTanggalLahir,
-        gender: newJenisKelamin,
-        generation: newAngkatan,
-        major: newJurusan,
-        concentration: newKonsentrasi,
-        position: newJabatan,
-        phone: newNoWa,
-        email: newEmail,
-        instagram: newIg,
-        facebook: newFb,
-      };
-      postData(`/member`, newData)
+      const formData = new FormData();
+      formData.append("nri", newNri);
+      formData.append("name", newName);
+      formData.append("photo", selectedFile);
+      formData.append("address", newAlamat);
+      formData.append("pob", newTempatLahir);
+      formData.append("dob", newTanggalLahir);
+      formData.append("gender", newJenisKelamin);
+      formData.append("generation", newAngkatan);
+      formData.append("major_id", newJurusan);
+      formData.append("concentration_id", newKonsentrasi);
+      formData.append("position", newJabatan);
+      formData.append("phone", newNoWa);
+      formData.append("email", newEmail);
+      formData.append("instagram", newIg);
+      formData.append("facebook", newFb);
+      postData(`/member`, formData)
         .then((res) => {
           setData([...data, res]);
           setOpenDrawer(false);
@@ -234,6 +234,7 @@ const Anggota = () => {
         .catch((error) => {
           console.error("Gagal menambahkan data:", error);
         });
+        console.log(newJenisKelamin)
     }
 
     setEditingId(null);
@@ -254,6 +255,7 @@ const Anggota = () => {
     setNewFb("");
     setOpenDrawer(false);
     setIsModalOpen(true);
+    
   };
 
   const handleAddChange = (e, field) => {
@@ -355,6 +357,22 @@ const Anggota = () => {
       setItemsPerPage(res.meta.perpage);
       console.log(res.data);
     });
+    fetchData(`/major?page=${page}&per_page=${itemsPerPage}`).then((res) => {
+      setDataMajor(res.data);
+      // setTotalPages(res.meta.total_page);
+      // setTotalItems(res.meta.total_item);
+      // setItemsPerPage(res.meta.perpage);
+      console.log(res.data);
+    });
+    fetchData(`/concentration?page=${page}&per_page=${itemsPerPage}`).then(
+      (res) => {
+        setDataConcentration(res.data);
+        // setTotalPages(res.meta.total_page);
+        // setTotalItems(res.meta.total_item);
+        // setItemsPerPage(res.meta.perpage);
+        console.log(res.data);
+      }
+    );
   }, [page, itemsPerPage, totalItems, totalPages]);
 
   return (
@@ -1067,19 +1085,20 @@ const Anggota = () => {
                 name="row-radio-buttons-group"
                 sx={{ gap: 16, fontFamily: "Poppins", fontWeight: 600 }}
                 value={newJenisKelamin}
-                onChange={(e) => handleAddChange(e, "jenisKelamin")}
+                onChange={(e) => setNewJenisKelamin(e.target.value)}
+                // {console.log(newJenisKelamin)}
               >
                 <FormControlLabel
                   sx={{ fontFamily: "Poppins" }}
                   control={<Radio />}
-                  label="Laki-Laki"
-                  value={"laki laki"}
+                  label="male"
+                  value={"male"}
                 />
                 <FormControlLabel
                   sx={{ fontFamily: "Poppins" }}
                   control={<Radio />}
-                  label="Perempuan"
-                  value={"perempuan"}
+                  label="female"
+                  value={"female"}
                 />
               </RadioGroup>
             </FormControl>
@@ -1109,46 +1128,36 @@ const Anggota = () => {
             <Typography sx={{ fontFamily: "Poppins", fontWeight: 500, mt: 2 }}>
               * Jurusan
             </Typography>
-            <Autocomplete
-              disablePortal
-              id="combo-box-demo"
-              options={["Teknik Informatika", "Sistem Informasi"]}
-              size="small"
-              sx={{ mt: "5px" }}
+            <Select
+              labelId="demo-simple-select-label"
+              id="demo-simple-select"
               value={newJurusan}
-              onChange={(event, value) => {
-                setNewJurusan(value);
-              }}
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  sx={{ fontFamily: "Poppins" }}
-                  placeholder={"Pilih Jurusan"}
-                />
-              )}
-            />
+              label="Age"
+              onChange={(e) => setNewJurusan(e.target.value)}
+            >
+              {dataMajor.map((e) => (
+                <MenuItem key={e.id} value={e.id}>
+                  {e.name}
+                </MenuItem>
+              ))}
+            </Select>
             {/* Konsentrasi */}
             <Typography sx={{ fontFamily: "Poppins", fontWeight: 500, mt: 2 }}>
               * Konsentrasi
             </Typography>
-            <Autocomplete
-              disablePortal
-              id="combo-box-demo"
-              options={["Website", "Desain", "Mobile"]}
-              size="small"
-              sx={{ mt: "5px" }}
+            <Select
+              labelId="demo-simple-select-label"
+              id="demo-simple-select"
               value={newKonsentrasi}
-              onChange={(event, value) => {
-                setNewKonsentrasi(value);
-              }}
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  sx={{ fontFamily: "Poppins" }}
-                  placeholder={"Pilih Konsentrasi"}
-                />
-              )}
-            />
+              label="Age"
+              onChange={(e) => setNewKonsentrasi(e.target.value)}
+            >
+              {dataConcentration.map((e) => (
+                <MenuItem key={e.id} value={e.id}>
+                  {e.name}
+                </MenuItem>
+              ))}
+            </Select>
             {/* jabatan */}
             <Typography sx={{ fontFamily: "Poppins", fontWeight: 500, mt: 2 }}>
               * Jabatan

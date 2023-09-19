@@ -82,6 +82,7 @@ const Kegiatan = () => {
   const handleDetailClick = (id) => {
     fetchData(`/activity/${id}`).then((res) => {
       setSelectedDetail(res.data);
+      console.log(res.data)
     });
   };
 
@@ -135,16 +136,17 @@ const Kegiatan = () => {
   const handleEdit = (id) => {
     setEditingId(id);
     const selectedItem = data.find((item) => item.id === id);
-    setNewImage(selectedItem.flayer_image);
-    setNewTitle(selectedItem.title);
-    setNewLocation(selectedItem.location);
-    setNewLink(selectedItem.registration_link);
-    setNewTime(selectedItem.time);
-    setNewCreatedAt(selectedItem.created_at);
-    setNewUpdateAt(selectedItem.updated_at);
-    setNewDescription(selectedItem.description);
+    setNewImage(selectedItem?.flayer_image);
+    setNewTitle(selectedItem?.title);
+    setNewLocation(selectedItem?.location);
+    setNewLink(selectedItem?.registration_link);
+    setNewTime(selectedItem?.time);
+    setNewCreatedAt(selectedItem?.created_at);
+    setNewUpdateAt(selectedItem?.updated_at);
+    setNewDescription(selectedItem?.description);
     setOpenDrawer(true);
     setEditMode(true);
+    console.log(selectedItem)
   };
   // delete
   const handleDelete = (id) => {
@@ -164,7 +166,7 @@ const Kegiatan = () => {
     if (editMode) {
       putData(`/activity/${editingId}`, {
         // id: editingId,
-        flayer_image: [newImage],
+        flayer_image: selectedFile,
         title: newTitle,
         location: newLocation,
         registration_link: newLink,
@@ -184,19 +186,17 @@ const Kegiatan = () => {
           console.error("Gagal mengedit data:", error);
         });
     } else {
-      const newData = {
-        id: data.length + 1,
-        flayer_image: [newImage],
-        title: newTitle,
-        location: newLocation,
-        registration_link: newLink,
-        time: newTime,
-        created_at: newCreatedAt,
-        updated_at: newUpdateAt,
-        description: newDescription,
-      };
+      const formData = new FormData();
+      formData.append("flayer_image", selectedFile)
+      formData.append("title", newTitle)
+      formData.append("location", newLocation)
+      formData.append("registration_link", newLink)
+      formData.append("time", newTime)
+      formData.append("created_at", newCreatedAt)
+      formData.append("updated_at", newCreatedAt)
+      formData.append("description", newDescription)
 
-      postData(`/activity`, newData)
+      postData(`/activity`, formData)
         .then((res) => {
           setData([...data, res]);
           setOpenDrawer(false);
@@ -206,7 +206,7 @@ const Kegiatan = () => {
           console.error("Gagal menambahkan data:", error);
         });
     }
-
+console.log(newImage)
     setEditingId(null);
     setNewTitle("");
     setNewLocation("");
@@ -237,6 +237,8 @@ const Kegiatan = () => {
       setSelectedFile(e.target.files[0]);
     } else if (field === "image") {
       setNewImage(e.target.value);
+    } else if (field === "link") {
+      setNewLink(e.target.value);
     }
   };
 
@@ -246,11 +248,13 @@ const Kegiatan = () => {
     if (selectedImage) {
       const reader = new FileReader();
       reader.onload = () => {
+        // setData(...data, flayer_image);
         setNewImage(reader.result);
       };
       reader.readAsDataURL(selectedImage);
     }
     setSelectedFile(e.target.files[0]);
+   
   };
   // delete
   const handleDeleteFile = () => {
@@ -366,8 +370,8 @@ const Kegiatan = () => {
               <Grid container spacing={2}>
                 <Grid item xs={4}>
                   <img
-                    src={selectedDetail.flayer_image[0]}
-                    alt="jgugu"
+                    src={selectedDetail.flayer_image}
+                    alt={selectedDetail.title}
                     style={{
                       width: "80%",
                       height: "300px",
@@ -770,6 +774,7 @@ const Kegiatan = () => {
                   accept="image/*"
                   style={{ display: "none" }}
                   onChange={handleImageChange}
+                  // value={newImage}
                 />
                 <ButtonYellow
                   sx={{
@@ -804,6 +809,7 @@ const Kegiatan = () => {
                     sx={{ mt: 1, fontFamily: "Poppins", fontSize: "14px" }}
                   >
                     {selectedFile.name}
+                    {/* {editMode ? selectedDetail.flayer_image : selectedFile.name} */}
                   </Typography>
                 </Stack>
               )}
@@ -841,6 +847,22 @@ const Kegiatan = () => {
               value={newLocation}
               onChange={(e) => handleAddChange(e, "lokasi")}
             ></OutlinedInput>
+            {/* lokasi */}
+            <Typography sx={{ fontFamily: "Poppins", fontWeight: 500 }}>
+              * Link Daftar
+            </Typography>
+
+            <OutlinedInput
+              sx={{
+                fontFamily: "Poppins",
+                height: "44px",
+                borderRadius: "7px",
+                mt: 1,
+              }}
+              placeholder="Masukkan Kategori"
+              value={newLink}
+              onChange={(e) => handleAddChange(e, "link")}
+            ></OutlinedInput>
             {/* waktu */}
             <Typography sx={{ fontFamily: "Poppins", fontWeight: 500, mt: 2 }}>
               * Waktu
@@ -854,7 +876,6 @@ const Kegiatan = () => {
                 mt: 1,
               }}
               type="date"
-              placeholder="Masukkan Kategori"
               value={newTime}
               onChange={(e) => handleAddChange(e, "waktu")}
             ></OutlinedInput>

@@ -39,7 +39,7 @@ import {
   ButtonYellow,
 } from "../../components/button/Index";
 import { ModalSlider } from "../../components/modal/Index";
-import { dataKarya } from "../../utils/InitialData";
+// import { dataAnggota, dataKarya } from "../../utils/InitialData";
 import { themePagination } from "../../components/paginations/Index";
 import Footer from "../../components/footer/Footer";
 import IconKegiatan from "../../assets/detailKegiatan.svg";
@@ -57,6 +57,7 @@ const useStyles = makeStyles({
 
 const Karya = () => {
   const [data, setData] = useState();
+  const [dataMember, setDataMember] = useState([]);
   const [itemsPerPage, setItemsPerPage] = useState(0);
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
@@ -68,9 +69,11 @@ const Karya = () => {
   const [newCreator, setNewCreator] = useState("");
   const [newLink, setNewLink] = useState("");
   const [newConcentration, setNewConcentration] = useState("");
+  const [inputValue, setInputValue] = useState("");
   const [newCreatedAt, setNewCreatedAt] = useState("");
   const [newUpdateAt, setNewUpdateAt] = useState("");
   const [newDescription, setNewDescription] = useState("");
+  const [memberId, setMemberId] = useState();
   const [editingId, setEditingId] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const csvFileRef = useRef(null);
@@ -124,18 +127,18 @@ const Karya = () => {
   // import csv end
 
   // export excel
-  const exportData = dataKarya.map((item) => ({
-    image: item.image,
-    album: item.album,
-    description: item.description,
-  }));
+  // const exportData = data.map((item) => ({
+  //   image: item.image,
+  //   album: item.album,
+  //   description: item.description,
+  // }));
 
-  const exportToExcel = () => {
-    const ws = XLSX.utils.json_to_sheet(exportData);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
-    XLSX.writeFile(wb, "dataExcel.xlsx");
-  };
+  // const exportToExcel = () => {
+  //   const ws = XLSX.utils.json_to_sheet(exportData);
+  //   const wb = XLSX.utils.book_new();
+  //   XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
+  //   XLSX.writeFile(wb, "dataExcel.xlsx");
+  // };
   // export excel end
 
   // edit
@@ -147,9 +150,11 @@ const Karya = () => {
     setNewCreator(selectedItem.creator);
     setNewLink(selectedItem.link);
     setNewConcentration(selectedItem.concentration);
+    // setInputValue(selectedItem.concentration)
     setNewCreatedAt(selectedItem.created_at);
     setNewUpdateAt(selectedItem.updated_at);
     setNewDescription(selectedItem.description);
+    setMemberId(selectedItem.member_id);
     setOpenDrawer(true);
     setEditMode(true);
   };
@@ -167,10 +172,11 @@ const Karya = () => {
   };
 
   // // tombol save atau simpan data
-  const handleSave = () => {
+  const handleSave = (id) => {
     if (editMode) {
       putData(`/work/${editingId}`, {
-        image: [newImage],
+        member_id: 12,
+        image: selectedFile,
         title: newTitle,
         creator: newCreator,
         link: newLink,
@@ -190,26 +196,25 @@ const Karya = () => {
           console.error("Gagal mengedit data:", error);
         });
     } else {
-      const newData = {
-        id: data.length + 1,
-        image: [newImage],
-        title: newTitle,
-        creator: newCreator,
-        link: newLink,
-        concentration: newConcentration,
-        created_at: newCreatedAt,
-        updated_at: newUpdateAt,
-        description: newDescription,
-      };
-      postData(`/work`, newData)
-      .then((res) => {
-        setData([...data, res]);
-        setOpenDrawer(false);
-        setIsModalOpen(true);
-      })
-      .catch((error) => {
-        console.error("Gagal menambahkan data:", error);
-      });
+      const formData = new FormData();
+      formData.append("image", selectedFile);
+      formData.append("title", newTitle);
+      formData.append("creator", newCreator);
+      formData.append("concentration", newConcentration);
+      formData.append("link", newLink);
+      formData.append("created_at", newCreatedAt);
+      formData.append("updated_at", newCreatedAt);
+      formData.append("description", newDescription);
+      formData.append("member_id", 12);
+      postData(`/work`, formData)
+        .then((res) => {
+          setData([...data, res]);
+          setOpenDrawer(false);
+          setIsModalOpen(true);
+        })
+        .catch((error) => {
+          console.error("Gagal menambahkan data:", error);
+        });
     }
 
     setEditingId(null);
@@ -221,6 +226,7 @@ const Karya = () => {
     setNewConcentration("");
     setNewDescription("");
     setNewImage("");
+    setMemberId();
     setOpenDrawer(false);
     setIsModalOpen(true);
   };
@@ -244,6 +250,8 @@ const Karya = () => {
       setNewImage(e.target.value);
     } else if (field === "link") {
       setNewLink(e.target.value);
+    } else if (field === "member_id") {
+      setMemberId(e.target.value);
     }
   };
   // image
@@ -252,6 +260,7 @@ const Karya = () => {
     if (selectedImage) {
       const reader = new FileReader();
       reader.onload = () => {
+        // setData(...data, flayer_image);
         setNewImage(reader.result);
       };
       reader.readAsDataURL(selectedImage);
@@ -309,6 +318,13 @@ const Karya = () => {
       setItemsPerPage(res.meta.perpage);
       console.log(res.data);
     });
+    // data anggota
+    fetchData(`/member`).then((res) => {
+      setDataMember(res.data);
+      console.log(res.data);
+      // console.log(dataMember([1].id))
+      // console.log(dataMember[0].nri)
+    });
   }, [page, itemsPerPage, totalItems, totalPages]);
 
   return (
@@ -318,7 +334,7 @@ const Karya = () => {
         onClickTambahData={toggleDrawer(true)}
         onClickCsv={() => csvFileRef.current.click()}
         onClickCetak={handlePrint}
-        onClickExcel={exportToExcel}
+        // onClickExcel={exportToExcel}
       />
       <Box my={3}>
         {selectedDetail ? (
@@ -373,7 +389,7 @@ const Karya = () => {
                 <Grid item xs={4}>
                   <img
                     src={selectedDetail.image}
-                    alt="jgugu"
+                    alt={selectedDetail.title}
                     style={{
                       width: "80%",
                       height: "300px",
@@ -774,6 +790,10 @@ const Karya = () => {
               onChange={(event, value) => {
                 setNewConcentration(value);
               }}
+              inputValue={inputValue}
+              onInputChange={(event, newInputValue) => {
+                setInputValue(newInputValue);
+              }}
               renderInput={(params) => (
                 <TextField
                   {...params}
@@ -891,6 +911,19 @@ const Karya = () => {
               value={newLink}
               onChange={(e) => handleAddChange(e, "link")}
             ></OutlinedInput>
+            {/* deskripsi */}
+            <Typography sx={{ fontFamily: "Poppins", fontWeight: 500, mt: 2 }}>
+              * Deskripsi
+            </Typography>
+
+            <OutlinedInput
+              sx={{ fontFamily: "Poppins", borderRadius: "7px" }}
+              placeholder="Masukkan Isi Berita"
+              multiline
+              rows={4}
+              value={newDescription}
+              onChange={(e) => handleAddChange(e, "deskripsi")}
+            />
           </Stack>
           <Stack
             mt={3}

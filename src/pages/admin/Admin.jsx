@@ -43,6 +43,7 @@ import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import { fetchData, postData, putData, deleteData } from "../../service/api";
 import { useEffect } from "react";
+import { useParams } from "react-router-dom";
 
 const useStyles = makeStyles({
   blueRow: {
@@ -59,8 +60,10 @@ const Admin = () => {
   const [totalItems, setTotalItems] = useState(0);
   const [openDrawer, setOpenDrawer] = useState(false);
   const [newName, setNewName] = useState("");
+  const [inputValue, setInputValue] = useState("");
   const [newUserName, setNewUserName] = useState("");
   const [newLevel, setNewLevel] = useState("");
+  const [newPassword, setNewPassword] = useState("")
   const [newCreatedAt, setNewCreatedAt] = useState("");
   const [newUpdateAt, setNewUpdateAt] = useState("");
   const [editingId, setEditingId] = useState(null);
@@ -70,6 +73,10 @@ const Admin = () => {
   const currentDate = new Date().toLocaleDateString();
   const [selectedDetail, setSelectedDetail] = useState(null);
   const [editMode, setEditMode] = useState(false);
+  const {id} = useParams();
+
+  const [memberData, setMemberData] = useState([])
+  const [selectedMember, setSelectedMember] = useState('')
 
   // detail
   const handleDetailClick = (id) => {
@@ -157,13 +164,15 @@ const Admin = () => {
       setNewCreatedAt(e.target.value);
     } else if (field === "tanggalUpdate") {
       setNewUpdateAt(e.target.value);
+    } else if (field === "password") {
+      setNewPassword(e.target.value);
     }
   };
 
   // // tombol save atau simpan data
   const handleSave = () => {
     if (editMode) {
-      putData(`/user/${editingId}`, {
+      putData(`/user/${id}`, {
         name: newName,
         username: newUserName,
         level: newLevel,
@@ -180,13 +189,14 @@ const Admin = () => {
         .catch((error) => {
           console.error("Gagal mengedit data:", error);
         });
+        console.log(id)
     } else {
+      console.log(selectedMember)
       const newData = {
-        name: newName,
+        member_id: selectedMember,
         username: newUserName,
         level: newLevel,
-        created_at: newCreatedAt,
-        updated_at: newUpdateAt,
+        password: newPassword,
       };
       postData(`/user`, newData)
         .then((res) => {
@@ -204,6 +214,7 @@ const Admin = () => {
     setNewUserName("");
     setNewLevel("");
     setNewCreatedAt("");
+    setNewPassword("")
     setNewUpdateAt("");
     setOpenDrawer(false);
     setIsModalOpen(true);
@@ -251,6 +262,12 @@ const Admin = () => {
       setItemsPerPage(res.meta.perpage);
       console.log(res.data);
     });
+
+    fetchData('/member/all').then(res => {
+      console.log(res.date)
+      setMemberData(res.date)
+    })
+
   }, [page, itemsPerPage, totalItems, totalPages]);
 
   return (
@@ -526,6 +543,7 @@ const Admin = () => {
                                 sx={{ color: "white" }}
                                 style={{ width: "-10px" }}
                                 onClick={() => handleDetailClick(row.id)}
+                                
                               >
                                 <VisibilityIcon />
                               </ButtonGreen>
@@ -533,9 +551,12 @@ const Admin = () => {
                                 sx={{ color: "white" }}
                                 variant="Contained"
                                 onClick={() => handleEdit(row.id)}
+                                
                               >
+                                
                                 <CreateIcon />
                               </ButtonYellow>
+                              
                               <ButtonPink
                                 sx={{ fontSize: "20px", color: "#FF2E00" }}
                                 variant="Contained"
@@ -600,17 +621,21 @@ const Admin = () => {
               * Name
             </Typography>
 
-            <OutlinedInput
-              sx={{
-                fontFamily: "Poppins",
-                height: "44px",
-                borderRadius: "7px",
-                mt: 1,
-              }}
-              placeholder="Masukkan Judul Agenda"
-              value={newName}
-              onChange={(e) => handleAddChange(e, "name")}
-            ></OutlinedInput>
+            <Select
+              labelId="demo-simple-select-label"
+              id="demo-simple-select"
+              value={selectedMember}
+              label="Age"
+              onChange={(e) =>setSelectedMember(e.target.value)}
+            >
+              {
+                memberData.map(e => (
+
+                  <MenuItem key={e.id} value={e.id}>{e.name}</MenuItem>
+                ))
+              }
+            </Select>
+
             {/* username */}
             <Typography sx={{ fontFamily: "Poppins", fontWeight: 500 }}>
               * Username
@@ -626,6 +651,22 @@ const Admin = () => {
               placeholder="Masukkan Judul Agenda"
               value={newUserName}
               onChange={(e) => handleAddChange(e, "username")}
+            ></OutlinedInput>
+            {/* username */}
+            <Typography sx={{ fontFamily: "Poppins", fontWeight: 500 }}>
+              * Password
+            </Typography>
+
+            <OutlinedInput
+              sx={{
+                fontFamily: "Poppins",
+                height: "44px",
+                borderRadius: "7px",
+                mt: 1,
+              }}
+              placeholder="Masukkan Judul Agenda"
+              value={newPassword}
+              onChange={(e) => handleAddChange(e, "password")}
             ></OutlinedInput>
             {/* level */}
             <Typography sx={{ fontFamily: "Poppins", fontWeight: 500, mt: 2 }}>

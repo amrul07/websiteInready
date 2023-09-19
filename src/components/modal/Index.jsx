@@ -1,8 +1,9 @@
 import { Box, Card, CardMedia, Modal, Stack, Typography } from "@mui/material";
 import Sukses from "../../assets/sukses.svg";
-import { ButtonYellow } from "../button/Index";
+import Delete from "../../assets/delete.jpg"
+import {  ButtonRed, ButtonYellow } from "../button/Index";
 
-const styleModalSlider = {
+const styleModalSucces = {
   position: "absolute",
   top: "50%",
   left: "50%",
@@ -26,7 +27,6 @@ const styleLogin = {
   outline: "none",
 };
 
-
 // modal slider
 const ModalSlider = (props) => {
   return (
@@ -36,7 +36,7 @@ const ModalSlider = (props) => {
       aria-labelledby="modal-modal-title"
       aria-describedby="modal-modal-description"
     >
-      <Box sx={styleModalSlider}>
+      <Box sx={styleModalSucces}>
         <Stack sx={{ alignSelf: "center" }}>
           <CardMedia
             sx={{
@@ -88,7 +88,6 @@ const ModalSlider = (props) => {
     </Modal>
   );
 };
-
 
 // modal login
 const ModalLogin = (props) => {
@@ -171,4 +170,67 @@ const ModalLogin = (props) => {
   );
 };
 
-export { ModalSlider, ModalLogin };
+const ModalDelete = (props) => {
+  return (
+    <Modal
+      open={props.open}
+      // onClose={handleClose}
+      aria-labelledby="modal-modal-title"
+      aria-describedby="modal-modal-description"
+    >
+      <Box sx={styleModalSucces}>
+        <Stack sx={{ alignSelf: "center" }}>
+          <CardMedia
+            sx={{
+              width: "135px",
+              height: "135px",
+              mt: 1,
+              alignSelf: "center",
+            }}
+            image={Delete}
+          />
+          <Typography
+            id="modal-modal-title"
+            sx={{
+              fontFamily: "Poppins",
+              fontSize: "18px",
+              fontWeight: 500,
+              textAlign: "center",
+              mt: 2,
+            }}
+          >
+            Apakah anda yakin ingin menghapus data?
+          </Typography>
+          <Stack sx={{display: "flex",flexDirection: "row",justifyContent: "space-around", mt: 1}}>
+            <ButtonYellow
+              onClick={props.onClickDelete}
+              sx={{
+                width: "85px",
+                alignSelf: "center",
+                my: 2,
+                borderRadius: "8px",
+                color: "white",
+              }}
+            >
+              Yes
+            </ButtonYellow>
+            <ButtonRed
+              onClick={props.onClick}
+              sx={{
+                width: "85px",
+                alignSelf: "center",
+                my: 2,
+                borderRadius: "8px",
+                color: "white",
+              }}
+            >
+              No
+            </ButtonRed>
+          </Stack>
+        </Stack>
+      </Box>
+    </Modal>
+  );
+};
+
+export { ModalSlider, ModalLogin, ModalDelete };

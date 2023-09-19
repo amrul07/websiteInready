@@ -164,9 +164,10 @@ const Blog = () => {
   const handleSave = () => {
     if (editMode) {
       putData(`/article/${editingSlug}`, {
-        image: [newImage],
+        image: selectedFile,
         title: newTitle,
         category: newCategory,
+        category_id: 4,
         writer: newWriter,
         created_at: newCreatedAt,
         updated_at: newUpdateAt,
@@ -183,16 +184,16 @@ const Blog = () => {
           console.error("Gagal mengedit data:", error);
         });
     } else {
-      const newData = {
-        image: [newImage],
-        title: newTitle,
-        category: newCategory,
-        writer: newWriter,
-        created_at: newCreatedAt,
-        updated_at: newUpdateAt,
-        content: newContent,
-      };
-      postData(`/article`, newData)
+      const formData = new FormData();
+      formData.append("image", selectedFile)
+      formData.append("title", newTitle)
+      formData.append("category", newCategory)
+      formData.append("category_id", 4)
+      formData.append("writer", newWriter)
+      formData.append("created_at", newCreatedAt)
+      formData.append("updated_at", newCreatedAt)
+      formData.append("content", newContent)
+      postData(`/article`, formData)
         .then((res) => {
           setData([...data, res]);
           setOpenDrawer(false);
@@ -211,6 +212,7 @@ const Blog = () => {
     setNewUpdateAt("");
     setNewContent("");
     setNewImage("");
+    setSelectedFile()
     setOpenDrawer(false);
     setIsModalOpen(true);
   };
@@ -241,6 +243,7 @@ const Blog = () => {
     if (selectedImage) {
       const reader = new FileReader();
       reader.onload = () => {
+        // setData(...data, flayer_image);
         setNewImage(reader.result);
       };
       reader.readAsDataURL(selectedImage);

@@ -32,7 +32,7 @@ import {
   ButtonPink,
   ButtonYellow,
 } from "../../components/button/Index";
-import { ModalSlider } from "../../components/modal/Index";
+import { ModalSlider, ModalDelete } from "../../components/modal/Index";
 import { dataAgenda } from "../../utils/InitialData";
 import { themePagination } from "../../components/paginations/Index";
 import Footer from "../../components/footer/Footer";
@@ -69,6 +69,8 @@ const Agenda = () => {
   const currentDate = new Date().toLocaleDateString();
   const [selectedDetail, setSelectedDetail] = useState(null);
   const [editMode, setEditMode] = useState(false);
+  const [modalDelete, setModalDelete] = useState(false);
+  const [deleteMode, setDeleteMode] = useState(false);
 
   // detail
   const handleDetailClick = (slug) => {
@@ -124,15 +126,22 @@ const Agenda = () => {
   // export excel end
 
   const handleDelete = (slug) => {
-    deleteData(`/agenda/${slug}`)
-      .then((res) => {
-        console.log("Data berhasil dihapus");
-        const updatedData = data.filter((item) => item.slug !== slug);
-        setData(updatedData);
-      })
-      .catch((error) => {
-        console.error("Gagal menghapus data:", error);
-      });
+    // if (deleteMode === true) {
+      deleteData(`/agenda/${slug}`)
+        .then((res) => {
+          const updatedData = data.filter((item) => item.slug !== slug);
+          setData(updatedData);
+          setModalDelete(false);
+        })
+        .catch((error) => {
+          console.error("Gagal menghapus data:", error);
+        });
+    // } else {
+    //   setModalDelete(false);
+    // }
+    // setModalDelete(!modalDelete);
+
+    // console.log(handleDelete);
   };
   // edit
   const handleEdit = (slug) => {
@@ -230,6 +239,15 @@ const Agenda = () => {
 
   const closeModal = () => {
     setIsModalOpen(false);
+  };
+
+  const closeModalDelete = () => {
+    setModalDelete(false);
+  };
+
+  const modeDelete = () => {
+    setDeleteMode(true);
+    setModalDelete(false);
   };
 
   // print
@@ -683,6 +701,11 @@ const Agenda = () => {
 
       {/* Modal */}
       <ModalSlider open={isModalOpen} onClick={closeModal} />
+      <ModalDelete
+        open={modalDelete}
+        onClick={closeModalDelete}
+        onClickDelete={modeDelete}
+      />
       <Footer />
     </Box>
   );
