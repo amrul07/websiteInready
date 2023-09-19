@@ -18,6 +18,10 @@ import {
   Pagination,
   OutlinedInput,
   CardMedia,
+  RadioGroup,
+  FormControlLabel,
+  Radio,
+  FormLabel,
 } from "@mui/material";
 import Header from "../../components/header/Header";
 import { makeStyles } from "@mui/styles";
@@ -69,6 +73,7 @@ const Slider = () => {
   const [newImage, setNewImage] = useState("");
   const [newTitle, setNewTitle] = useState("");
   const [newDescription, setNewDescription] = useState("");
+  const [isActive, setIsActive] = useState(true);
   const [editingId, setEditingId] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const csvFileRef = useRef(null);
@@ -80,6 +85,7 @@ const Slider = () => {
   const handleDetailClick = (id) => {
     fetchData(`/slider/${id}`).then((res) => {
       setSelectedDetail(res.data);
+      console.log(selectedDetail);
     });
   };
 
@@ -136,6 +142,7 @@ const Slider = () => {
     setNewImage(selectedItem.image);
     setNewTitle(selectedItem.title);
     setNewDescription(selectedItem.description);
+    setIsActive(selectedItem.is_active);
     setOpenDrawer(true);
     setEditMode(true);
   };
@@ -156,10 +163,10 @@ const Slider = () => {
   const handleSave = () => {
     if (editMode) {
       putData(`/slider/${editingId}`, {
-        id: editingId,
-        image: [newImage],
+        image: selectedFile,
         title: newTitle,
         description: newDescription,
+        is_active: isActive,
       })
         .then((res) => {
           const updatedData = data.map((item) =>
@@ -172,13 +179,13 @@ const Slider = () => {
           console.error("Gagal mengedit data:", error);
         });
     } else {
-      const newData = {
-        id: data.length + 1,
-        image: [newImage],
-        title: newTitle,
-        description: newDescription,
-      };
-      postData(`/slider`, newData)
+      const formData = new FormData();
+      formData.append("image", selectedFile);
+      formData.append("title", newTitle);
+      formData.append("description", newDescription);
+      formData.append("is_active", isActive);
+
+      postData(`/slider`, formData)
         .then((res) => {
           setData([...data, res]);
           setOpenDrawer(false);
@@ -193,6 +200,7 @@ const Slider = () => {
     setNewImage("");
     setNewTitle("");
     setNewDescription("");
+    setIsActive();
     setOpenDrawer(false);
     setIsModalOpen(true);
   };
@@ -436,6 +444,35 @@ const Slider = () => {
                   </Typography>
                   <Typography sx={{ fontFamily: "Poppins", fontSize: "16px" }}>
                     {selectedDetail.title}
+                  </Typography>
+                </Stack>
+                <Stack
+                  sx={{
+                    display: "flex",
+                    flexDirection: "row",
+                    fontFamily: "Poppins",
+                  }}
+                >
+                  <Typography
+                    sx={{
+                      paddingRight: "240px",
+                      fontFamily: "Poppins",
+                      fontSize: "16px",
+                    }}
+                  >
+                    Aktif
+                  </Typography>
+                  <Typography
+                    sx={{
+                      paddingRight: "5px",
+                      fontFamily: "Poppins",
+                      fontSize: "16px",
+                    }}
+                  >
+                    :
+                  </Typography>
+                  <Typography sx={{ fontFamily: "Poppins", fontSize: "16px" }}>
+                    {selectedDetail.is_active}
                   </Typography>
                 </Stack>
                 <Stack
@@ -762,6 +799,40 @@ const Slider = () => {
               value={newTitle}
               onChange={handleAlbumChange}
             ></OutlinedInput>
+            <FormControl>
+              <FormLabel
+                id="demo-row-radio-buttons-group-label"
+                sx={{
+                  fontFamily: "Poppins",
+                  fontWeight: 500,
+                  mt: 2,
+                  color: "black",
+                }}
+              >
+                * Aktif
+              </FormLabel>
+              <RadioGroup
+                row
+                aria-labelledby="demo-row-radio-buttons-group-label"
+                name="row-radio-buttons-group"
+                sx={{ gap: 16, fontFamily: "Poppins", fontWeight: 600 }}
+                value={isActive}
+                onChange={(e) => setIsActive(e.target.value)}
+              >
+                <FormControlLabel
+                  sx={{ fontFamily: "Poppins" }}
+                  control={<Radio />}
+                  label="true"
+                  value={1}
+                />
+                <FormControlLabel
+                  sx={{ fontFamily: "Poppins" }}
+                  control={<Radio />}
+                  label="false"
+                  value={0}
+                />
+              </RadioGroup>
+            </FormControl>
             <Typography sx={{ fontFamily: "Poppins", fontWeight: 500, mt: 1 }}>
               Deskripsi
             </Typography>

@@ -24,6 +24,7 @@ import {
   Radio,
   Autocomplete,
   CardMedia,
+  InputLabel,
 } from "@mui/material";
 import Header from "../../components/header/Header";
 import { makeStyles } from "@mui/styles";
@@ -181,8 +182,8 @@ const Anggota = () => {
   const handleSave = (id) => {
     if (editMode) {
       putData(`/member/${editingId}`, {
-        id: editingId,
-        photo: [newImage],
+        // id: editingId,
+        photo: selectedFile,
         name: newName,
         nri: newNri,
         address: newAlamat,
@@ -190,8 +191,8 @@ const Anggota = () => {
         dob: newTanggalLahir,
         gender: newJenisKelamin,
         generation: newAngkatan,
-        major: newJurusan,
-        concentration: newKonsentrasi,
+        major_id: newJurusan,
+        concentration_id: newKonsentrasi,
         position: newJabatan,
         phone: newNoWa,
         email: newEmail,
@@ -234,7 +235,8 @@ const Anggota = () => {
         .catch((error) => {
           console.error("Gagal menambahkan data:", error);
         });
-        console.log(newJenisKelamin)
+      console.log(newJenisKelamin);
+      console.log(newKonsentrasi);
     }
 
     setEditingId(null);
@@ -255,44 +257,44 @@ const Anggota = () => {
     setNewFb("");
     setOpenDrawer(false);
     setIsModalOpen(true);
-    
+    console.log(newKonsentrasi);
   };
 
-  const handleAddChange = (e, field) => {
-    if (field === "nri") {
-      setNewNri(e.target.value);
-    } else if (field === "nama") {
-      setNewName(e.target.value);
-    } else if (field === "file") {
-      setSelectedFile(e.target.files[0]);
-    } else if (field === "image") {
-      setNewImage(e.target.value);
-    } else if (field === "alamat") {
-      setNewAlamat(e.target.value);
-    } else if (field === "tempatLahir") {
-      setNewTempatLahir(e.target.value);
-    } else if (field === "tanggalLahir") {
-      setNewTanggalLahir(e.target.value);
-    } else if (field === "jenisKelamin") {
-      setNewJenisKelamin(e.target.value);
-    } else if (field === "angkatan") {
-      setNewAngkatan(e.target.value[0]);
-    } else if (field === "jurusan") {
-      setNewJurusan(e.target.value);
-    } else if (field === "konsentrasi") {
-      setNewKonsentrasi(e.target.value);
-    } else if (field === "jabatan") {
-      setNewJabatan(e.target.value);
-    } else if (field === "noWa") {
-      setNewNoWa(e.target.value);
-    } else if (field === "email") {
-      setNewEmail(e.target.value);
-    } else if (field === "ig") {
-      setNewIg(e.target.value);
-    } else if (field === "fb") {
-      setNewFb(e.target.value);
-    }
-  };
+  // const handleAddChange = (e, field) => {
+  //   if (field === "nri") {
+  //     setNewNri(e.target.value);
+  //   } else if (field === "nama") {
+  //     setNewName(e.target.value);
+  //   } else if (field === "file") {
+  //     setSelectedFile(e.target.files[0]);
+  //   } else if (field === "image") {
+  //     setNewImage(e.target.value);
+  //   } else if (field === "alamat") {
+  //     setNewAlamat(e.target.value);
+  //   } else if (field === "tempatLahir") {
+  //     setNewTempatLahir(e.target.value);
+  //   } else if (field === "tanggalLahir") {
+  //     setNewTanggalLahir(e.target.value);
+  //   } else if (field === "jenisKelamin") {
+  //     setNewJenisKelamin(e.target.value);
+  //   } else if (field === "angkatan") {
+  //     setNewAngkatan(e.target.value[0]);
+  //   } else if (field === "jurusan") {
+  //     setNewJurusan(e.target.value);
+  //   } else if (field === "konsentrasi") {
+  //     setNewKonsentrasi(e.target.value);
+  //   } else if (field === "jabatan") {
+  //     setNewJabatan(e.target.value);
+  //   } else if (field === "noWa") {
+  //     setNewNoWa(e.target.value);
+  //   } else if (field === "email") {
+  //     setNewEmail(e.target.value);
+  //   } else if (field === "ig") {
+  //     setNewIg(e.target.value);
+  //   } else if (field === "fb") {
+  //     setNewFb(e.target.value);
+  //   }
+  // };
 
   // image
   const handleImageChange = (e) => {
@@ -359,18 +361,11 @@ const Anggota = () => {
     });
     fetchData(`/major?page=${page}&per_page=${itemsPerPage}`).then((res) => {
       setDataMajor(res.data);
-      // setTotalPages(res.meta.total_page);
-      // setTotalItems(res.meta.total_item);
-      // setItemsPerPage(res.meta.perpage);
-      console.log(res.data);
     });
     fetchData(`/concentration?page=${page}&per_page=${itemsPerPage}`).then(
       (res) => {
         setDataConcentration(res.data);
-        // setTotalPages(res.meta.total_page);
-        // setTotalItems(res.meta.total_item);
-        // setItemsPerPage(res.meta.perpage);
-        console.log(res.data);
+        // console.log(dataConcentration)
       }
     );
   }, [page, itemsPerPage, totalItems, totalPages]);
@@ -437,7 +432,7 @@ const Anggota = () => {
                 <Grid item xs={4}>
                   <img
                     src={selectedDetail.photo}
-                    alt="jgugu"
+                    alt={selectedDetail.name}
                     style={{
                       width: "80%",
                       height: "70%",
@@ -901,7 +896,7 @@ const Anggota = () => {
               }}
               placeholder="Masukkan NRI"
               value={newNri}
-              onChange={(e) => handleAddChange(e, "nri")}
+              onChange={(e) => setNewNri(e.target.value)}
             ></OutlinedInput>
             <Typography sx={{ fontFamily: "Poppins", fontWeight: 500, mt: 2 }}>
               * Nama Lengkap
@@ -915,7 +910,7 @@ const Anggota = () => {
               }}
               placeholder="Masukkan Nama Lengkap"
               value={newName}
-              onChange={(e) => handleAddChange(e, "nama")}
+              onChange={(e) => setNewName(e.target.value)}
             ></OutlinedInput>
             <Typography
               sx={{
@@ -1022,7 +1017,7 @@ const Anggota = () => {
               }}
               placeholder="Masukkan Alamat"
               value={newAlamat}
-              onChange={(e) => handleAddChange(e, "alamat")}
+              onChange={(e) => setNewAlamat(e.target.value)}
             ></OutlinedInput>
             <Stack
               gap={3}
@@ -1043,7 +1038,7 @@ const Anggota = () => {
                   }}
                   placeholder="Masukkan Tempat Lahir"
                   value={newTempatLahir}
-                  onChange={(e) => handleAddChange(e, "tempatLahir")}
+                  onChange={(e) => setNewTempatLahir(e.target.value)}
                 />
               </Stack>
               <Stack>
@@ -1063,7 +1058,7 @@ const Anggota = () => {
                   }}
                   placeholder="Masukkan Tanggal Lahir"
                   value={newTanggalLahir}
-                  onChange={(e) => handleAddChange(e, "tanggalLahir")}
+                  onChange={(e) => setNewTanggalLahir(e.target.value)}
                 />
               </Stack>
             </Stack>
@@ -1086,7 +1081,6 @@ const Anggota = () => {
                 sx={{ gap: 16, fontFamily: "Poppins", fontWeight: 600 }}
                 value={newJenisKelamin}
                 onChange={(e) => setNewJenisKelamin(e.target.value)}
-                // {console.log(newJenisKelamin)}
               >
                 <FormControlLabel
                   sx={{ fontFamily: "Poppins" }}
@@ -1129,10 +1123,10 @@ const Anggota = () => {
               * Jurusan
             </Typography>
             <Select
-              labelId="demo-simple-select-label"
-              id="demo-simple-select"
+            sx={{ fontFamily: "Poppins" }}
               value={newJurusan}
-              label="Age"
+              size="small"
+              // label="Age"
               onChange={(e) => setNewJurusan(e.target.value)}
             >
               {dataMajor.map((e) => (
@@ -1146,18 +1140,20 @@ const Anggota = () => {
               * Konsentrasi
             </Typography>
             <Select
-              labelId="demo-simple-select-label"
-              id="demo-simple-select"
+              sx={{ fontFamily: "Poppins" }}
+              size="small"
               value={newKonsentrasi}
-              label="Age"
               onChange={(e) => setNewKonsentrasi(e.target.value)}
+              
             >
               {dataConcentration.map((e) => (
-                <MenuItem key={e.id} value={e.id}>
+                <MenuItem key={e.id} value={e.id} placeholder="pilih ki" >
                   {e.name}
                 </MenuItem>
               ))}
             </Select>
+            {/*  */}
+
             {/* jabatan */}
             <Typography sx={{ fontFamily: "Poppins", fontWeight: 500, mt: 2 }}>
               * Jabatan
@@ -1194,7 +1190,7 @@ const Anggota = () => {
               }}
               placeholder="Masukkan Nomor WhatsApp"
               value={newNoWa}
-              onChange={(e) => handleAddChange(e, "noWa")}
+              onChange={(e) => setNewNoWa(e.target.value)}
             ></OutlinedInput>
             {/* emial */}
             <Typography sx={{ fontFamily: "Poppins", fontWeight: 500, mt: 2 }}>
@@ -1210,7 +1206,7 @@ const Anggota = () => {
               }}
               placeholder="Masukkan Email"
               value={newEmail}
-              onChange={(e) => handleAddChange(e, "email")}
+              onChange={(e) => setNewEmail(e.target.value)}
             ></OutlinedInput>
             {/* Instagram */}
             <Typography sx={{ fontFamily: "Poppins", fontWeight: 500, mt: 2 }}>
@@ -1226,7 +1222,7 @@ const Anggota = () => {
               }}
               placeholder="Masukkan Instagram"
               value={newIg}
-              onChange={(e) => handleAddChange(e, "ig")}
+              onChange={(e) => setNewIg(e.target.value)}
             ></OutlinedInput>
             {/* fb */}
             <Typography sx={{ fontFamily: "Poppins", fontWeight: 500, mt: 2 }}>
@@ -1242,7 +1238,7 @@ const Anggota = () => {
               }}
               placeholder="Masukkan Facebook"
               value={newFb}
-              onChange={(e) => handleAddChange(e, "fb")}
+              onChange={(e) => setNewFb(e.target.value)}
             ></OutlinedInput>
           </Stack>
           <Stack

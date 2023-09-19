@@ -63,7 +63,7 @@ const Admin = () => {
   const [inputValue, setInputValue] = useState("");
   const [newUserName, setNewUserName] = useState("");
   const [newLevel, setNewLevel] = useState("");
-  const [newPassword, setNewPassword] = useState("")
+  const [newPassword, setNewPassword] = useState("");
   const [newCreatedAt, setNewCreatedAt] = useState("");
   const [newUpdateAt, setNewUpdateAt] = useState("");
   const [editingId, setEditingId] = useState(null);
@@ -73,10 +73,10 @@ const Admin = () => {
   const currentDate = new Date().toLocaleDateString();
   const [selectedDetail, setSelectedDetail] = useState(null);
   const [editMode, setEditMode] = useState(false);
-  const {id} = useParams();
+  const { id } = useParams();
 
-  const [memberData, setMemberData] = useState([])
-  const [selectedMember, setSelectedMember] = useState('')
+  const [memberData, setMemberData] = useState([]);
+  const [selectedMember, setSelectedMember] = useState("");
 
   // detail
   const handleDetailClick = (id) => {
@@ -189,9 +189,9 @@ const Admin = () => {
         .catch((error) => {
           console.error("Gagal mengedit data:", error);
         });
-        console.log(id)
+      console.log(id);
     } else {
-      console.log(selectedMember)
+      console.log(selectedMember);
       const newData = {
         member_id: selectedMember,
         username: newUserName,
@@ -214,7 +214,7 @@ const Admin = () => {
     setNewUserName("");
     setNewLevel("");
     setNewCreatedAt("");
-    setNewPassword("")
+    setNewPassword("");
     setNewUpdateAt("");
     setOpenDrawer(false);
     setIsModalOpen(true);
@@ -263,11 +263,10 @@ const Admin = () => {
       console.log(res.data);
     });
 
-    fetchData('/member/all').then(res => {
-      console.log(res.date)
-      setMemberData(res.date)
-    })
-
+    fetchData("/member/all").then((res) => {
+      console.log(res.date);
+      setMemberData(res.date);
+    });
   }, [page, itemsPerPage, totalItems, totalPages]);
 
   return (
@@ -543,7 +542,6 @@ const Admin = () => {
                                 sx={{ color: "white" }}
                                 style={{ width: "-10px" }}
                                 onClick={() => handleDetailClick(row.id)}
-                                
                               >
                                 <VisibilityIcon />
                               </ButtonGreen>
@@ -551,12 +549,10 @@ const Admin = () => {
                                 sx={{ color: "white" }}
                                 variant="Contained"
                                 onClick={() => handleEdit(row.id)}
-                                
                               >
-                                
                                 <CreateIcon />
                               </ButtonYellow>
-                              
+
                               <ButtonPink
                                 sx={{ fontSize: "20px", color: "#FF2E00" }}
                                 variant="Contained"
@@ -626,14 +622,13 @@ const Admin = () => {
               id="demo-simple-select"
               value={selectedMember}
               label="Age"
-              onChange={(e) =>setSelectedMember(e.target.value)}
+              onChange={(e) => setSelectedMember(e.target.value)}
             >
-              {
-                memberData.map(e => (
-
-                  <MenuItem key={e.id} value={e.id}>{e.name}</MenuItem>
-                ))
-              }
+              {/* {memberData.map((e) => (
+                <MenuItem key={e.id} value={e.id}>
+                  {e.name}
+                </MenuItem>
+              ))} */}
             </Select>
 
             {/* username */}
