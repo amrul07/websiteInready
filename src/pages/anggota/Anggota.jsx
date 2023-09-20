@@ -260,42 +260,6 @@ const Anggota = () => {
     console.log(newKonsentrasi);
   };
 
-  // const handleAddChange = (e, field) => {
-  //   if (field === "nri") {
-  //     setNewNri(e.target.value);
-  //   } else if (field === "nama") {
-  //     setNewName(e.target.value);
-  //   } else if (field === "file") {
-  //     setSelectedFile(e.target.files[0]);
-  //   } else if (field === "image") {
-  //     setNewImage(e.target.value);
-  //   } else if (field === "alamat") {
-  //     setNewAlamat(e.target.value);
-  //   } else if (field === "tempatLahir") {
-  //     setNewTempatLahir(e.target.value);
-  //   } else if (field === "tanggalLahir") {
-  //     setNewTanggalLahir(e.target.value);
-  //   } else if (field === "jenisKelamin") {
-  //     setNewJenisKelamin(e.target.value);
-  //   } else if (field === "angkatan") {
-  //     setNewAngkatan(e.target.value[0]);
-  //   } else if (field === "jurusan") {
-  //     setNewJurusan(e.target.value);
-  //   } else if (field === "konsentrasi") {
-  //     setNewKonsentrasi(e.target.value);
-  //   } else if (field === "jabatan") {
-  //     setNewJabatan(e.target.value);
-  //   } else if (field === "noWa") {
-  //     setNewNoWa(e.target.value);
-  //   } else if (field === "email") {
-  //     setNewEmail(e.target.value);
-  //   } else if (field === "ig") {
-  //     setNewIg(e.target.value);
-  //   } else if (field === "fb") {
-  //     setNewFb(e.target.value);
-  //   }
-  // };
-
   // image
   const handleImageChange = (e) => {
     const selectedImage = e.target.files[0];

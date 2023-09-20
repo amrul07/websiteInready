@@ -117,7 +117,7 @@ const Admin = () => {
   // import csv end
 
   // export excel
-  const exportData = dataAdmin.map((item) => ({
+  const exportData = data.map((item) => ({
     image: item.image,
     album: item.album,
     description: item.description,
@@ -264,8 +264,8 @@ const Admin = () => {
     });
 
     fetchData("/member/all").then((res) => {
-      console.log(res.date);
-      setMemberData(res.date);
+      console.log(res.data);
+      setMemberData(res.data);
     });
   }, [page, itemsPerPage, totalItems, totalPages]);
 
@@ -616,7 +616,6 @@ const Admin = () => {
             <Typography sx={{ fontFamily: "Poppins", fontWeight: 500 }}>
               * Name
             </Typography>
-
             <Select
               labelId="demo-simple-select-label"
               id="demo-simple-select"
@@ -624,18 +623,16 @@ const Admin = () => {
               label="Age"
               onChange={(e) => setSelectedMember(e.target.value)}
             >
-              {/* {memberData.map((e) => (
+              {memberData.map((e) => (
                 <MenuItem key={e.id} value={e.id}>
                   {e.name}
                 </MenuItem>
-              ))} */}
+              ))}
             </Select>
-
             {/* username */}
             <Typography sx={{ fontFamily: "Poppins", fontWeight: 500 }}>
               * Username
             </Typography>
-
             <OutlinedInput
               sx={{
                 fontFamily: "Poppins",
@@ -651,7 +648,6 @@ const Admin = () => {
             <Typography sx={{ fontFamily: "Poppins", fontWeight: 500 }}>
               * Password
             </Typography>
-
             <OutlinedInput
               sx={{
                 fontFamily: "Poppins",
@@ -663,29 +659,36 @@ const Admin = () => {
               value={newPassword}
               onChange={(e) => handleAddChange(e, "password")}
             ></OutlinedInput>
-            {/* level */}
-            <Typography sx={{ fontFamily: "Poppins", fontWeight: 500, mt: 2 }}>
-              * Level
-            </Typography>
-            <Autocomplete
-              disablePortal
-              id="combo-box-demo"
-              options={["user", "admin"]}
-              size="small"
-              sx={{ mt: "5px" }}
-              value={newLevel}
-              onChange={(event, value) => {
-                setNewLevel(value);
-              }}
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  sx={{ fontFamily: "Poppins" }}
-                  placeholder={"Pilih Level"}
+             {/* level */}
+            {!editMode && (
+              <>
+                <Typography
+                  sx={{ fontFamily: "Poppins", fontWeight: 500, mt: 2 }}
+                >
+                  * Level
+                </Typography>
+                <Autocomplete
+                  disablePortal
+                  id="combo-box-demo"
+                  options={["user", "admin"]}
+                  size="small"
+                  sx={{ mt: "5px" }}
+                  value={newLevel}
+                  onChange={(event, value) => {
+                    setNewLevel(value);
+                  }}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      sx={{ fontFamily: "Poppins" }}
+                      placeholder={"Pilih Level"}
+                    />
+                  )}
                 />
-              )}
-            />
+              </>
+            )}
           </Stack>
+
           <Stack
             mt={3}
             gap={2}

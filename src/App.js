@@ -16,6 +16,7 @@ import Kegiatan from "./pages/kegiatan/Kegiatan";
 import Karya from "./pages/karya/Karya";
 import Agenda from "./pages/agenda/Agenda";
 import Admin from "./pages/admin/Admin";
+import Gallery from "./pages/gallery/Gallery";
 
 function App() {
   return (
@@ -27,6 +28,7 @@ function App() {
             <Route path="/slider" element={<Slider />} />
             <Route path="/anggota" element={<Anggota />} />
             <Route path="/blog" element={<Blog />} />
+            <Route path="/gallery" element={<Gallery />} />
             <Route path="/kegiatan" element={<Kegiatan />} />
             <Route path="/karya" element={<Karya />} />
             <Route path="/agenda" element={<Agenda />} />

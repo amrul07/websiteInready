@@ -7,6 +7,7 @@ import { ReactComponent as Agenda } from "../assets/navbar/agenda.svg";
 import { ReactComponent as Admin } from "../assets/navbar/admin.svg";
 import { ReactComponent as Kegiatan } from "../assets/navbar/kegiatan.svg";
 import { ReactComponent as Karya } from "../assets/navbar/karya.svg";
+import { ReactComponent as Gallery } from "../assets/navbar/gallery.svg";
 
 export const menu = [
   {
@@ -28,6 +29,12 @@ export const menu = [
     title: "Blog",
     router: "/blog",
     icon: <Blog style={{paddingLeft: "1px"}} width={"18px"} />,
+    // icon: <img src={Blog} alt="" />,
+  },
+  {
+    title: "Gallery",
+    router: "/gallery",
+    icon: <Gallery style={{paddingLeft: "1px"}} width={"20px"} />,
     // icon: <img src={Blog} alt="" />,
   },
   {

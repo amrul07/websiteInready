@@ -5,10 +5,11 @@ kegitan ✅
 blog ✅
 aggota ✅
 slider : detail dan edit
+gallery✅
 
 
 
 
 
 
-admin : undifine data major/all
+gallery : glide : selectedDetail.image.map no function

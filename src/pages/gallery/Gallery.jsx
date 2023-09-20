@@ -14,10 +14,12 @@ import {
   TableRow,
   Typography,
   Grid,
-  Input,
   Pagination,
   OutlinedInput,
+  TextField,
+  Autocomplete,
   CardMedia,
+  Input,
   RadioGroup,
   FormControlLabel,
   Radio,
@@ -28,31 +30,31 @@ import { makeStyles } from "@mui/styles";
 import { ThemeProvider } from "@mui/material/styles";
 import CreateIcon from "@mui/icons-material/Create";
 import { RiDeleteBin5Fill } from "react-icons/ri";
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useState } from "react";
 import Drawer from "@mui/material/Drawer";
-import ImageIcon from "@mui/icons-material/Image";
 import Papa from "papaparse";
 import * as XLSX from "xlsx";
-import "./Slider.css";
 import {
   ButtonGreen,
   ButtonPink,
   ButtonYellow,
 } from "../../components/button/Index";
 import { ModalSlider } from "../../components/modal/Index";
-import { initialData } from "../../utils/InitialData";
+import { dataAdmin } from "../../utils/InitialData";
 import { themePagination } from "../../components/paginations/Index";
 import Footer from "../../components/footer/Footer";
 import IconKegiatan from "../../assets/detailKegiatan.svg";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import VisibilityIcon from "@mui/icons-material/Visibility";
-import Image from "../../assets/image.svg";
+import { fetchData, postData, putData, deleteData } from "../../service/api";
+import { useEffect } from "react";
+import { useParams } from "react-router-dom";
+import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 import Glide from "@glidejs/glide";
 import "@glidejs/glide/dist/css/glide.core.min.css";
 import "@glidejs/glide/dist/css/glide.theme.min.css";
-import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
-import { fetchData, postData, putData, deleteData } from "../../service/api";
-
+import Image from "../../assets/image.svg"
+import ImageIcon from "@mui/icons-material/Image";
 const useStyles = makeStyles({
   blueRow: {
     "&:nth-of-type(odd)": {
@@ -61,31 +63,28 @@ const useStyles = makeStyles({
   },
 });
 
-const Slider = () => {
+const Gallery = () => {
   const [data, setData] = useState();
   const [itemsPerPage, setItemsPerPage] = useState(0);
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [totalItems, setTotalItems] = useState(0);
-  const [menu, setMenu] = useState(1);
   const [openDrawer, setOpenDrawer] = useState(false);
-  const [selectedFile, setSelectedFile] = useState(null);
-  const [newImage, setNewImage] = useState("");
-  const [newTitle, setNewTitle] = useState("");
-  const [newDescription, setNewDescription] = useState("");
+  const [newImage, setNewImage] = useState([]);
   const [isActive, setIsActive] = useState(true);
+  const [selectedFile, setSelectedFile] = useState(null);
   const [editingId, setEditingId] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const csvFileRef = useRef(null);
   const [category, setCategory] = useState("filterByAlbum");
+  const currentDate = new Date().toLocaleDateString();
   const [selectedDetail, setSelectedDetail] = useState(null);
   const [editMode, setEditMode] = useState(false);
 
   // detail
   const handleDetailClick = (id) => {
-    fetchData(`/slider/${id}`).then((res) => {
+    fetchData(`/gallery/${id}`).then((res) => {
       setSelectedDetail(res.data);
-      console.log(selectedDetail);
     });
   };
 
@@ -121,7 +120,7 @@ const Slider = () => {
   // import csv end
 
   // export excel
-  const exportData = initialData.map((item) => ({
+  const exportData = dataAdmin.map((item) => ({
     image: item.image,
     album: item.album,
     description: item.description,
@@ -135,22 +134,9 @@ const Slider = () => {
   };
   // export excel end
 
-  // edit
-  const handleEdit = (id) => {
-    setEditingId(id);
-    const selectedItem = data.find((item) => item.id === id);
-    setNewImage(selectedItem.image);
-    setNewTitle(selectedItem.title);
-    setNewDescription(selectedItem.description);
-    setIsActive(selectedItem.is_active);
-    setOpenDrawer(true);
-    setEditMode(true);
-  };
-  // delete
   const handleDelete = (id) => {
-    deleteData(`/slider/${id}`)
+    deleteData(`/gallery/${id}`)
       .then((res) => {
-        console.log("Data berhasil dihapus");
         const updatedData = data.filter((item) => item.id !== id);
         setData(updatedData);
       })
@@ -158,19 +144,30 @@ const Slider = () => {
         console.error("Gagal menghapus data:", error);
       });
   };
+  // edit
+  const handleEdit = (id) => {
+    setEditingId(id);
+    const selectedItem = data.find((item) => item.id === id);
+    setNewImage(selectedItem?.image);
+    setIsActive(selectedItem?.username);
+    setOpenDrawer(true);
+    setEditMode(true);
+  };
+  // delete
+  const handleDeleteFile = () => {
+    setSelectedFile(null);
+  };
 
-  // edit dan tambah data
+  // // tombol save atau simpan data
   const handleSave = () => {
     if (editMode) {
-      putData(`/slider/${editingId}`, {
+      putData(`/gallery/${editingId}`, {
         image: selectedFile,
-        title: newTitle,
-        description: newDescription,
         is_active: isActive,
       })
         .then((res) => {
           const updatedData = data.map((item) =>
-            item.slug === editingId ? res : item
+            item.id === editingId ? res : item
           );
           setData(updatedData);
           setEditMode(false);
@@ -181,11 +178,8 @@ const Slider = () => {
     } else {
       const formData = new FormData();
       formData.append("image", selectedFile);
-      formData.append("title", newTitle);
-      formData.append("description", newDescription);
       formData.append("is_active", isActive);
-
-      postData(`/slider`, formData)
+      postData(`/gallery`, formData)
         .then((res) => {
           setData([...data, res]);
           setOpenDrawer(false);
@@ -197,41 +191,12 @@ const Slider = () => {
     }
 
     setEditingId(null);
-    setNewImage("");
-    setNewTitle("");
-    setNewDescription("");
-    setIsActive();
+    setNewImage([]);
+    setIsActive("");
     setOpenDrawer(false);
     setIsModalOpen(true);
   };
-  // image
-  const handleImageChange = (e) => {
-    const selectedImage = e.target.files[0];
-    if (selectedImage) {
-      const reader = new FileReader();
-      reader.onload = () => {
-        setNewImage(reader.result);
-      };
-      reader.readAsDataURL(selectedImage);
-    }
-    setSelectedFile(e.target.files[0]);
-  };
 
-  const handleAlbumChange = (e) => {
-    setNewTitle(e.target.value);
-  };
-
-  const handleDescriptionChange = (e) => {
-    setNewDescription(e.target.value);
-  };
-  // delete
-  const handleDeleteFile = () => {
-    setSelectedFile(null);
-  };
-  // tombol input image
-  const handleChooseFileClick = () => {
-    document.querySelector('input[type="file"]').click();
-  };
   // drawer
   const toggleDrawer =
     (open, isEditMode = false) =>
@@ -245,18 +210,32 @@ const Slider = () => {
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
   };
-  // menampilkan item perpage
-  const handleChangeItemsPerPage = (event) => {
-    setItemsPerPage(event.target.value);
-    setPage(1);
+
+  // const handleChangeItemsPerPage = (event) => {
+  //   setItemsPerPage(event.target.value);
+  //   setPage(1);
+  // };
+
+  // image
+  const handleImageChange = (e) => {
+    const selectedImage = e.target.files[0];
+    if (selectedImage) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        // setData(...data, flayer_image);
+        setNewImage(reader.result);
+      };
+      reader.readAsDataURL(selectedImage);
+    }
+    setSelectedFile(e.target.files[0]);
   };
 
-  const handleChangeMenu = (event) => {
-    setMenu(event.target.value);
-  };
-  // modal
   const closeModal = () => {
     setIsModalOpen(false);
+  };
+
+  const handleChooseFileClick = () => {
+    document.querySelector('input[type="file"]').click();
   };
 
   // print
@@ -270,10 +249,8 @@ const Slider = () => {
     document.body.innerHTML = originalContents;
   };
 
-  // glide js
-
   useEffect(() => {
-    fetchData(`/slider?page=${page}&per_page=${itemsPerPage}`).then((res) => {
+    fetchData(`/gallery?page=${page}&per_page=${itemsPerPage}`).then((res) => {
       setData(res.data);
       setTotalPages(res.meta.total_page);
       setTotalItems(res.meta.total_item);
@@ -311,17 +288,8 @@ const Slider = () => {
 
   return (
     <Box sx={{ fontFamily: "Poppins", mt: "-23px" }}>
-      {/* import csv */}
-      {/* <input  
-        type="file"
-        // accept=".csv"
-        // onChange={handleFileCsvChange}
-        style={{ display: "none" }}
-        // ref={csvFileRef}
-      /> */}
-      {/* end import csv */}
       <Header
-        title={"Slider"}
+        title={"Admin"}
         onClickTambahData={toggleDrawer(true)}
         onClickCsv={() => csvFileRef.current.click()}
         onClickCetak={handlePrint}
@@ -355,7 +323,7 @@ const Slider = () => {
                   }}
                   onClick={handleCloseDetail}
                 >
-                  Kegiatan
+                  Gallery
                 </Typography>
                 <Typography sx={{ mt: "4px", ml: "-4px" }}>
                   <ArrowForwardIosIcon
@@ -371,19 +339,23 @@ const Slider = () => {
                     fontWeight: 500,
                   }}
                 >
-                  Detail Kegiatan
+                  Detail Gallery
                 </Typography>
               </Stack>
             </Card>
             <Box sx={{ textAlign: "center", marginTop: "20px" }}>
-              <div id={`glide-${selectedDetail.id}`} className="glide">
+              <Card
+                sx={{ paddingX: 4, paddingY: 3, textAlign: "left" }}
+                className="album-description"
+              >
+                <div id={`glide-${selectedDetail.id}`} className="glide">
                 <div className="glide__track" data-glide-el="track">
                   <ul className="glide__slides">
-                    {selectedDetail.image.map((image, index) => (
-                      <li className="glide__slide" key={index}>
+                    {/* {selectedDetail.image.map((image, index) => ( */}
+                      <li className="glide__slide" /*key={index}*/>
                         <img
-                          src={image}
-                          alt={`Album ${selectedDetail.id} - ${index}`}
+                          src={selectedDetail.image}
+                        //   alt={`Album ${selectedDetail.id} - ${index}`}
                           style={{
                             width: "200px",
                             height: "180px",
@@ -392,7 +364,7 @@ const Slider = () => {
                           }}
                         />
                       </li>
-                    ))}
+                    {/* ))} */}
                   </ul>
                 </div>
 
@@ -413,98 +385,25 @@ const Slider = () => {
                   </button>
                 </div>
               </div>
-              <Card
-                sx={{ mt: 1, paddingX: 4, paddingY: 5, textAlign: "left" }}
-                className="album-description"
-              >
-                <Stack
-                  sx={{
-                    display: "flex",
-                    flexDirection: "row",
-                    fontFamily: "Poppins",
-                  }}
+                <Grid
+                  container
+                  sx={{ display: "flex", flexDirection: "row", my: 1 }}
                 >
-                  <Typography
-                    sx={{
-                      paddingRight: "240px",
-                      fontFamily: "Poppins",
-                      fontSize: "16px",
-                    }}
-                  >
-                    Title
-                  </Typography>
-                  <Typography
-                    sx={{
-                      paddingRight: "5px",
-                      fontFamily: "Poppins",
-                      fontSize: "16px",
-                    }}
-                  >
-                    :
-                  </Typography>
-                  <Typography sx={{ fontFamily: "Poppins", fontSize: "16px" }}>
-                    {selectedDetail.title}
-                  </Typography>
-                </Stack>
-                <Stack
-                  sx={{
-                    display: "flex",
-                    flexDirection: "row",
-                    fontFamily: "Poppins",
-                  }}
-                >
-                  <Typography
-                    sx={{
-                      paddingRight: "240px",
-                      fontFamily: "Poppins",
-                      fontSize: "16px",
-                    }}
-                  >
-                    Aktif
-                  </Typography>
-                  <Typography
-                    sx={{
-                      paddingRight: "5px",
-                      fontFamily: "Poppins",
-                      fontSize: "16px",
-                    }}
-                  >
-                    :
-                  </Typography>
-                  <Typography sx={{ fontFamily: "Poppins", fontSize: "16px" }}>
-                    {selectedDetail.is_active}
-                  </Typography>
-                </Stack>
-                <Stack
-                  sx={{
-                    display: "flex",
-                    flexDirection: "row",
-                    fontFamily: "Poppins",
-                    my: 1,
-                  }}
-                >
-                  <Typography
-                    sx={{
-                      paddingRight: "220px",
-                      fontFamily: "Poppins",
-                      fontSize: "16px",
-                    }}
-                  >
-                    Deskripsi
-                  </Typography>
-                  <Typography
-                    sx={{
-                      paddingRight: "5px",
-                      fontFamily: "Poppins",
-                      fontSize: "16px",
-                    }}
-                  >
-                    :
-                  </Typography>
-                </Stack>
-                <Typography sx={{ fontFamily: "Poppins", fontSize: "16px" }}>
-                  {selectedDetail.description}
-                </Typography>
+                  <Grid item xs={4}>
+                    <Typography
+                      sx={{ fontFamily: "Poppins", fontSize: "16px" }}
+                    >
+                      Aktif
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={8}>
+                    <Typography
+                      sx={{ fontFamily: "Poppins", fontSize: "16px" }}
+                    >
+                      : {selectedDetail.is_active}
+                    </Typography>
+                  </Grid>
+                </Grid>
               </Card>
             </Box>
           </Box>
@@ -530,7 +429,7 @@ const Slider = () => {
                   <Select
                     sx={{ height: 25, width: 62, mx: 1, fontFamily: "Poppins" }}
                     value={itemsPerPage}
-                    onChange={handleChangeItemsPerPage}
+                    // onChange={handleChangeItemsPerPage}
                   >
                     <MenuItem value={5}>5</MenuItem>
                     <MenuItem value={10}>10</MenuItem>
@@ -544,7 +443,7 @@ const Slider = () => {
               <FormControl sx={{ fontFamily: "Poppins" }}>
                 <Stack>
                   <Select
-                    sx={{ height: 30, width: 200, fontFamily: "Poppins" }}
+                    sx={{ height: 30, width: 230, fontFamily: "Poppins" }}
                     value={category}
                     onChange={handleCategoryChange}
                   >
@@ -552,7 +451,7 @@ const Slider = () => {
                       sx={{ fontFamily: "Poppins" }}
                       value={"filterByAlbum"}
                     >
-                      Filter By Album
+                      Filter By Judul Karya
                     </MenuItem>
                     <MenuItem
                       sx={{ fontFamily: "Poppins" }}
@@ -572,19 +471,17 @@ const Slider = () => {
                 <Table>
                   <TableHead sx={{ fontFamily: "Poppins" }}>
                     <TableRow>
-                      <TableCell sx={{ fontFamily: "Poppins", width: "170px" }}>
+                      <TableCell sx={{ fontFamily: "Poppins", width: "350px" }}>
                         Gambar
                       </TableCell>
-                      <TableCell sx={{ fontFamily: "Poppins", width: "240px" }}>
-                        Album
+                      <TableCell sx={{ fontFamily: "Poppins", width: "350px" }}>
+                        Aktif
                       </TableCell>
-                      <TableCell sx={{ fontFamily: "Poppins", width: "450px" }}>
-                        Deskripsi
-                      </TableCell>
+
                       <TableCell
                         sx={{
                           fontFamily: "Poppins",
-                          width: "100px",
+                          width: "40px",
                           textAlign: "center",
                         }}
                       >
@@ -606,11 +503,9 @@ const Slider = () => {
                             />
                           </TableCell>
                           <TableCell sx={{ fontFamily: "Poppins" }}>
-                            {row.title}
+                            {row.is_active}
                           </TableCell>
-                          <TableCell sx={{ fontFamily: "Poppins" }}>
-                            {row.description}
-                          </TableCell>
+
                           <TableCell>
                             <Stack
                               direction={"row"}
@@ -619,6 +514,7 @@ const Slider = () => {
                                 // display: "flex",
                                 alignItems: "center",
                                 alignSelf: "center",
+                                justifyContent: "end",
                               }}
                             >
                               <ButtonGreen
@@ -678,8 +574,6 @@ const Slider = () => {
           </Card>
         )}
       </Box>
-      {/* filter by album end */}
-
       {/* Drawer */}
       <Drawer anchor="right" open={openDrawer} sx={{ width: 700 }}>
         <Box
@@ -694,7 +588,7 @@ const Slider = () => {
               fontSize: "20px",
             }}
           >
-            Slider
+            Gallery
           </Typography>
 
           <Stack sx={{ mt: 4 }}>
@@ -705,101 +599,98 @@ const Slider = () => {
                 fontSize: "14px",
                 display: "flex",
                 flexDirection: "column",
+                mt: 2,
               }}
             >
               Foto
             </Typography>
-          </Stack>
-          <Grid container gap={3} mt={1}>
-            <Grid xs={4}>
-              <Stack sx={{ border: "1px dashed #576974", borderRadius: "8px" }}>
-                <img
-                  src={Image}
-                  style={{ width: "50px", margin: "0 auto", marginTop: "22px" }}
-                  alt=""
-                />
-                <Typography
-                  sx={{
-                    width: "80%",
-                    alignSelf: "center",
-                    fontFamily: "Poppins",
-                    color: "#576974",
-                    textAlign: "center",
-                  }}
+            <Grid container gap={3} mt={1}>
+              <Grid xs={4}>
+                <Stack
+                  sx={{ border: "1px dashed #576974", borderRadius: "8px" }}
                 >
-                  Tarik dan lepas foto di sini
-                </Typography>
-                <Input
-                  type="file"
-                  accept="image/*"
-                  style={{ display: "none" }}
-                  // onChange={handleFileChange}
-                  onChange={handleImageChange}
-                  // value={newImage}
-                />
-                <ButtonYellow
-                  sx={{
-                    my: 2,
-                    alignSelf: "center",
-                    color: "white",
-                    width: "80%",
-                    borderRadius: "8px",
-                  }}
-                  variant="contained"
-                  color="primary"
-                  onClick={handleChooseFileClick}
-                  value={newImage}
-                  // onChange={handleImageChange}
-                >
-                  Pilih File
-                </ButtonYellow>
-              </Stack>
-            </Grid>
-            <Grid xs={5}>
-              <Typography sx={{ fontFamily: "Poppins", fontWeight: 500 }}>
-                Upload Files
-              </Typography>
-              {selectedFile && (
-                <Stack sx={{ display: "flex", flexDirection: "row" }}>
-                  <ImageIcon
-                    sx={{ color: "#576974", pt: 1, fontSize: "30px" }}
+                  <img
+                    src={Image}
+                    style={{
+                      width: "50px",
+                      margin: "0 auto",
+                      marginTop: "22px",
+                    }}
+                    alt=""
                   />
                   <Typography
-                    sx={{ mt: 1, fontFamily: "Poppins", fontSize: "14px" }}
+                    sx={{
+                      mt: 1,
+                      width: "80%",
+                      alignSelf: "center",
+                      fontFamily: "Poppins",
+                      color: "#576974",
+                      textAlign: "center",
+                    }}
                   >
-                    {selectedFile.name}
+                    Tarik dan lepas foto di sini
                   </Typography>
+                  <Input
+                    type="file"
+                    accept="image/*"
+                    style={{ display: "none" }}
+                    onChange={handleImageChange}
+                  />
+                  <ButtonYellow
+                    sx={{
+                      my: 2,
+                      alignSelf: "center",
+                      color: "white",
+                      width: "80%",
+                      borderRadius: "8px",
+                    }}
+                    variant="contained"
+                    color="primary"
+                    onClick={handleChooseFileClick}
+                    value={newImage}
+                  >
+                    Pilih File
+                  </ButtonYellow>
                 </Stack>
-              )}
-            </Grid>
-            <Grid xs={1} pt={5}>
-              {selectedFile && (
-                <Typography
-                  sx={{
-                    fontSize: "20px",
-                    cursor: "pointer",
-                    textAlign: "end",
-                  }}
-                  color="#576974"
-                  onClick={handleDeleteFile}
-                >
-                  <RiDeleteBin5Fill />
+              </Grid>
+              <Grid xs={5}>
+                <Typography sx={{ fontFamily: "Poppins", fontWeight: 500 }}>
+                  Upload Files
                 </Typography>
-              )}
+                {selectedFile && (
+                  <Stack
+                    sx={{ display: "flex", flexDirection: "row" }}
+                    // gap={"2px"}
+                  >
+                    <ImageIcon
+                      sx={{ color: "#576974", pt: 1, fontSize: "30px" }}
+                    />
+                    <Typography
+                      sx={{ mt: 1, fontFamily: "Poppins", fontSize: "14px" }}
+                    >
+                      {selectedFile?.name}
+                    </Typography>
+                  </Stack>
+                )}
+              </Grid>
+              <Grid xs={1} pt={5}>
+                {selectedFile && (
+                  <Typography
+                    sx={{
+                      fontSize: "20px",
+                      cursor: "pointer",
+                      textAlign: "end",
+                    }}
+                    color="#576974"
+                    onClick={handleDeleteFile}
+                  >
+                    <RiDeleteBin5Fill />
+                  </Typography>
+                )}
+              </Grid>
             </Grid>
-          </Grid>
-          <Stack mt={2}>
-            <Typography sx={{ fontFamily: "Poppins", fontWeight: 500 }}>
-              Title
-            </Typography>
-
-            <OutlinedInput
-              sx={{ fontFamily: "Poppins" }}
-              placeholder="Masukkan nama Album"
-              value={newTitle}
-              onChange={handleAlbumChange}
-            ></OutlinedInput>
-            <FormControl>
+          </Stack>
+          <FormControl>
               <FormLabel
                 id="demo-row-radio-buttons-group-label"
                 sx={{
@@ -833,19 +724,6 @@ const Slider = () => {
                 />
               </RadioGroup>
             </FormControl>
-            <Typography sx={{ fontFamily: "Poppins", fontWeight: 500, mt: 1 }}>
-              Deskripsi
-            </Typography>
-
-            <OutlinedInput
-              sx={{ fontFamily: "Poppins" }}
-              placeholder="Masukkan Deskripsi"
-              multiline
-              rows={4}
-              value={newDescription}
-              onChange={handleDescriptionChange}
-            />
-          </Stack>
           <Stack
             mt={3}
             gap={2}
@@ -885,57 +763,9 @@ const Slider = () => {
 
       {/* Modal */}
       <ModalSlider open={isModalOpen} onClick={closeModal} />
-
-      {/* Detail Kegiatan */}
-      {category === "detailKegiatan" && (
-        <Box mt={3}>
-          <Card sx={{ py: 2, pl: 4, display: "flex", gap: 2 }}>
-            <CardMedia
-              sx={{ width: "24px", height: "24px" }}
-              image={IconKegiatan}
-            />
-            <Typography
-              sx={{ fontFamily: "Poppins", color: "#D1D3E2", fontWeight: 500 }}
-            >
-              Kegiatan
-            </Typography>
-            <FormControl
-              variant="standard"
-              style={{ border: "none" }}
-              sx={{ fontFamily: "Poppins", mt: "-2px", ml: "-5px" }}
-            >
-              <Stack>
-                <Select
-                  sx={{
-                    height: 30,
-                    width: 200,
-                    fontFamily: "Poppins",
-                    color: "#576974",
-                  }}
-                  value={category}
-                  onChange={handleCategoryChange}
-                >
-                  <MenuItem
-                    sx={{ fontFamily: "Poppins" }}
-                    value={"filterByAlbum"}
-                  >
-                    Filter By Album
-                  </MenuItem>
-                  <MenuItem
-                    sx={{ fontFamily: "Poppins" }}
-                    value={"detailKegiatan"}
-                  >
-                    Detail Kegiatan
-                  </MenuItem>
-                </Select>
-              </Stack>
-            </FormControl>
-          </Card>
-        </Box>
-      )}
       <Footer />
     </Box>
   );
 };
 
-export default Slider;
+export default Gallery;

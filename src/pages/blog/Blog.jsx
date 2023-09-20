@@ -365,7 +365,7 @@ const Blog = () => {
                 <Grid item xs={4}>
                   <img
                     src={selectedDetail?.image}
-                    alt="jgugu"
+                    alt={selectedDetail?.title}
                     style={{
                       width: "80%",
                       height: "300px",
