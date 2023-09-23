@@ -26,6 +26,21 @@ export const menu = [
     icon: <Anggota width={"22px"} />,
   },
   {
+    title: "Presidium",
+    router: "/presidium",
+    icon: <Anggota width={"22px"} />,
+  },
+  {
+    title: "Bpo",
+    router: "/bpo",
+    icon: <Anggota width={"22px"} />,
+  },
+  {
+    title: "Division",
+    router: "/division",
+    icon: <Anggota width={"22px"} />,
+  },
+  {
     title: "Blog",
     router: "/blog",
     icon: <Blog style={{paddingLeft: "1px"}} width={"18px"} />,

@@ -17,6 +17,9 @@ import Karya from "./pages/karya/Karya";
 import Agenda from "./pages/agenda/Agenda";
 import Admin from "./pages/admin/Admin";
 import Gallery from "./pages/gallery/Gallery";
+import Presidium from "./pages/presidium/Presidium";
+import Bpo from "./pages/bpo/Bpo";
+import Division from "./pages/division/Division";
 
 function App() {
   return (
@@ -27,6 +30,9 @@ function App() {
             <Route index element={<Dashboard />} />
             <Route path="/slider" element={<Slider />} />
             <Route path="/anggota" element={<Anggota />} />
+            <Route path="/bpo" element={<Bpo />} />
+            <Route path="/presidium" element={<Presidium />} />
+            <Route path="/division" element={<Division />} />
             <Route path="/blog" element={<Blog />} />
             <Route path="/gallery" element={<Gallery />} />
             <Route path="/kegiatan" element={<Kegiatan />} />

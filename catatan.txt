@@ -1,10 +1,10 @@
 agenda ✅
-admin : edit
+admin : ✅
 karya : edit : konsentrasi✅
 kegitan ✅
 blog ✅
 aggota ✅
-slider : detail dan edit
+slider :  edit gambar
 gallery✅
 
 

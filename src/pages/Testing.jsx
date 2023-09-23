@@ -4862,6 +4862,10 @@ import "@glidejs/glide/dist/css/glide.core.min.css";
 import "@glidejs/glide/dist/css/glide.theme.min.css";
 import Image from "../assets/image.svg";
 import ImageIcon from "@mui/icons-material/Image";
+import Slider from "react-slick";
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
+import "./Testing.css";
 const useStyles = makeStyles({
   blueRow: {
     "&:nth-of-type(odd)": {
@@ -4871,7 +4875,7 @@ const useStyles = makeStyles({
 });
 
 const Testing = () => {
-  const [data, setData] = useState();
+  const [data, setData] = useState([]);
   const [itemsPerPage, setItemsPerPage] = useState(0);
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
@@ -4889,6 +4893,50 @@ const Testing = () => {
   const [editMode, setEditMode] = useState(false);
 
   const [selectedImages, setSelectedImages] = useState([]);
+
+  const settings = {
+    // dots: true,
+    infinite: true,
+    speed: 500,
+    slidesToShow: 3,
+    slidesToScroll: 1,
+    centerMode: true,
+    centerPadding: "0px",
+    autoplay: false,
+    autoplaySpeed: 1500,
+    dots: true,
+
+    responsive: [
+      {
+        breakpoint: 1024,
+        settings: {
+          slidesToShow: 3,
+          slidesToScroll: 2,
+          infinite: false,
+          dots: true,
+        },
+      },
+      {
+        breakpoint: 600,
+        settings: {
+          slidesToShow: 3,
+          slidesToScroll: 2,
+          initialSlide: 2,
+          dots: true,
+        },
+      },
+      {
+        breakpoint: 480,
+        settings: {
+          slidesToShow: 2,
+          slidesToScroll: 1,
+          dots: true,
+          autoplay: true,
+          // centerMode: false,
+        },
+      },
+    ],
+  };
 
   // detail
   const handleDetailClick = (id) => {
@@ -4986,7 +5034,7 @@ const Testing = () => {
         });
     } else {
       const formData = new FormData();
-      formData.append("image", selectedFile);
+      formData.append("image", selectedImages);
       formData.append("is_active", isActive);
       postData(`/gallery`, formData)
         .then((res) => {
@@ -5027,16 +5075,8 @@ const Testing = () => {
 
   // image
   const handleImageChange = (e) => {
-    const selectedImage = e.target.files[0];
-    if (selectedImage) {
-      const reader = new FileReader();
-      reader.onload = () => {
-        // Menambahkan gambar ke dalam daftar gambar yang dipilih
-        setSelectedImages((prevImages) => [...prevImages, reader.result]);
-      };
-      reader.readAsDataURL(selectedImage);
-    }
-    setSelectedFile(e.target.files[0]);
+    const selectedImagesArray = Array.from(e.target.files);
+    setSelectedImages((prevImages) => [...prevImages, ...selectedImagesArray]);
   };
 
   const closeModal = () => {
@@ -5064,35 +5104,8 @@ const Testing = () => {
       setTotalPages(res.meta.total_page);
       setTotalItems(res.meta.total_item);
       setItemsPerPage(res.meta.perpage);
-      console.log(res.data);
+      console.log(res.data.image);
     });
-
-    if (selectedDetail) {
-      const totalImages = selectedDetail.image.length;
-      const perView = totalImages <= 5 ? totalImages : 5;
-      const glide = new Glide(`#glide-${selectedDetail.id}`, {
-        type: "carousel",
-        startAt: 0,
-        perView: perView,
-        rewind: true,
-        animationTimingFunc: "linear",
-        animationDuration: 800,
-        breakpoints: {
-          800: {
-            perView: 2,
-          },
-          480: {
-            perView: 1,
-          },
-        },
-      });
-
-      glide.mount();
-
-      return () => {
-        glide.destroy();
-      };
-    }
   }, [selectedDetail, page, itemsPerPage, totalItems, totalPages]);
 
   return (
@@ -5157,62 +5170,6 @@ const Testing = () => {
                 sx={{ paddingX: 4, paddingY: 3, textAlign: "left" }}
                 className="album-description"
               >
-                <div id={`glide-${selectedDetail.id}`} className="glide">
-                  <div className="glide__track" data-glide-el="track">
-                    <ul className="glide__slides">
-                      {data.map((item) => (
-                        // <div>aa</div>
-                      <li className="glide__slide" /*key={index}*/>
-                        {Array.isArray(item.image) && item.image.map((image, index) => (
-
-                       
-                        <img
-                          src={image}
-                          key={index}
-                            alt={`Album ${selectedDetail.id} - ${index}`}
-                          style={{
-                            width: "200px",
-                            height: "180px",
-                            objectFit: "cover",
-                            borderRadius: "12px",
-                          }}
-                        />
-                        ))}
-                      </li>
-                       ))} 
-                    </ul>
-                  </div>
-                  {selectedImages.map((image, index) => (
-                    <img
-                      key={index}
-                      src={image}
-                      alt={`Selected Image ${index}`}
-                      style={{
-                        width: "50px",
-                        height: "50px",
-                        objectFit: "cover",
-                        marginRight: "5px",
-                      }}
-                    />
-                  ))}
-
-                  <div class="glide__arrows" data-glide-el="controls">
-                    <button
-                      style={{ border: "none", boxShadow: "none" }}
-                      class="glide__arrow glide__arrow--left"
-                      data-glide-dir="<"
-                    >
-                      <ArrowBackIosIcon />
-                    </button>
-                    <button
-                      style={{ border: "none", boxShadow: "none" }}
-                      class="glide__arrow glide__arrow--right"
-                      data-glide-dir=">"
-                    >
-                      <ArrowForwardIosIcon />
-                    </button>
-                  </div>
-                </div>
                 <Grid
                   container
                   sx={{ display: "flex", flexDirection: "row", my: 1 }}
@@ -5232,6 +5189,42 @@ const Testing = () => {
                     </Typography>
                   </Grid>
                 </Grid>
+                <Slider {...settings}>
+            {data.map((item, index) => (
+              <div className="card carousel-image" key={index}>
+                <div className="card-top  ">
+                  <Stack
+                    sx={{
+                      width: {
+                        xs: "140px",
+                        sm: "200px",
+                        md: "270px",
+                        lg: "300px",
+                      },
+                      height: {
+                        xs: "200px",
+                        sm: "350px",
+                        md: "340px",
+                        lg: "340px",
+                      },
+                      margin: "auto",
+                    }}
+                  >
+                    <img
+                      style={{
+                        borderRadius: "25px",
+                        width: "100%",
+                        height: "100%",
+                      }}
+                      src={selectedDetail.image}
+                      alt=""
+                      // onError={handleErrorImage}
+                    />
+                  </Stack>
+                </div>
+              </div>
+            ))}
+          </Slider>
               </Card>
             </Box>
           </Box>
@@ -5459,6 +5452,7 @@ const Testing = () => {
                     Tarik dan lepas foto di sini
                   </Typography>
                   <Input
+                    multiple
                     type="file"
                     accept="image/*"
                     style={{ display: "none" }}
@@ -5485,7 +5479,7 @@ const Testing = () => {
                 <Typography sx={{ fontFamily: "Poppins", fontWeight: 500 }}>
                   Upload Files
                 </Typography>
-                {selectedFile && (
+                {selectedImages && (
                   <Stack
                     sx={{ display: "flex", flexDirection: "row" }}
                     // gap={"2px"}
@@ -5496,7 +5490,7 @@ const Testing = () => {
                     <Typography
                       sx={{ mt: 1, fontFamily: "Poppins", fontSize: "14px" }}
                     >
-                      {selectedFile?.name}
+                      {selectedImages?.name}
                     </Typography>
                   </Stack>
                 )}

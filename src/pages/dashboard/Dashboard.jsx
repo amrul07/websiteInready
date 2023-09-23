@@ -19,8 +19,23 @@ import Kalender from "../../components/dashboard/kalender/Kalender";
 import Kegiatan from "../../components/dashboard/kegiatan terlaksana/Kegiatan";
 import Agenda from "../../components/dashboard/agenda/Agenda";
 import Footer from "../../components/footer/Footer";
+import { useEffect } from "react";
+import { fetchData } from "../../service/api";
+import { useState } from "react";
 
 const Dashboard = () => {
+  const [data, setData] = useState([]);
+  const [desain, setDesain] = useState();
+  const [website, setWebsite] = useState();
+  const [mobile, setMobile] = useState();
+  const [total, setTotal] = useState()
+  // const web = data.website_count
+  // const des = data.desain_count
+  // const mob = data.mobile_count
+  // console.log(web)
+  console.log(desain);
+  console.log(website);
+  console.log(mobile);
   const label = ["Bootcamp", "Open house", "Pembelajaran"];
   const date = [
     [new Date("2023/04/03").getTime(), new Date("2023/04/10").getTime()],
@@ -28,24 +43,44 @@ const Dashboard = () => {
     [new Date("2023/04/20").getTime(), new Date("2023/04/26").getTime()],
   ];
   const navigate = useNavigate();
+
+  useEffect(() => {
+    fetchData(`/dashboard/member_chart`).then((res) => {
+      setData(res.data);
+      setDesain(res.data.desain_count);
+      setWebsite(res.data.website_count);
+      setMobile(res.data.mobile_count);
+      setTotal(res.data.member_count)
+      console.log(res.data);
+    });
+  }, []);
   return (
     <Box sx={{ marginTop: "-23px" }}>
       <Grid container sx={{ backgroundColor: "white", py: 1 }}>
         <Grid xs={6} sx={{ display: "flex", alignItems: "center" }}>
           <Typography
-            sx={{ marginLeft: "30px" ,fontFamily: "Poppins",fontWeight: 500,fontSize: "18px",color: "black"}}
+            sx={{
+              marginLeft: "30px",
+              fontFamily: "Poppins",
+              fontWeight: 500,
+              fontSize: "18px",
+              color: "black",
+            }}
           >
             Dashboard
           </Typography>
         </Grid>
         <Grid xs={5} sx={{ display: "flex", justifyContent: "flex-end" }}>
           <FormControl
-            sx={{ m: 1, width: "35ch",fontFamily: "Poppins" }}
+            sx={{ m: 1, width: "35ch", fontFamily: "Poppins" }}
             variant="outlined"
             size="small"
             fullWidth
           >
-            <InputLabel htmlFor="outlined-adornment-password" sx={{fontFamily: "Poppins"}}>
+            <InputLabel
+              htmlFor="outlined-adornment-password"
+              sx={{ fontFamily: "Poppins" }}
+            >
               Search
             </InputLabel>
             <OutlinedInput
@@ -60,7 +95,6 @@ const Dashboard = () => {
                   </IconButton>
                 </InputAdornment>
               }
-              
             />
           </FormControl>
         </Grid>
@@ -81,12 +115,17 @@ const Dashboard = () => {
         </Grid>
       </Grid>
 
-      <Box sx={{ mt: 3, display: "flex", }}>
+      <Box sx={{ mt: 3, display: "flex" }}>
         <Grid gap={2} sx={{ width: 350 }}>
-          <Card sx={{ borderRadius: "20px",height: 200 }}>
+          <Card sx={{ borderRadius: "20px", height: 200 }}>
             <Konsentrasi
-              series={[45, 90, 35]}
-              labels={[`45 Desain`, `90 Website`, `35 Mobile`,`170 Orang`]}
+              series={[desain, website, mobile]}
+              labels={[
+                `${desain} Desain`,
+                `${website} Website`,
+                `${mobile} Mobile`,
+                `${total} Orang`,
+              ]}
             />
           </Card>
           <Card sx={{ mt: 2, borderRadius: "20px" }}>
@@ -146,7 +185,6 @@ const Dashboard = () => {
                       fillColor: "#FFC400",
                     },
                   ],
-                  
                 },
               ]}
             />

@@ -170,7 +170,7 @@ const Slider = () => {
       })
         .then((res) => {
           const updatedData = data.map((item) =>
-            item.slug === editingId ? res : item
+            item.id === editingId ? res : item
           );
           setData(updatedData);
           setEditMode(false);
@@ -203,6 +203,7 @@ const Slider = () => {
     setIsActive();
     setOpenDrawer(false);
     setIsModalOpen(true);
+    console.log(selectedFile);
   };
   // image
   const handleImageChange = (e) => {
@@ -281,32 +282,32 @@ const Slider = () => {
       console.log(res.data);
     });
 
-    if (selectedDetail) {
-      const totalImages = selectedDetail.image.length;
-      const perView = totalImages <= 5 ? totalImages : 5;
-      const glide = new Glide(`#glide-${selectedDetail.id}`, {
-        type: "carousel",
-        startAt: 0,
-        perView: perView,
-        rewind: true,
-        animationTimingFunc: "linear",
-        animationDuration: 800,
-        breakpoints: {
-          800: {
-            perView: 2,
-          },
-          480: {
-            perView: 1,
-          },
-        },
-      });
+    // if (selectedDetail) {
+    //   const totalImages = selectedDetail.image.length;
+    //   const perView = totalImages <= 5 ? totalImages : 5;
+    //   const glide = new Glide(`#glide-${selectedDetail.id}`, {
+    //     type: "carousel",
+    //     startAt: 0,
+    //     perView: perView,
+    //     rewind: true,
+    //     animationTimingFunc: "linear",
+    //     animationDuration: 800,
+    //     breakpoints: {
+    //       800: {
+    //         perView: 2,
+    //       },
+    //       480: {
+    //         perView: 1,
+    //       },
+    //     },
+    //   });
 
-      glide.mount();
+    //   glide.mount();
 
-      return () => {
-        glide.destroy();
-      };
-    }
+    //   return () => {
+    //     glide.destroy();
+    //   };
+    // }
   }, [selectedDetail, page, itemsPerPage, totalItems, totalPages]);
 
   return (
@@ -376,7 +377,7 @@ const Slider = () => {
               </Stack>
             </Card>
             <Box sx={{ textAlign: "center", marginTop: "20px" }}>
-              <div id={`glide-${selectedDetail.id}`} className="glide">
+              {/* <div id={`glide-${selectedDetail.id}`} className="glide">
                 <div className="glide__track" data-glide-el="track">
                   <ul className="glide__slides">
                     {selectedDetail.image.map((image, index) => (
@@ -412,7 +413,17 @@ const Slider = () => {
                     <ArrowForwardIosIcon />
                   </button>
                 </div>
-              </div>
+              </div> */}
+              <img
+                src={selectedDetail.image}
+                alt={selectedDetail.title}
+                style={{
+                  width: "200px",
+                  height: "180px",
+                  objectFit: "cover",
+                  borderRadius: "12px",
+                }}
+              />
               <Card
                 sx={{ mt: 1, paddingX: 4, paddingY: 5, textAlign: "left" }}
                 className="album-description"

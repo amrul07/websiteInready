@@ -1,0 +1,11 @@
+button.slick-arrow.slick-next {
+    background-color: rgba(109, 92, 77, 0.5);
+    border-radius: 50%;
+    height: 19px;
+  }
+  button.slick-arrow.slick-prev {
+    background-color: rgba(109, 92, 77, 0.5);
+    height: 19px;
+    border-radius: 50%;
+    color: red;
+  }

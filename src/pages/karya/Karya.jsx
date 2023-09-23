@@ -790,10 +790,6 @@ const Karya = () => {
               onChange={(event, value) => {
                 setNewConcentration(value);
               }}
-              inputValue={inputValue}
-              onInputChange={(event, newInputValue) => {
-                setInputValue(newInputValue);
-              }}
               renderInput={(params) => (
                 <TextField
                   {...params}

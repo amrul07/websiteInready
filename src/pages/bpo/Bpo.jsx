@@ -52,33 +52,34 @@ const useStyles = makeStyles({
     },
   },
 });
-const Admin = () => {
+
+const Bpo = () => {
   const [data, setData] = useState();
+  const [dataPresidium, setDataPresidium] = useState([]);
+  const [dataDivision, setDataDivision] = useState([]);
+  const [dataAnggota, setDataAnggota] = useState([]);
   const [itemsPerPage, setItemsPerPage] = useState(0);
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [totalItems, setTotalItems] = useState(0);
   const [openDrawer, setOpenDrawer] = useState(false);
   const [newName, setNewName] = useState("");
-  const [newUserName, setNewUserName] = useState("");
-  const [newLevel, setNewLevel] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [newCreatedAt, setNewCreatedAt] = useState("");
-  const [newUpdateAt, setNewUpdateAt] = useState("");
+  const [newIsDivisionHead, setNewIsDivisionHead] = useState("");
+  const [newPresidium, setNewPresidium] = useState("");
+  const [newDivision, setNewDivision] = useState("");
+  const [newPresidiumId, setNewPresidiumId] = useState("");
+  const [newDivisionId, setNewDivisionId] = useState("");
   const [editingId, setEditingId] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const csvFileRef = useRef(null);
   const [category, setCategory] = useState("filterByAlbum");
-  const currentDate = new Date().toLocaleDateString();
   const [selectedDetail, setSelectedDetail] = useState(null);
   const [editMode, setEditMode] = useState(false);
-
-  const [memberData, setMemberData] = useState([]);
-  const [selectedMember, setSelectedMember] = useState("");
+  //   const [selectedMember, setSelectedMember] = useState("");
 
   // detail
   const handleDetailClick = (id) => {
-    fetchData(`/user/${id}`).then((res) => {
+    fetchData(`/bpo/${id}`).then((res) => {
       setSelectedDetail(res.data);
     });
   };
@@ -130,7 +131,7 @@ const Admin = () => {
   // export excel end
 
   const handleDelete = (id) => {
-    deleteData(`/user/${id}`)
+    deleteData(`/bpo/${id}`)
       .then((res) => {
         const updatedData = data.filter((item) => item.id !== id);
         setData(updatedData);
@@ -144,36 +145,23 @@ const Admin = () => {
     setEditingId(id);
     const selectedItem = data.find((item) => item.id === id);
     setNewName(selectedItem.name);
-    setNewUserName(selectedItem.username);
-    setNewLevel(selectedItem.level);
-    setNewCreatedAt(selectedItem.created_at);
-    setNewUpdateAt(selectedItem.updated_at);
+    setNewIsDivisionHead(selectedItem.is_division_head);
+    setNewPresidium(selectedItem.presidium);
+    setNewDivision(selectedItem.division);
+    setNewPresidiumId(selectedItem.presidium_id);
+    setNewDivisionId(selectedItem.division_id);
     setOpenDrawer(true);
     setEditMode(true);
-  };
-  const handleAddChange = (e, field) => {
-    if (field === "name") {
-      setNewName(e.target.value);
-    } else if (field === "username") {
-      setNewUserName(e.target.value);
-    } else if (field === "level") {
-      setNewLevel(e.target.value);
-    } else if (field === "tanggalPost") {
-      setNewCreatedAt(e.target.value);
-    } else if (field === "tanggalUpdate") {
-      setNewUpdateAt(e.target.value);
-    } else if (field === "password") {
-      setNewPassword(e.target.value);
-    }
   };
 
   // // tombol save atau simpan data
   const handleSave = () => {
     if (editMode) {
-      putData(`/user/${editingId}`, {
-        name: newName,
-        username: newUserName,
-        member_id: selectedMember,
+      putData(`/bpo/${editingId}`, {
+        member_id: newName,
+        presidium_id: newPresidium,
+        division_id: newDivision,
+        is_division_head: newIsDivisionHead,
       })
         .then((res) => {
           const updatedData = data.map((item) =>
@@ -187,14 +175,12 @@ const Admin = () => {
         });
       // console.log(id);
     } else {
-      console.log(selectedMember);
-      const newData = {
-        member_id: selectedMember,
-        username: newUserName,
-        level: newLevel,
-        password: newPassword,
-      };
-      postData(`/user`, newData)
+      const formData = new FormData();
+      formData.append("member_id", newName);
+      formData.append("presidium_id", newPresidium);
+      formData.append("division_id", newDivision);
+      formData.append("is_division_head", newIsDivisionHead);
+      postData(`/bpo`, formData)
         .then((res) => {
           setData([...data, res]);
           setOpenDrawer(false);
@@ -206,12 +192,11 @@ const Admin = () => {
     }
 
     setEditingId(null);
+    // setSelectedMember();
     setNewName("");
-    setNewUserName("");
-    setNewLevel("");
-    setNewCreatedAt("");
-    setNewPassword("");
-    setNewUpdateAt("");
+    setNewPresidium();
+    setNewDivision();
+    setNewIsDivisionHead();
     setOpenDrawer(false);
     setIsModalOpen(true);
   };
@@ -251,7 +236,7 @@ const Admin = () => {
   };
 
   useEffect(() => {
-    fetchData(`/user?page=${page}&per_page=${itemsPerPage}`).then((res) => {
+    fetchData(`/bpo?page=${page}&per_page=${itemsPerPage}`).then((res) => {
       setData(res.data);
       setTotalPages(res.meta.total_page);
       setTotalItems(res.meta.total_item);
@@ -259,9 +244,17 @@ const Admin = () => {
       console.log(res.data);
     });
 
-    fetchData("/member/all").then((res) => {
+    fetchData(`/presidium`).then((res) => {
+      setDataPresidium(res.data);
       console.log(res.data);
-      setMemberData(res.data);
+    });
+    fetchData(`/division`).then((res) => {
+      setDataDivision(res.data);
+      console.log(res.data);
+    });
+    fetchData(`/member`).then((res) => {
+      setDataAnggota(res.data);
+      console.log(res.data);
     });
   }, [page, itemsPerPage, totalItems, totalPages]);
 
@@ -302,7 +295,7 @@ const Admin = () => {
                   }}
                   onClick={handleCloseDetail}
                 >
-                  Admin
+                  Bpo
                 </Typography>
                 <Typography sx={{ mt: "4px", ml: "-4px" }}>
                   <ArrowForwardIosIcon
@@ -318,7 +311,7 @@ const Admin = () => {
                     fontWeight: 500,
                   }}
                 >
-                  Detail Admin
+                  Detail Bpo
                 </Typography>
               </Stack>
             </Card>
@@ -354,14 +347,14 @@ const Admin = () => {
                     <Typography
                       sx={{ fontFamily: "Poppins", fontSize: "16px" }}
                     >
-                      Username
+                      Is Division Head
                     </Typography>
                   </Grid>
                   <Grid item xs={8}>
                     <Typography
                       sx={{ fontFamily: "Poppins", fontSize: "16px" }}
                     >
-                      : {selectedDetail.username}
+                      : {selectedDetail.is_division_head}
                     </Typography>
                   </Grid>
                 </Grid>
@@ -373,14 +366,14 @@ const Admin = () => {
                     <Typography
                       sx={{ fontFamily: "Poppins", fontSize: "16px" }}
                     >
-                      Level
+                      Presidium
                     </Typography>
                   </Grid>
                   <Grid item xs={8}>
                     <Typography
                       sx={{ fontFamily: "Poppins", fontSize: "16px" }}
                     >
-                      : {selectedDetail.level}
+                      : {selectedDetail.presidium}
                     </Typography>
                   </Grid>
                 </Grid>
@@ -392,33 +385,14 @@ const Admin = () => {
                     <Typography
                       sx={{ fontFamily: "Poppins", fontSize: "16px" }}
                     >
-                      TanggalPost
+                      Divisi
                     </Typography>
                   </Grid>
                   <Grid item xs={8}>
                     <Typography
                       sx={{ fontFamily: "Poppins", fontSize: "16px" }}
                     >
-                      : {selectedDetail.created_at}
-                    </Typography>
-                  </Grid>
-                </Grid>
-                <Grid
-                  container
-                  sx={{ display: "flex", flexDirection: "row", my: 1 }}
-                >
-                  <Grid item xs={4}>
-                    <Typography
-                      sx={{ fontFamily: "Poppins", fontSize: "16px" }}
-                    >
-                      TanggalUpdate
-                    </Typography>
-                  </Grid>
-                  <Grid item xs={8}>
-                    <Typography
-                      sx={{ fontFamily: "Poppins", fontSize: "16px" }}
-                    >
-                      : {selectedDetail.updated_at}
+                      : {selectedDetail.division}
                     </Typography>
                   </Grid>
                 </Grid>
@@ -493,10 +467,10 @@ const Admin = () => {
                         Name
                       </TableCell>
                       <TableCell sx={{ fontFamily: "Poppins", width: "350px" }}>
-                        Username
+                        Presidium
                       </TableCell>
                       <TableCell sx={{ fontFamily: "Poppins", width: "350px" }}>
-                        Level
+                        Division
                       </TableCell>
                       <TableCell
                         sx={{
@@ -517,10 +491,10 @@ const Admin = () => {
                             {row.name}
                           </TableCell>
                           <TableCell sx={{ fontFamily: "Poppins" }}>
-                            {row.username}
+                            {row.presidium}
                           </TableCell>
                           <TableCell sx={{ fontFamily: "Poppins" }}>
-                            {row.level}
+                            {row.division}
                           </TableCell>
                           <TableCell>
                             <Stack
@@ -604,7 +578,7 @@ const Admin = () => {
               fontSize: "20px",
             }}
           >
-            Admin
+            Bpo
           </Typography>
 
           <Stack sx={{ mt: 4 }}>
@@ -615,74 +589,68 @@ const Admin = () => {
             <Select
               labelId="demo-simple-select-label"
               id="demo-simple-select"
-              value={selectedMember}
+              value={newName}
               label="Age"
-              onChange={(e) => setSelectedMember(e.target.value)}
+              onChange={(e) => setNewName(e.target.value)}
             >
-              {memberData.map((e) => (
+              {dataAnggota.map((e) => (
                 <MenuItem key={e.id} value={e.id}>
                   {e.name}
                 </MenuItem>
               ))}
             </Select>
-            {/* username */}
+            {/* Presidium */}
             <Typography sx={{ fontFamily: "Poppins", fontWeight: 500 }}>
-              * Username
+              * Presidium
             </Typography>
-            <OutlinedInput
-              sx={{
-                fontFamily: "Poppins",
-                height: "44px",
-                borderRadius: "7px",
-                mt: 1,
-              }}
-              placeholder="Masukkan Judul Agenda"
-              value={newUserName}
-              onChange={(e) => handleAddChange(e, "username")}
-            ></OutlinedInput>
-            {/* username */}
+            <Select
+              labelId="demo-simple-select-label"
+              id="demo-simple-select"
+              value={newPresidium}
+              label="Age"
+              onChange={(e) => setNewPresidium(e.target.value)}
+            >
+              {dataPresidium.map((e) => (
+                <MenuItem key={e.id} value={e.id}>
+                  {e.name}
+                </MenuItem>
+              ))}
+            </Select>
+            {/* divisi */}
             <Typography sx={{ fontFamily: "Poppins", fontWeight: 500 }}>
-              * Password
+              * Divisi
             </Typography>
-            <OutlinedInput
-              sx={{
-                fontFamily: "Poppins",
-                height: "44px",
-                borderRadius: "7px",
-                mt: 1,
-              }}
-              placeholder="Masukkan Judul Agenda"
-              value={newPassword}
-              onChange={(e) => handleAddChange(e, "password")}
-            ></OutlinedInput>
-             {/* level */}
-            {!editMode && (
-              <>
-                <Typography
-                  sx={{ fontFamily: "Poppins", fontWeight: 500, mt: 2 }}
-                >
-                  * Level
-                </Typography>
-                <Autocomplete
-                  disablePortal
-                  id="combo-box-demo"
-                  options={["user", "admin"]}
-                  size="small"
-                  sx={{ mt: "5px" }}
-                  value={newLevel}
-                  onChange={(event, value) => {
-                    setNewLevel(value);
-                  }}
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      sx={{ fontFamily: "Poppins" }}
-                      placeholder={"Pilih Level"}
-                    />
-                  )}
-                />
-              </>
-            )}
+            <Select
+              labelId="demo-simple-select-label"
+              id="demo-simple-select"
+              value={newDivisionId}
+              label="Age"
+              onChange={(e) => setNewDivisionId(e.target.value)}
+            >
+              {dataDivision.map((e) => (
+                <MenuItem key={e.id} value={e.id}>
+                  {e.name}
+                </MenuItem>
+              ))}
+            </Select>
+            {/* is division head */}
+            <Typography sx={{ fontFamily: "Poppins", fontWeight: 500 }}>
+              * Kepala Divisi
+            </Typography>
+            <Select
+              labelId="demo-simple-select-label"
+              id="demo-simple-select"
+              value={newIsDivisionHead}
+              label="Age"
+              onChange={(e) => setNewIsDivisionHead(e.target.value)}
+            >
+              <MenuItem key={0} value={0}>
+                True
+              </MenuItem>
+              <MenuItem key={1} value={1}>
+                False
+              </MenuItem>
+            </Select>
           </Stack>
 
           <Stack
@@ -729,4 +697,4 @@ const Admin = () => {
   );
 };
 
-export default Admin;
+export default Bpo;
