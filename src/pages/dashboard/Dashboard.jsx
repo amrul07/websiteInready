@@ -24,18 +24,19 @@ import { fetchData } from "../../service/api";
 import { useState } from "react";
 
 const Dashboard = () => {
-  const [data, setData] = useState([]);
-  const [desain, setDesain] = useState();
-  const [website, setWebsite] = useState();
-  const [mobile, setMobile] = useState();
-  const [total, setTotal] = useState()
-  // const web = data.website_count
-  // const des = data.desain_count
-  // const mob = data.mobile_count
-  // console.log(web)
-  console.log(desain);
-  console.log(website);
-  console.log(mobile);
+  const [dataKonsentrasi, setDataKonsentrasi] = useState([]);
+  const [dataAgenda, setDataAgenda] = useState([]);
+
+  const seriesAgenda = dataAgenda.map((item, index) => ({
+    data: [
+      {
+        x: item.title,
+        y: [new Date(item.time).getTime(), new Date("2024-02-01").getTime()],
+        fillColor: "#FFC400",
+      },
+    ],
+  }));
+
   const label = ["Bootcamp", "Open house", "Pembelajaran"];
   const date = [
     [new Date("2023/04/03").getTime(), new Date("2023/04/10").getTime()],
@@ -46,11 +47,11 @@ const Dashboard = () => {
 
   useEffect(() => {
     fetchData(`/dashboard/member_chart`).then((res) => {
-      setData(res.data);
-      setDesain(res.data.desain_count);
-      setWebsite(res.data.website_count);
-      setMobile(res.data.mobile_count);
-      setTotal(res.data.member_count)
+      setDataKonsentrasi(res.data);
+      console.log(res.data);
+    });
+    fetchData(`/dashboard/upcoming_agenda`).then((res) => {
+      setDataAgenda(res.data);
       console.log(res.data);
     });
   }, []);
@@ -119,12 +120,16 @@ const Dashboard = () => {
         <Grid gap={2} sx={{ width: 350 }}>
           <Card sx={{ borderRadius: "20px", height: 200 }}>
             <Konsentrasi
-              series={[desain, website, mobile]}
+              series={[
+                dataKonsentrasi.desain_count,
+                dataKonsentrasi.website_count,
+                dataKonsentrasi.mobile_count,
+              ]}
               labels={[
-                `${desain} Desain`,
-                `${website} Website`,
-                `${mobile} Mobile`,
-                `${total} Orang`,
+                `${dataKonsentrasi.desain_count} Desain`,
+                `${dataKonsentrasi.website_count} Website`,
+                `${dataKonsentrasi.mobile_count} Mobile`,
+                `${dataKonsentrasi.member_count} Orang`,
               ]}
             />
           </Card>
@@ -165,29 +170,7 @@ const Dashboard = () => {
             <Kalender />
           </Card>
           <Card sx={{ borderRadius: "20px", mt: 2 }}>
-            <Agenda
-              series={[
-                {
-                  data: [
-                    {
-                      x: `${label[0]} `,
-                      y: date[0],
-                      fillColor: "#FFC400",
-                    },
-                    {
-                      x: `${label[1]} `,
-                      y: date[1],
-                      fillColor: "#FFC400",
-                    },
-                    {
-                      x: `${label[2]} `,
-                      y: date[2],
-                      fillColor: "#FFC400",
-                    },
-                  ],
-                },
-              ]}
-            />
+            <Agenda series={seriesAgenda} />
           </Card>
         </Grid>
       </Box>

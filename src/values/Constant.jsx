@@ -8,6 +8,9 @@ import { ReactComponent as Admin } from "../assets/navbar/admin.svg";
 import { ReactComponent as Kegiatan } from "../assets/navbar/kegiatan.svg";
 import { ReactComponent as Karya } from "../assets/navbar/karya.svg";
 import { ReactComponent as Gallery } from "../assets/navbar/gallery.svg";
+import { ReactComponent as Presidium } from "../assets/navbar/presidium.svg";
+import { ReactComponent as Bpo } from "../assets/navbar/bpo.svg";
+import { ReactComponent as Divisi } from "../assets/navbar/divisi.svg";
 
 export const menu = [
   {
@@ -28,48 +31,50 @@ export const menu = [
   {
     title: "Presidium",
     router: "/presidium",
-    icon: <Anggota width={"22px"} />,
+    icon: <Presidium width={"22px"} />,
   },
   {
     title: "Bpo",
     router: "/bpo",
-    icon: <Anggota width={"22px"} />,
+    icon: <Bpo width={"22px"} />,
   },
   {
     title: "Division",
     router: "/division",
-    icon: <Anggota width={"22px"} />,
+    icon: <Divisi width={"24px"} />,
   },
   {
     title: "Blog",
     router: "/blog",
-    icon: <Blog style={{paddingLeft: "1px"}} width={"18px"} />,
+    icon: <Blog style={{ paddingLeft: "1px" }} width={"18px"} />,
     // icon: <img src={Blog} alt="" />,
   },
   {
     title: "Gallery",
     router: "/gallery",
-    icon: <Gallery style={{paddingLeft: "1px"}} width={"20px"} />,
+    icon: <Gallery style={{ paddingLeft: "1px" }} width={"20px"} />,
     // icon: <img src={Blog} alt="" />,
   },
   {
     title: "Kegiatan",
     router: "/kegiatan",
-    icon: <Kegiatan style={{paddingLeft: "2px"}} width={"20px"} />,
+    icon: <Kegiatan style={{ paddingLeft: "2px" }} width={"20px"} />,
   },
   {
     title: "Karya",
     router: "/karya",
-    icon: <Karya style={{paddingLeft: "1px"}} width={"18px"} />,
+    icon: <Karya style={{ paddingLeft: "1px" }} width={"18px"} />,
   },
   {
     title: "Agenda",
     router: "/agenda",
-    icon: <Agenda style={{marginTop: "5px"}} width={"26px"} height={"18px"} />,
+    icon: (
+      <Agenda style={{ marginTop: "5px" }} width={"26px"} height={"18px"} />
+    ),
   },
   {
     title: "Admin",
     router: "/admin",
-    icon: <Admin style={{marginTop: "5px",paddingLeft: "1px"}} />,
+    icon: <Admin style={{ marginTop: "5px", paddingLeft: "1px" }} />,
   },
 ];

@@ -1,5 +1,5 @@
 // import Sidenav from "./Sidenav";
-import { Routes, Route, BrowserRouter } from "react-router-dom";
+import { Routes, Route, BrowserRouter, Navigate } from "react-router-dom";
 // import Home from "./pages/Home";
 // import About from "./pages/About";
 // import Setting from "./pages/Setting";
@@ -20,13 +20,21 @@ import Gallery from "./pages/gallery/Gallery";
 import Presidium from "./pages/presidium/Presidium";
 import Bpo from "./pages/bpo/Bpo";
 import Division from "./pages/division/Division";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 function App() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   return (
     <>
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Index />}>
+          <Route
+            path="/"
+            element={
+              isLoggedIn ? <Index /> : <Navigate to="/login" replace={true} />
+            }
+          >
             <Route index element={<Dashboard />} />
             <Route path="/slider" element={<Slider />} />
             <Route path="/anggota" element={<Anggota />} />
@@ -40,7 +48,7 @@ function App() {
             <Route path="/agenda" element={<Agenda />} />
             <Route path="/admin" element={<Admin />} />
           </Route>
-          <Route path="/login" element={<Login />} />
+          <Route path="/login" element={<Login setIsLoggedIn={setIsLoggedIn} />} />
           <Route path="/testing" element={<Testing />} />
           <Route path="/coba" element={<Coba />} />
 

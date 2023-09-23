@@ -20,7 +20,7 @@ import React, { useState } from "react";
 import { ModalLogin } from "../../components/modal/Index";
 import { ButtonYellow } from "../../components/button/Index";
 
-const Login = () => {
+const Login = ({ setIsLoggedIn }) => {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -36,7 +36,8 @@ const Login = () => {
     const validPassword = "admin123";
 
     if (email === validEmail && password === validPassword) {
-      navigate("/dashboard");
+      setIsLoggedIn(true);
+      navigate("/");
     } else {
       alert("Email atau password salah!");
     }
@@ -52,7 +53,7 @@ const Login = () => {
     <Grid container sx={{ height: "100vh" }}>
       <Grid item xs={6}>
         <CardMedia
-          sx={{ height: "100vh", width: "100%", backgroundColor: "#FFC400" }}
+          sx={{ height: "100vh", width: "111%", backgroundColor: "#FFC400",marginLeft: "-75px" }}
           image={Bg}
           alt={"bg"}
         />
@@ -74,52 +75,46 @@ const Login = () => {
           >
             Login
           </Typography>
-          <CardContent sx={{ mt: 6 }}>
-            {/* email */}
-            <FormControl
-              sx={{ m: 1, width: "63%", fontFamily: "Poppins" }}
-              variant="outlined"
-              size="medium"
-              fullWidth
+          <CardContent
+            sx={{
+              mt: 20,
+              display: "flex",
+              flexDirection: "column",
+            }}
+          >
+            {/* username */}
+            <OutlinedInput
+              sx={{
+                fontFamily: "Poppins",
+                height: "44px",
+                borderRadius: "7px",
+                mt: 1,
+                width: "50%",
+                alignSelf: "center"
+              }}
+              placeholder="Masukkan Judul Agenda"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-            >
-              <InputLabel
-                htmlFor="outlined-adornment-password"
-                sx={{ fontFamily: "Poppins", color: "#646464" }}
-              >
-                E-mail
-              </InputLabel>
-              <OutlinedInput
-                id="outlined-adornment-password"
-                endAdornment={<InputAdornment position="end"></InputAdornment>}
-              />
-            </FormControl>
+            ></OutlinedInput>
             {/* password */}
-            <FormControl
-              sx={{ m: 1, width: "63%", fontFamily: "Inter" }}
-              variant="outlined"
-              size="medium"
-              fullWidth
+            <OutlinedInput
+              sx={{
+                fontFamily: "Poppins",
+                height: "44px",
+                borderRadius: "7px",
+                mt: 1,
+                width: "50%",
+                alignSelf: "center"
+              }}
+              placeholder="Masukkan Judul Agenda"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-            >
-              <InputLabel
-                htmlFor="outlined-adornment-password"
-                sx={{ fontFamily: "Inter", color: "#646464" }}
-              >
-                Password
-              </InputLabel>
-              <OutlinedInput
-                id="outlined-adornment-password"
-                endAdornment={<InputAdornment position="end"></InputAdornment>}
-              />
-            </FormControl>
+            ></OutlinedInput>
             <Stack>
               <Typography
                 onClick={handleOpen}
                 sx={{
-                  width: "80%",
+                  width: "75%",
                   mt: 1,
                   textAlign: "end",
                   cursor: "pointer",
@@ -135,7 +130,17 @@ const Login = () => {
                 onClickBack={handleClose}
               />
             </Stack>
-            <ButtonYellow onClick={handleLogin} sx={{ color: "white",width: "63%",mt: 3,py: 1,borderRadius: "12px"  }}>
+            <ButtonYellow
+              onClick={handleLogin}
+              sx={{
+                color: "white",
+                width: "50%",
+                mt: 3,
+                py: 1,
+                borderRadius: "12px",
+                alignSelf: "center"
+              }}
+            >
               Login
             </ButtonYellow>
           </CardContent>
