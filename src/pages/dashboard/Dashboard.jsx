@@ -25,6 +25,9 @@ import { useState } from "react";
 
 const Dashboard = () => {
   const [dataKonsentrasi, setDataKonsentrasi] = useState([]);
+  const [website, setWebsite] = useState();
+  const [desain, setDesain] = useState();
+  const [mobile, setMobile] = useState();
   const [dataAgenda, setDataAgenda] = useState([]);
 
   const seriesAgenda = dataAgenda.map((item, index) => ({
@@ -48,7 +51,10 @@ const Dashboard = () => {
   useEffect(() => {
     fetchData(`/dashboard/member_chart`).then((res) => {
       setDataKonsentrasi(res.data);
-      console.log(res.data);
+      setWebsite(res.data.website_count);
+      setDesain(res.data.desain_count);
+      setMobile(res.data.mobile_count);
+      console.log("data konsentrasi", res.data);
     });
     fetchData(`/dashboard/upcoming_agenda`).then((res) => {
       setDataAgenda(res.data);
@@ -58,6 +64,7 @@ const Dashboard = () => {
   return (
     <Box sx={{ marginTop: "-23px" }}>
       <Grid container sx={{ backgroundColor: "white", py: 1 }}>
+        {/* title */}
         <Grid xs={6} sx={{ display: "flex", alignItems: "center" }}>
           <Typography
             sx={{
@@ -71,20 +78,18 @@ const Dashboard = () => {
             Dashboard
           </Typography>
         </Grid>
+        {/* search */}
         <Grid xs={5} sx={{ display: "flex", justifyContent: "flex-end" }}>
           <FormControl
+            // onChange={props.onChange}
             sx={{ m: 1, width: "35ch", fontFamily: "Poppins" }}
             variant="outlined"
             size="small"
             fullWidth
           >
-            <InputLabel
-              htmlFor="outlined-adornment-password"
-              sx={{ fontFamily: "Poppins" }}
-            >
-              Search
-            </InputLabel>
             <OutlinedInput
+              sx={{ fontFamily: "Poppins" }}
+              placeholder="Search"
               id="outlined-adornment-password"
               endAdornment={
                 <InputAdornment position="end">
@@ -99,10 +104,11 @@ const Dashboard = () => {
             />
           </FormControl>
         </Grid>
+        {/* logout */}
         <Grid
           xs={1}
           sx={{ display: "flex", justifyContent: "center" }}
-          onClick={() => navigate("/slider")}
+          onClick={() => navigate("/login")}
         >
           <CardMedia
             sx={{
@@ -120,11 +126,8 @@ const Dashboard = () => {
         <Grid gap={2} sx={{ width: 350 }}>
           <Card sx={{ borderRadius: "20px", height: 200 }}>
             <Konsentrasi
-              series={[
-                dataKonsentrasi.desain_count,
-                dataKonsentrasi.website_count,
-                dataKonsentrasi.mobile_count,
-              ]}
+              // series={[desain, website, mobile]}
+              series={[19, 14, 17]}
               labels={[
                 `${dataKonsentrasi.desain_count} Desain`,
                 `${dataKonsentrasi.website_count} Website`,

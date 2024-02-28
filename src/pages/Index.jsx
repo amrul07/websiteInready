@@ -14,7 +14,7 @@ function Index() {
   return (
     <Box sx={{ display: "flex" }}>
       <CssBaseline />
-      <NavbarComponent menu={menu} type="dokter" />
+      <NavbarComponent menu={menu}  />
       <Box
         component="main"
         sx={{

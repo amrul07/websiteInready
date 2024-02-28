@@ -48,7 +48,10 @@ function App() {
             <Route path="/agenda" element={<Agenda />} />
             <Route path="/admin" element={<Admin />} />
           </Route>
-          <Route path="/login" element={<Login setIsLoggedIn={setIsLoggedIn} />} />
+          <Route
+            path="/login"
+            element={<Login setIsLoggedIn={setIsLoggedIn} />}
+          />
           <Route path="/testing" element={<Testing />} />
           <Route path="/coba" element={<Coba />} />
 
@@ -56,6 +59,7 @@ function App() {
           <Route path="/setting" element={<Setting />} />
           <Route path="/tes" element={<Tes />} /> */}
         </Routes>
+        {/* {console.log({ isLoggedIn })} */}
       </BrowserRouter>
     </>
   );

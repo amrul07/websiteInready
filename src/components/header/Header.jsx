@@ -20,11 +20,14 @@ import {
   ButtonRed,
   ButtonYellow,
 } from "../button/Index";
+import { useNavigate } from "react-router-dom";
 
 const Header = (props) => {
+  const navigate = useNavigate();
   return (
     <Box>
       <Grid container sx={{ backgroundColor: "white", py: 1 }}>
+        {/* title */}
         <Grid xs={6} sx={{ display: "flex", alignItems: "center" }}>
           <Typography
             sx={{
@@ -38,6 +41,7 @@ const Header = (props) => {
             {props.title}
           </Typography>
         </Grid>
+        {/* search */}
         <Grid xs={5} sx={{ display: "flex", justifyContent: "flex-end" }}>
           <FormControl
             onChange={props.onChange}
@@ -63,16 +67,19 @@ const Header = (props) => {
             />
           </FormControl>
         </Grid>
+        {/* logout */}
         <Grid
           xs={1}
           sx={{ display: "flex", justifyContent: "center" }}
-          onClick={props.onClick}
+          onClick={() => navigate("/login")}
+          // onClick={props.onClick}
         >
           <CardMedia
             sx={{
               width: 25,
               height: 30,
               alignSelf: "center",
+              cursor: "pointer",
             }}
             image={Logout}
             title="green iguana"
@@ -84,6 +91,7 @@ const Header = (props) => {
         gap={7}
         sx={{ backgroundColor: "white", mt: "1px", py: 2 }}
       >
+        {/* add data */}
         <Grid xs={4} sx={{ display: "flex", alignItems: "center" }}>
           <ButtonYellow
             onClick={props.onClickTambahData}
@@ -105,6 +113,7 @@ const Header = (props) => {
             spacing={2}
             sx={{ display: "flex", justifyContent: "flex-end" }}
           >
+            {/* import CSV */}
             <ButtonBlue
               onClick={props.onClickCsv}
               sx={{ borderRadius: "8px", color: "white" }}
@@ -126,6 +135,7 @@ const Header = (props) => {
                 Import CSV
               </Typography>
             </ButtonBlue>
+            {/* export excel */}
             <ButtonGreen
               onClick={props.onClickExcel}
               sx={{ borderRadius: "8px" }}
@@ -147,6 +157,7 @@ const Header = (props) => {
                 Export Excel
               </Typography>
             </ButtonGreen>
+            {/* cetak laporan */}
             <ButtonRed
               onClick={props.onClickCetak}
               sx={{ borderRadius: "8px" }}

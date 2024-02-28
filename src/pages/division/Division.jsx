@@ -527,7 +527,7 @@ const Division = () => {
               value={newName}
               onChange={(e) => setNewName(e.target.value)}
             ></OutlinedInput>
-            {/* name */}
+            {/* presidium */}
             <Typography sx={{ fontFamily: "Poppins", fontWeight: 500 }}>
               * Presidium
             </Typography>
