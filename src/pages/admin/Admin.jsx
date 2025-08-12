@@ -21,7 +21,8 @@ import {
   CardMedia,
 } from "@mui/material";
 import Header from "../../components/header/Header";
-import { makeStyles } from "@mui/styles";
+import { styled } from "@mui/material/styles";
+
 import { ThemeProvider } from "@mui/material/styles";
 import CreateIcon from "@mui/icons-material/Create";
 import { RiDeleteBin5Fill } from "react-icons/ri";
@@ -46,13 +47,11 @@ import { useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { AdminData } from "../../values/Constant";
 
-const useStyles = makeStyles({
-  blueRow: {
-    "&:nth-of-type(odd)": {
-      backgroundColor: "rgba(255, 196, 0, 0.10)",
-    },
+const useStyles = styled(TableRow)(({ theme }) => ({
+  "&:nth-of-type(odd)": {
+    backgroundColor: "rgba(255, 196, 0, 0.10)",
   },
-});
+}));
 const Admin = () => {
   const [data, setData] = useState();
   const [itemsPerPage, setItemsPerPage] = useState(10);
@@ -83,7 +82,7 @@ const Admin = () => {
     //   setSelectedDetail(res.data);
     // });
 
-    setSelectedDetail(id)
+    setSelectedDetail(id);
   };
 
   const handleCloseDetail = () => {
@@ -658,7 +657,7 @@ const Admin = () => {
               value={newPassword}
               onChange={(e) => handleAddChange(e, "password")}
             ></OutlinedInput>
-             {/* level */}
+            {/* level */}
             {!editMode && (
               <>
                 <Typography
