@@ -42,6 +42,7 @@ import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import { fetchData, postData, putData, deleteData } from "../../service/api";
 import { useEffect } from "react";
+import { DivisiData } from "../../values/Constant";
 
 const useStyles = makeStyles({
   blueRow: {
@@ -54,10 +55,10 @@ const useStyles = makeStyles({
 const Division = () => {
   const [data, setData] = useState([]);
   const [dataPresidium, setDataPresidium] = useState([]);
-  const [itemsPerPage, setItemsPerPage] = useState(0);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
-  const [totalItems, setTotalItems] = useState(0);
+  const [totalItems, setTotalItems] = useState(10);
   const [openDrawer, setOpenDrawer] = useState(false);
   const [newName, setNewName] = useState("");
   const [newPresidium, setNewPresidium] = useState("");
@@ -71,9 +72,11 @@ const Division = () => {
 
   // detail
   const handleDetailClick = (id) => {
-    fetchData(`/division/${id}`).then((res) => {
-      setSelectedDetail(res.data);
-    });
+    // fetchData(`/division/${id}`).then((res) => {
+    //   setSelectedDetail(res.data);
+    // });
+
+    setSelectedDetail(id)
   };
 
   const handleCloseDetail = () => {
@@ -135,10 +138,10 @@ const Division = () => {
   // edit
   const handleEdit = (id) => {
     setEditingId(id);
-    const selectedItem = data.find((item) => item.id === id);
-    setNewName(selectedItem.name);
+    const selectedItem = DivisiData.find((item) => item.id === id);
+    setNewName(selectedItem.nama);
     setNewPresidiumId(selectedItem.presidium_id);
-    setNewPresidium(selectedItem.presidium);
+    setNewPresidium(selectedItem.nama_divisi);
     setOpenDrawer(true);
     setEditMode(true);
   };
@@ -218,19 +221,19 @@ const Division = () => {
     document.body.innerHTML = originalContents;
   };
 
-  useEffect(() => {
-    fetchData(`/division?page=${page}&per_page=${itemsPerPage}`).then((res) => {
-      setData(res.data);
-      setTotalPages(res.meta.total_page);
-      setTotalItems(res.meta.total_item);
-      setItemsPerPage(res.meta.perpage);
-      console.log(res.data);
-    });
-    fetchData(`/presidium`).then((res) => {
-      setDataPresidium(res.data);
-      console.log(res.data);
-    });
-  }, [page, itemsPerPage, totalItems, totalPages]);
+  // useEffect(() => {
+  //   fetchData(`/division?page=${page}&per_page=${itemsPerPage}`).then((res) => {
+  //     setData(res.data);
+  //     setTotalPages(res.meta.total_page);
+  //     setTotalItems(res.meta.total_item);
+  //     setItemsPerPage(res.meta.perpage);
+  //     console.log(res.data);
+  //   });
+  //   fetchData(`/presidium`).then((res) => {
+  //     setDataPresidium(res.data);
+  //     console.log(res.data);
+  //   });
+  // }, [page, itemsPerPage, totalItems, totalPages]);
 
   return (
     <Box sx={{ fontFamily: "Poppins", mt: "-23px" }}>
@@ -309,7 +312,7 @@ const Division = () => {
                     <Typography
                       sx={{ fontFamily: "Poppins", fontSize: "16px" }}
                     >
-                      : {selectedDetail.name}
+                      : {DivisiData[selectedDetail - 1].nama}
                     </Typography>
                   </Grid>
                 </Grid>
@@ -328,7 +331,7 @@ const Division = () => {
                     <Typography
                       sx={{ fontFamily: "Poppins", fontSize: "16px" }}
                     >
-                      : {selectedDetail.presidium}
+                      : {DivisiData[selectedDetail - 1].nama_divisi}
                     </Typography>
                   </Grid>
                 </Grid>
@@ -417,14 +420,14 @@ const Division = () => {
                     </TableRow>
                   </TableHead>
                   <TableBody sx={{ fontFamily: "Poppins" }}>
-                    {data &&
-                      data.map((row) => (
+                    {DivisiData &&
+                      DivisiData.map((row) => (
                         <TableRow key={row.id} className={classes.blueRow}>
                           <TableCell sx={{ fontFamily: "Poppins" }}>
-                            {row.name}
+                            {row.nama}
                           </TableCell>
                           <TableCell sx={{ fontFamily: "Poppins" }}>
-                            {row.presidium}
+                            {row.nama_divisi}
                           </TableCell>
                           <TableCell>
                             <Stack

@@ -11,19 +11,17 @@ const Konsentrasi = (props) => {
   // const total = web + mobile + desain;
 
   const options = {
-    labels: props.labels,
+    labels: ["website", "desain", "mobile"],
 
-      chart: {
-        fontFamily: "Inter",
-        fontWeight: 400,
-        marginLeft: "10px",
-        color: "red"
-
+    chart: {
+      fontFamily: "Inter",
+      fontWeight: 400,
+      marginLeft: "10px",
+      color: "red",
     },
-    colors: ['#11E54C', '#FFC400', '#11A5E5', '#000'],
+    colors: ["#11E54C", "#FFC400", "#11A5E5", "#000"],
     plotOptions: {
       pie: {
-        
         expandOnClick: false,
         donut: {
           size: "40px",
@@ -42,20 +40,20 @@ const Konsentrasi = (props) => {
       fontWeight: 400,
       labels: {
         colors: "black",
-       
+
         // useSeriesColors: false
-    },
+      },
       markers: {
         width: 14,
         height: 14,
         offsetX: -5,
-        offsetY: 3
+        offsetY: 3,
       },
       itemMargin: {
         // horizontal: 15,
-        vertical: 8
+        vertical: 8,
+      },
     },
-    }
   };
 
   return (

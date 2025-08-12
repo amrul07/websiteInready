@@ -951,7 +951,7 @@
 //       Foto,
 //       Foto,
 //       Foto,
-      
+
 //     ],
 //   },
 //   {
@@ -962,7 +962,7 @@
 //       Foto,
 //       Foto,
 //       Foto,
-      
+
 //     ],
 //   },
 //   // Add more albums here
@@ -992,7 +992,7 @@
 //     });
 
 //     glide.mount();
-  
+
 //     return () => {
 //       glide.destroy();
 //     };
@@ -1044,20 +1044,20 @@
 //     </div>
 //   );
 // }
- 
+
 // export default Coba;
 
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   FormControl,
   FormGroup,
   FormControlLabel,
   Checkbox,
   TextField,
-} from '@mui/material';
+} from "@mui/material";
 const Coba = () => {
   const [selectedOptions, setSelectedOptions] = useState([]);
-  const [customInput, setCustomInput] = useState('');
+  const [customInput, setCustomInput] = useState("");
 
   const handleCheckboxChange = (event) => {
     const value = event.target.value;
@@ -1066,21 +1066,26 @@ const Coba = () => {
     } else {
       setSelectedOptions(selectedOptions.filter((item) => item !== value));
     }
-    console.log(selectedOptions)
+    console.log(selectedOptions);
   };
 
   const handleCustomInputChange = (event) => {
     setCustomInput(event.target.value);
-    console.log(customInput)
+    console.log(customInput);
   };
 
   const options = [
-    'Option 1',
-    'Option 2',
-    'Option 3',
+    "Option 1",
+    "Option 2",
+    "Option 3",
     // ...Tambahkan pilihan lainnya di sini
   ];
 
+  const date = new Date();
+  const tahun = date.getFullYear(); // ambil tahun (misalnya 2025)
+  const bulan = date.getMonth() + 1; // ambil bulan (0-11), jadi tambahkan +1
+
+  console.log(`Tahun: ${tahun}, Bulan: ${bulan}`);
   return (
     <FormControl component="fieldset">
       <FormGroup>
@@ -1106,6 +1111,6 @@ const Coba = () => {
       </FormGroup>
     </FormControl>
   );
-}
- 
+};
+
 export default Coba;

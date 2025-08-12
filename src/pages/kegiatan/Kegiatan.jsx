@@ -45,6 +45,7 @@ import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import { fetchData, postData, putData, deleteData } from "../../service/api";
 import { useEffect } from "react";
+import { KegiatanData } from "../../values/Constant";
 
 const useStyles = makeStyles({
   blueRow: {
@@ -56,10 +57,10 @@ const useStyles = makeStyles({
 
 const Kegiatan = () => {
   const [data, setData] = useState();
-  const [itemsPerPage, setItemsPerPage] = useState(0);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
-  const [totalItems, setTotalItems] = useState();
+  const [totalItems, setTotalItems] = useState(10);
   const [openDrawer, setOpenDrawer] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
   const [newImage, setNewImage] = useState("");
@@ -80,10 +81,12 @@ const Kegiatan = () => {
 
   // detail
   const handleDetailClick = (id) => {
-    fetchData(`/activity/${id}`).then((res) => {
-      setSelectedDetail(res.data);
-      console.log(res.data)
-    });
+    // fetchData(`/activity/${id}`).then((res) => {
+    //   setSelectedDetail(res.data);
+    //   console.log(res.data)
+    // });
+
+    setSelectedDetail(id)
   };
 
   const handleCloseDetail = () => {
@@ -135,15 +138,15 @@ const Kegiatan = () => {
   // edit
   const handleEdit = (id) => {
     setEditingId(id);
-    const selectedItem = data.find((item) => item.id === id);
-    setNewImage(selectedItem?.flayer_image);
-    setNewTitle(selectedItem?.title);
-    setNewLocation(selectedItem?.location);
-    setNewLink(selectedItem?.registration_link);
-    setNewTime(selectedItem?.time);
-    setNewCreatedAt(selectedItem?.created_at);
-    setNewUpdateAt(selectedItem?.updated_at);
-    setNewDescription(selectedItem?.description);
+    const selectedItem = KegiatanData.find((item) => item.id === id);
+    setNewImage(selectedItem?.gambar);
+    setNewTitle(selectedItem?.judul);
+    setNewLocation(selectedItem?.lokasi);
+    setNewLink(selectedItem?.link_daftar);
+    setNewTime(selectedItem?.waktu);
+    setNewCreatedAt(selectedItem?.tanggal_post);
+    setNewUpdateAt(selectedItem?.tanggal_update);
+    setNewDescription(selectedItem?.deskripsi);
     setOpenDrawer(true);
     setEditMode(true);
     console.log(selectedItem)
@@ -299,15 +302,15 @@ console.log(newImage)
     document.body.innerHTML = originalContents;
   };
 
-  useEffect(() => {
-    fetchData(`/activity?page=${page}&per_page=${itemsPerPage}`).then((res) => {
-      setData(res.data);
-      setTotalPages(res.meta.total_page);
-      setTotalItems(res.meta.total_item);
-      setItemsPerPage(res.meta.perpage);
-      console.log(res.data);
-    });
-  }, [page, itemsPerPage, totalItems, totalPages]);
+  // useEffect(() => {
+  //   fetchData(`/activity?page=${page}&per_page=${itemsPerPage}`).then((res) => {
+  //     setData(res.data);
+  //     setTotalPages(res.meta.total_page);
+  //     setTotalItems(res.meta.total_item);
+  //     setItemsPerPage(res.meta.perpage);
+  //     console.log(res.data);
+  //   });
+  // }, [page, itemsPerPage, totalItems, totalPages]);
 
   return (
     <Box sx={{ fontFamily: "Poppins", mt: "-23px" }}>
@@ -370,8 +373,8 @@ console.log(newImage)
               <Grid container spacing={2}>
                 <Grid item xs={4}>
                   <img
-                    src={selectedDetail.flayer_image}
-                    alt={selectedDetail.title}
+                    src={KegiatanData[selectedDetail - 1].gambar}
+                    alt={KegiatanData[selectedDetail - 1].judul}
                     style={{
                       width: "80%",
                       height: "300px",
@@ -401,7 +404,7 @@ console.log(newImage)
                         <Typography
                           sx={{ fontFamily: "Poppins", fontSize: "16px" }}
                         >
-                          : {selectedDetail.title}
+                          : {KegiatanData[selectedDetail - 1].judul}
                         </Typography>
                       </Grid>
                     </Grid>
@@ -420,7 +423,7 @@ console.log(newImage)
                         <Typography
                           sx={{ fontFamily: "Poppins", fontSize: "16px" }}
                         >
-                          : {selectedDetail.location}
+                          : {KegiatanData[selectedDetail - 1].lokasi}
                         </Typography>
                       </Grid>
                     </Grid>
@@ -439,7 +442,7 @@ console.log(newImage)
                         <Typography
                           sx={{ fontFamily: "Poppins", fontSize: "16px" }}
                         >
-                          : {selectedDetail.registration_link}
+                          : {KegiatanData[selectedDetail - 1].link_daftar}
                         </Typography>
                       </Grid>
                     </Grid>
@@ -458,7 +461,7 @@ console.log(newImage)
                         <Typography
                           sx={{ fontFamily: "Poppins", fontSize: "16px" }}
                         >
-                          : {selectedDetail.time}
+                          : {KegiatanData[selectedDetail - 1].waktu}
                         </Typography>
                       </Grid>
                     </Grid>
@@ -477,7 +480,7 @@ console.log(newImage)
                         <Typography
                           sx={{ fontFamily: "Poppins", fontSize: "16px" }}
                         >
-                          : {selectedDetail.created_at}
+                          : {KegiatanData[selectedDetail - 1].tanggal_post}
                         </Typography>
                       </Grid>
                     </Grid>
@@ -496,7 +499,7 @@ console.log(newImage)
                         <Typography
                           sx={{ fontFamily: "Poppins", fontSize: "16px" }}
                         >
-                          : {selectedDetail.updated_at}
+                          : {KegiatanData[selectedDetail - 1].tanggal_update}
                         </Typography>
                       </Grid>
                     </Grid>
@@ -522,7 +525,7 @@ console.log(newImage)
                     <Typography
                       sx={{ fontFamily: "Poppins", fontSize: "16px" }}
                     >
-                      {selectedDetail.description}
+                      {KegiatanData[selectedDetail - 1].deskripsi}
                     </Typography>
                   </Card>
                 </Grid>
@@ -617,21 +620,21 @@ console.log(newImage)
                     </TableRow>
                   </TableHead>
                   <TableBody sx={{ fontFamily: "Poppins" }}>
-                    {data &&
-                      data.map((row) => (
+                    {KegiatanData &&
+                      KegiatanData.map((row) => (
                         <TableRow key={row.id} className={classes.blueRow}>
                           <TableCell sx={{ fontFamily: "Poppins" }}>
-                            {row.title}
+                            {row.judul}
                           </TableCell>
                           <TableCell sx={{ fontFamily: "Poppins" }}>
-                            {row.location}
+                            {row.lokasi}
                           </TableCell>
                           <TableCell sx={{ fontFamily: "Poppins" }}>
-                            {row.time}
+                            {row.waktu}
                             {/* {bulans[parseInt(row.waktu)-1]} */}
                           </TableCell>
                           <TableCell sx={{ fontFamily: "Poppins" }}>
-                            {row.registration_link}
+                            {row.link_daftar}
                           </TableCell>
 
                           <TableCell>

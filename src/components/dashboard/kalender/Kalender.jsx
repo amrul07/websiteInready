@@ -9,13 +9,14 @@ import { useRef, useState } from "react";
 import { Typography } from "@mui/material";
 
 const Kalender = () => {
+  const colors = ["#DF8704", "#04DF76"];
 
-
-const colors = ["#DF8704", "#04DF76"]
-
-
-var color = colors[Math.floor(Math.random()*colors.length)];
+  var color = colors[Math.floor(Math.random() * colors.length)];
   const [event, setEvent] = useState([]);
+
+  const date = new Date();
+  const tahun = date.getFullYear(); // ambil tahun (misalnya 2025)
+  const bulan = date.getMonth() + 1; // ambil bulan (0-11), jadi tambahkan +1
 
   return (
     <>
@@ -37,6 +38,7 @@ var color = colors[Math.floor(Math.random()*colors.length)];
             const endDate = arg.endStr;
 
             const list = [...event];
+            // const list = [...event];
 
             list.push({
               title: title,
@@ -45,17 +47,31 @@ var color = colors[Math.floor(Math.random()*colors.length)];
               backgroundColor: color,
               borderColor: color,
               fontFamily: "Poppins",
-              
-              
             });
             setEvent(list);
           }}
           // eventBorderColor={color}
           height={350}
           // contentHeight={1900}
-          events={event}
+          // events={event}
+          events={[
+            {
+              title: "Bootcamp",
+              date: `${tahun}-0${bulan}-03`,
+              end: `${tahun}-0${bulan}-08`,
+              color: "#DF8704",
+            },
+            {
+              title: "Open House",
+              date: `${tahun}-0${bulan}-12`,
+              end: `${tahun}-0${bulan}-15`,
+              color: "#04DF76",
+            },
+          ]}
         />
-        <div sx={{fontFamily: "Poppins"}} className="custom-header-right">Tabel Kegiatan</div>
+        <div sx={{ fontFamily: "Poppins" }} className="custom-header-right">
+          Tabel Kegiatan
+        </div>
       </div>
     </>
   );

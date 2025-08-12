@@ -31,9 +31,10 @@ function App() {
         <Routes>
           <Route
             path="/"
-            element={
-              isLoggedIn ? <Index /> : <Navigate to="/login" replace={true} />
-            }
+            // element={
+            //   isLoggedIn ? <Index /> : <Navigate to="/login" replace={true} />
+            // }
+            element={<Index />}
           >
             <Route index element={<Dashboard />} />
             <Route path="/slider" element={<Slider />} />

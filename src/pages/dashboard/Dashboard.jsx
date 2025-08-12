@@ -49,17 +49,17 @@ const Dashboard = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetchData(`/dashboard/member_chart`).then((res) => {
-      setDataKonsentrasi(res.data);
-      setWebsite(res.data.website_count);
-      setDesain(res.data.desain_count);
-      setMobile(res.data.mobile_count);
-      console.log("data konsentrasi", res.data);
-    });
-    fetchData(`/dashboard/upcoming_agenda`).then((res) => {
-      setDataAgenda(res.data);
-      console.log(res.data);
-    });
+    // fetchData(`/dashboard/member_chart`).then((res) => {
+    //   setDataKonsentrasi(res.data);
+    //   setWebsite(res.data.website_count);
+    //   setDesain(res.data.desain_count);
+    //   setMobile(res.data.mobile_count);
+    //   console.log("data konsentrasi", res.data);
+    // });
+    // fetchData(`/dashboard/upcoming_agenda`).then((res) => {
+    //   setDataAgenda(res.data);
+    //   console.log(res.data);
+    // });
   }, []);
   return (
     <Box sx={{ marginTop: "-23px" }}>
@@ -124,7 +124,7 @@ const Dashboard = () => {
 
       <Box sx={{ mt: 3, display: "flex" }}>
         <Grid gap={2} sx={{ width: 350 }}>
-          <Card sx={{ borderRadius: "20px", height: 200 }}>
+          <Card sx={{ borderRadius: "20px", height: 210 }}>
             <Konsentrasi
               // series={[desain, website, mobile]}
               series={[19, 14, 17]}
@@ -136,7 +136,7 @@ const Dashboard = () => {
               ]}
             />
           </Card>
-          <Card sx={{ mt: 2, borderRadius: "20px" }}>
+          <Card sx={{ mt: 2, borderRadius: "20px", }}>
             <Kegiatan
               series={[
                 {
@@ -144,23 +144,31 @@ const Dashboard = () => {
                   data: [
                     {
                       x: 1996,
-                      y: 8,
+                      y: 20,
                     },
                     {
                       x: 1997,
-                      y: 9,
+                      y: 15,
                     },
                     {
                       x: 1998,
-                      y: 8,
+                      y: 20,
                     },
                     {
                       x: 1999,
-                      y: 9,
+                      y: 14,
                     },
                     {
                       x: 2000,
-                      y: 8,
+                      y: 20,
+                    },
+                    {
+                      x: 2001,
+                      y: 15,
+                    },
+                    {
+                      x: 2002,
+                      y: 20,
                     },
                   ],
                 },
@@ -173,7 +181,7 @@ const Dashboard = () => {
             <Kalender />
           </Card>
           <Card sx={{ borderRadius: "20px", mt: 2 }}>
-            <Agenda series={seriesAgenda} />
+            <Agenda  />
           </Card>
         </Grid>
       </Box>

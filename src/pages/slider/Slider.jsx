@@ -52,6 +52,7 @@ import "@glidejs/glide/dist/css/glide.core.min.css";
 import "@glidejs/glide/dist/css/glide.theme.min.css";
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 import { fetchData, postData, putData, deleteData } from "../../service/api";
+import { SliderData } from "../../values/Constant";
 
 const useStyles = makeStyles({
   blueRow: {
@@ -63,10 +64,10 @@ const useStyles = makeStyles({
 
 const Slider = () => {
   const [data, setData] = useState();
-  const [itemsPerPage, setItemsPerPage] = useState(0);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
-  const [totalItems, setTotalItems] = useState(0);
+  const [totalItems, setTotalItems] = useState(10);
   const [menu, setMenu] = useState(1);
   const [openDrawer, setOpenDrawer] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
@@ -83,10 +84,12 @@ const Slider = () => {
 
   // detail
   const handleDetailClick = (id) => {
-    fetchData(`/slider/${id}`).then((res) => {
-      setSelectedDetail(res.data);
-      console.log(selectedDetail);
-    });
+    // fetchData(`/slider/${id}`).then((res) => {
+    //   setSelectedDetail(res.data);
+    //   console.log(selectedDetail);
+    // });
+
+    setSelectedDetail(id)
   };
 
   const handleCloseDetail = () => {
@@ -121,10 +124,15 @@ const Slider = () => {
   // import csv end
 
   // export excel
-  const exportData = initialData.map((item) => ({
-    image: item.image,
+  // const exportData = initialData.map((item) => ({
+  //   image: item.image,
+  //   album: item.album,
+  //   description: item.description,
+  // }));
+  const exportData = SliderData.map((item) => ({
+    image: item.gambar,
     album: item.album,
-    description: item.description,
+    description: item.deskripsi,
   }));
 
   const exportToExcel = () => {
@@ -135,16 +143,31 @@ const Slider = () => {
   };
   // export excel end
 
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const filteredData = SliderData.filter(item =>
+    item.album.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    item.deskripsi.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   // edit
   const handleEdit = (id) => {
     setEditingId(id);
-    const selectedItem = data.find((item) => item.id === id);
-    setNewImage(selectedItem.image);
-    setNewTitle(selectedItem.title);
-    setNewDescription(selectedItem.description);
+    const selectedItem = SliderData.find((item) => item.id === id);
+    setNewImage(selectedItem.gambar);
+    setNewTitle(selectedItem.album);
+    setNewDescription(selectedItem.deskripsi);
     setIsActive(selectedItem.is_active);
     setOpenDrawer(true);
     setEditMode(true);
+    // setEditingId(id);
+    // const selectedItem = data.find((item) => item.id === id);
+    // setNewImage(selectedItem.image);
+    // setNewTitle(selectedItem.title);
+    // setNewDescription(selectedItem.description);
+    // setIsActive(selectedItem.is_active);
+    // setOpenDrawer(true);
+    // setEditMode(true);
   };
   // delete
   const handleDelete = (id) => {
@@ -273,42 +296,42 @@ const Slider = () => {
 
   // glide js
 
-  useEffect(() => {
-    fetchData(`/slider?page=${page}&per_page=${itemsPerPage}`).then((res) => {
-      setData(res.data);
-      setTotalPages(res.meta.total_page);
-      setTotalItems(res.meta.total_item);
-      setItemsPerPage(res.meta.perpage);
-      console.log(res.data);
-    });
+  // useEffect(() => {
+  //   fetchData(`/slider?page=${page}&per_page=${itemsPerPage}`).then((res) => {
+  //     setData(res.data);
+  //     setTotalPages(res.meta.total_page);
+  //     setTotalItems(res.meta.total_item);
+  //     setItemsPerPage(res.meta.perpage);
+  //     console.log(res.data);
+  //   });
 
-    // if (selectedDetail) {
-    //   const totalImages = selectedDetail.image.length;
-    //   const perView = totalImages <= 5 ? totalImages : 5;
-    //   const glide = new Glide(`#glide-${selectedDetail.id}`, {
-    //     type: "carousel",
-    //     startAt: 0,
-    //     perView: perView,
-    //     rewind: true,
-    //     animationTimingFunc: "linear",
-    //     animationDuration: 800,
-    //     breakpoints: {
-    //       800: {
-    //         perView: 2,
-    //       },
-    //       480: {
-    //         perView: 1,
-    //       },
-    //     },
-    //   });
+  //   // if (selectedDetail) {
+  //   //   const totalImages = selectedDetail.image.length;
+  //   //   const perView = totalImages <= 5 ? totalImages : 5;
+  //   //   const glide = new Glide(`#glide-${selectedDetail.id}`, {
+  //   //     type: "carousel",
+  //   //     startAt: 0,
+  //   //     perView: perView,
+  //   //     rewind: true,
+  //   //     animationTimingFunc: "linear",
+  //   //     animationDuration: 800,
+  //   //     breakpoints: {
+  //   //       800: {
+  //   //         perView: 2,
+  //   //       },
+  //   //       480: {
+  //   //         perView: 1,
+  //   //       },
+  //   //     },
+  //   //   });
 
-    //   glide.mount();
+  //   //   glide.mount();
 
-    //   return () => {
-    //     glide.destroy();
-    //   };
-    // }
-  }, [selectedDetail, page, itemsPerPage, totalItems, totalPages]);
+  //   //   return () => {
+  //   //     glide.destroy();
+  //   //   };
+  //   // }
+  // }, [selectedDetail, page, itemsPerPage, totalItems, totalPages]);
 
   return (
     <Box sx={{ fontFamily: "Poppins", mt: "-23px" }}>
@@ -322,9 +345,10 @@ const Slider = () => {
       /> */}
       {/* end import csv */}
       <Header
+      onChange={(e) => setSearchTerm(e.target.value)}
         title={"Slider"}
         onClickTambahData={toggleDrawer(true)}
-        onClickCsv={() => csvFileRef.current.click()}
+        // onClickCsv={() => csvFileRef.current.click()}
         onClickCetak={handlePrint}
         onClickExcel={exportToExcel}
       />
@@ -415,8 +439,9 @@ const Slider = () => {
                 </div>
               </div> */}
               <img
-                src={selectedDetail.image}
-                alt={selectedDetail.title}
+                src={SliderData[selectedDetail - 1].gambar}
+                // src={selectedDetail.image}
+                alt={SliderData[selectedDetail - 1].album}
                 style={{
                   width: "200px",
                   height: "180px",
@@ -454,10 +479,11 @@ const Slider = () => {
                     :
                   </Typography>
                   <Typography sx={{ fontFamily: "Poppins", fontSize: "16px" }}>
-                    {selectedDetail.title}
+                    {/* {selectedDetail.title} */}
+                    {SliderData[selectedDetail - 1].album}
                   </Typography>
                 </Stack>
-                <Stack
+                {/* <Stack
                   sx={{
                     display: "flex",
                     flexDirection: "row",
@@ -485,7 +511,7 @@ const Slider = () => {
                   <Typography sx={{ fontFamily: "Poppins", fontSize: "16px" }}>
                     {selectedDetail.is_active}
                   </Typography>
-                </Stack>
+                </Stack> */}
                 <Stack
                   sx={{
                     display: "flex",
@@ -514,7 +540,7 @@ const Slider = () => {
                   </Typography>
                 </Stack>
                 <Typography sx={{ fontFamily: "Poppins", fontSize: "16px" }}>
-                  {selectedDetail.description}
+                  {SliderData[selectedDetail - 1].deskripsi}
                 </Typography>
               </Card>
             </Box>
@@ -604,23 +630,23 @@ const Slider = () => {
                     </TableRow>
                   </TableHead>
                   <TableBody sx={{ fontFamily: "Poppins" }}>
-                    {data &&
-                      data.map((row) => (
+                    {SliderData &&
+                      SliderData.map((row) => (
                         <TableRow key={row.id} className={classes.blueRow}>
                           <TableCell>
                             <img
                               style={{ objectFit: "cover" }}
-                              src={row.image}
-                              alt={`Gambar ${row.title}`}
+                              src={row.gambar}
+                              alt={`Gambar ${row.album}`}
                               width="99"
                               height="111"
                             />
                           </TableCell>
                           <TableCell sx={{ fontFamily: "Poppins" }}>
-                            {row.title}
+                            {row.album}
                           </TableCell>
                           <TableCell sx={{ fontFamily: "Poppins" }}>
-                            {row.description}
+                            {row.deskripsi}
                           </TableCell>
                           <TableCell>
                             <Stack

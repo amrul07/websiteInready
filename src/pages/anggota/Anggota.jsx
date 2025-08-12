@@ -51,6 +51,7 @@ import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import Image from "../../assets/image.svg";
 import { fetchData, postData, putData, deleteData } from "../../service/api";
+import { AnggotaData } from "../../values/Constant";
 const useStyles = makeStyles({
   blueRow: {
     "&:nth-of-type(odd)": {
@@ -62,10 +63,10 @@ const Anggota = () => {
   const [data, setData] = useState([]);
   const [dataMajor, setDataMajor] = useState([]);
   const [dataConcentration, setDataConcentration] = useState([]);
-  const [itemsPerPage, setItemsPerPage] = useState(0);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
-  const [totalItems, setTotalItems] = useState(0);
+  const [totalItems, setTotalItems] = useState(10);
   const [menu, setMenu] = useState(1);
   const [openDrawer, setOpenDrawer] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
@@ -93,9 +94,11 @@ const Anggota = () => {
 
   // detail
   const handleDetailClick = (id) => {
-    fetchData(`/member/${id}`).then((res) => {
-      setSelectedDetail(res.data);
-    });
+    // fetchData(`/member/${id}`).then((res) => {
+    //   setSelectedDetail(res.data);
+    // });
+
+    setSelectedDetail(id)
   };
   // close detail
   const handleCloseDetail = () => {
@@ -130,10 +133,10 @@ const Anggota = () => {
   // import csv end
 
   // export excel
-  const exportData = dataAnggota.map((item) => ({
-    image: item.image,
-    album: item.album,
-    description: item.description,
+  const exportData = AnggotaData.map((item) => ({
+    image: item.foto,
+    album: item.nama,
+    description: item.jabatan,
   }));
 
   const exportToExcel = () => {
@@ -315,24 +318,24 @@ const Anggota = () => {
     document.body.innerHTML = originalContents;
   };
 
-  useEffect(() => {
-    fetchData(`/member?page=${page}&per_page=${itemsPerPage}`).then((res) => {
-      setData(res.data);
-      setTotalPages(res.meta.total_page);
-      setTotalItems(res.meta.total_item);
-      setItemsPerPage(res.meta.perpage);
-      console.log(res.data);
-    });
-    fetchData(`/major?page=${page}&per_page=${itemsPerPage}`).then((res) => {
-      setDataMajor(res.data);
-    });
-    fetchData(`/concentration?page=${page}&per_page=${itemsPerPage}`).then(
-      (res) => {
-        setDataConcentration(res.data);
-        // console.log(dataConcentration)
-      }
-    );
-  }, [page, itemsPerPage, totalItems, totalPages]);
+  // useEffect(() => {
+  //   fetchData(`/member?page=${page}&per_page=${itemsPerPage}`).then((res) => {
+  //     setData(res.data);
+  //     setTotalPages(res.meta.total_page);
+  //     setTotalItems(res.meta.total_item);
+  //     setItemsPerPage(res.meta.perpage);
+  //     console.log(res.data);
+  //   });
+  //   fetchData(`/major?page=${page}&per_page=${itemsPerPage}`).then((res) => {
+  //     setDataMajor(res.data);
+  //   });
+  //   fetchData(`/concentration?page=${page}&per_page=${itemsPerPage}`).then(
+  //     (res) => {
+  //       setDataConcentration(res.data);
+  //       // console.log(dataConcentration)
+  //     }
+  //   );
+  // }, [page, itemsPerPage, totalItems, totalPages]);
 
   return (
     <Box sx={{ fontFamily: "Poppins", mt: "-23px" }}>
@@ -395,8 +398,8 @@ const Anggota = () => {
               <Grid container spacing={2}>
                 <Grid item xs={4}>
                   <img
-                    src={selectedDetail.photo}
-                    alt={selectedDetail.name}
+                    src={AnggotaData[selectedDetail - 1].foto}
+                    alt={AnggotaData[selectedDetail - 1].nama}
                     style={{
                       width: "80%",
                       height: "70%",
@@ -426,7 +429,7 @@ const Anggota = () => {
                         <Typography
                           sx={{ fontFamily: "Poppins", fontSize: "16px" }}
                         >
-                          : {selectedDetail.name}
+                          : {AnggotaData[selectedDetail - 1].nama}
                         </Typography>
                       </Grid>
                     </Grid>
@@ -445,7 +448,7 @@ const Anggota = () => {
                         <Typography
                           sx={{ fontFamily: "Poppins", fontSize: "16px" }}
                         >
-                          : {selectedDetail.nri}
+                          : {AnggotaData[selectedDetail - 1].nomor_registrasi}
                         </Typography>
                       </Grid>
                     </Grid>
@@ -464,7 +467,7 @@ const Anggota = () => {
                         <Typography
                           sx={{ fontFamily: "Poppins", fontSize: "16px" }}
                         >
-                          : {selectedDetail.address}
+                          : {AnggotaData[selectedDetail - 1].alamat}
                         </Typography>
                       </Grid>
                     </Grid>
@@ -483,7 +486,7 @@ const Anggota = () => {
                         <Typography
                           sx={{ fontFamily: "Poppins", fontSize: "16px" }}
                         >
-                          : {selectedDetail.pob},{selectedDetail.dob}
+                          : {AnggotaData[selectedDetail - 1].tempat_tanggal_lahir}
                         </Typography>
                       </Grid>
                     </Grid>
@@ -502,7 +505,7 @@ const Anggota = () => {
                         <Typography
                           sx={{ fontFamily: "Poppins", fontSize: "16px" }}
                         >
-                          : {selectedDetail.gender}
+                          : {AnggotaData[selectedDetail - 1].jenis_kelamin}
                         </Typography>
                       </Grid>
                     </Grid>
@@ -521,7 +524,7 @@ const Anggota = () => {
                         <Typography
                           sx={{ fontFamily: "Poppins", fontSize: "16px" }}
                         >
-                          : {selectedDetail.generation}
+                          : {AnggotaData[selectedDetail - 1].angkatan}
                         </Typography>
                       </Grid>
                     </Grid>
@@ -540,7 +543,7 @@ const Anggota = () => {
                         <Typography
                           sx={{ fontFamily: "Poppins", fontSize: "16px" }}
                         >
-                          : {selectedDetail.major}
+                          : {AnggotaData[selectedDetail - 1].jurusan}
                         </Typography>
                       </Grid>
                     </Grid>
@@ -559,7 +562,7 @@ const Anggota = () => {
                         <Typography
                           sx={{ fontFamily: "Poppins", fontSize: "16px" }}
                         >
-                          : {selectedDetail.concentration}
+                          : {AnggotaData[selectedDetail - 1].konsentrasi}
                         </Typography>
                       </Grid>
                     </Grid>
@@ -578,7 +581,7 @@ const Anggota = () => {
                         <Typography
                           sx={{ fontFamily: "Poppins", fontSize: "16px" }}
                         >
-                          : {selectedDetail.position}
+                          : {AnggotaData[selectedDetail - 1].jabatan}
                         </Typography>
                       </Grid>
                     </Grid>
@@ -597,7 +600,7 @@ const Anggota = () => {
                         <Typography
                           sx={{ fontFamily: "Poppins", fontSize: "16px" }}
                         >
-                          : {selectedDetail.phone}
+                          : {AnggotaData[selectedDetail - 1].no_wa}
                         </Typography>
                       </Grid>
                     </Grid>
@@ -616,7 +619,7 @@ const Anggota = () => {
                         <Typography
                           sx={{ fontFamily: "Poppins", fontSize: "16px" }}
                         >
-                          : {selectedDetail.email}
+                          : email@gmail.com
                         </Typography>
                       </Grid>
                     </Grid>
@@ -635,7 +638,7 @@ const Anggota = () => {
                         <Typography
                           sx={{ fontFamily: "Poppins", fontSize: "16px" }}
                         >
-                          : {selectedDetail.instagram}
+                          : {AnggotaData[selectedDetail - 1].instagram}
                         </Typography>
                       </Grid>
                     </Grid>
@@ -654,7 +657,7 @@ const Anggota = () => {
                         <Typography
                           sx={{ fontFamily: "Poppins", fontSize: "16px" }}
                         >
-                          : {selectedDetail.facebook}
+                          : {AnggotaData[selectedDetail - 1].fb}
                         </Typography>
                       </Grid>
                     </Grid>
@@ -746,22 +749,22 @@ const Anggota = () => {
                     </TableRow>
                   </TableHead>
                   <TableBody sx={{ fontFamily: "Poppins" }}>
-                    {data &&
-                      data.map((row) => (
+                    {AnggotaData &&
+                      AnggotaData.map((row) => (
                         <TableRow key={row.id} className={classes.blueRow}>
                           <TableCell sx={{ fontFamily: "Poppins" }}>
-                            {row.nri}
+                            {row.nomor_registrasi}
                           </TableCell>
                           <TableCell sx={{ fontFamily: "Poppins" }}>
-                            {row.name}
-                          </TableCell>
-
-                          <TableCell sx={{ fontFamily: "Poppins" }}>
-                            {row.address}
+                            {row.nama}
                           </TableCell>
 
                           <TableCell sx={{ fontFamily: "Poppins" }}>
-                            {row.phone}
+                            {row.alamat}
+                          </TableCell>
+
+                          <TableCell sx={{ fontFamily: "Poppins" }}>
+                            {row.no_wa}
                           </TableCell>
                           <TableCell>
                             <Stack
@@ -784,7 +787,7 @@ const Anggota = () => {
                               <ButtonYellow
                                 sx={{ color: "white" }}
                                 variant="Contained"
-                                onClick={() => handleEdit(row.id)}
+                                // onClick={() => handleEdit(row.id)}
                               >
                                 <CreateIcon />
                               </ButtonYellow>

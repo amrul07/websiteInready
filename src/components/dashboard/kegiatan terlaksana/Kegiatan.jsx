@@ -76,6 +76,7 @@ const Kegiatan = (props) => {
         series={props.series}
         type="area"
         height={330}
+        // width={200}
       />
     </div>
   );

@@ -44,6 +44,7 @@ import VisibilityIcon from "@mui/icons-material/Visibility";
 import { fetchData, postData, putData, deleteData } from "../../service/api";
 import { useEffect } from "react";
 import { useParams } from "react-router-dom";
+import { AnggotaData } from "../../values/Constant";
 
 const useStyles = makeStyles({
   blueRow: {
@@ -58,10 +59,10 @@ const Bpo = () => {
   const [dataPresidium, setDataPresidium] = useState([]);
   const [dataDivision, setDataDivision] = useState([]);
   const [dataAnggota, setDataAnggota] = useState([]);
-  const [itemsPerPage, setItemsPerPage] = useState(0);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
-  const [totalItems, setTotalItems] = useState(0);
+  const [totalItems, setTotalItems] = useState(10);
   const [openDrawer, setOpenDrawer] = useState(false);
   const [newName, setNewName] = useState("");
   const [newIsDivisionHead, setNewIsDivisionHead] = useState("");
@@ -79,9 +80,11 @@ const Bpo = () => {
 
   // detail
   const handleDetailClick = (id) => {
-    fetchData(`/bpo/${id}`).then((res) => {
-      setSelectedDetail(res.data);
-    });
+    // fetchData(`/bpo/${id}`).then((res) => {
+    //   setSelectedDetail(res.data);
+    // });
+
+    setSelectedDetail(id)
   };
 
   const handleCloseDetail = () => {
@@ -143,15 +146,25 @@ const Bpo = () => {
   // edit
   const handleEdit = (id) => {
     setEditingId(id);
-    const selectedItem = data.find((item) => item.id === id);
-    setNewName(selectedItem.name);
-    setNewIsDivisionHead(selectedItem.is_division_head);
-    setNewPresidium(selectedItem.presidium);
-    setNewDivision(selectedItem.division);
+    const selectedItem = AnggotaData.find((item) => item.id === id);
+    setNewName(selectedItem.nama);
+    setNewIsDivisionHead(selectedItem.jabatan);
+    setNewPresidium(selectedItem.jabatan);
+    setNewDivision(selectedItem.konsentrasi);
     setNewPresidiumId(selectedItem.presidium_id);
     setNewDivisionId(selectedItem.division_id);
     setOpenDrawer(true);
     setEditMode(true);
+    // setEditingId(id);
+    // const selectedItem = data.find((item) => item.id === id);
+    // setNewName(selectedItem.name);
+    // setNewIsDivisionHead(selectedItem.is_division_head);
+    // setNewPresidium(selectedItem.presidium);
+    // setNewDivision(selectedItem.division);
+    // setNewPresidiumId(selectedItem.presidium_id);
+    // setNewDivisionId(selectedItem.division_id);
+    // setOpenDrawer(true);
+    // setEditMode(true);
   };
 
   // // tombol save atau simpan data
@@ -235,28 +248,28 @@ const Bpo = () => {
     document.body.innerHTML = originalContents;
   };
 
-  useEffect(() => {
-    fetchData(`/bpo?page=${page}&per_page=${itemsPerPage}`).then((res) => {
-      setData(res.data);
-      setTotalPages(res.meta.total_page);
-      setTotalItems(res.meta.total_item);
-      setItemsPerPage(res.meta.perpage);
-      console.log(res.data);
-    });
+  // useEffect(() => {
+  //   fetchData(`/bpo?page=${page}&per_page=${itemsPerPage}`).then((res) => {
+  //     setData(res.data);
+  //     setTotalPages(res.meta.total_page);
+  //     setTotalItems(res.meta.total_item);
+  //     setItemsPerPage(res.meta.perpage);
+  //     console.log(res.data);
+  //   });
 
-    fetchData(`/presidium`).then((res) => {
-      setDataPresidium(res.data);
-      console.log(res.data);
-    });
-    fetchData(`/division`).then((res) => {
-      setDataDivision(res.data);
-      console.log(res.data);
-    });
-    fetchData(`/member`).then((res) => {
-      setDataAnggota(res.data);
-      console.log(res.data);
-    });
-  }, [page, itemsPerPage, totalItems, totalPages]);
+  //   fetchData(`/presidium`).then((res) => {
+  //     setDataPresidium(res.data);
+  //     console.log(res.data);
+  //   });
+  //   fetchData(`/division`).then((res) => {
+  //     setDataDivision(res.data);
+  //     console.log(res.data);
+  //   });
+  //   fetchData(`/member`).then((res) => {
+  //     setDataAnggota(res.data);
+  //     console.log(res.data);
+  //   });
+  // }, [page, itemsPerPage, totalItems, totalPages]);
 
   return (
     <Box sx={{ fontFamily: "Poppins", mt: "-23px" }}>
@@ -335,7 +348,7 @@ const Bpo = () => {
                     <Typography
                       sx={{ fontFamily: "Poppins", fontSize: "16px" }}
                     >
-                      : {selectedDetail.name}
+                      : {AnggotaData[selectedDetail - 1].nama}
                     </Typography>
                   </Grid>
                 </Grid>
@@ -354,7 +367,7 @@ const Bpo = () => {
                     <Typography
                       sx={{ fontFamily: "Poppins", fontSize: "16px" }}
                     >
-                      : {selectedDetail.is_division_head}
+                      : {AnggotaData[selectedDetail - 1].jabatan}
                     </Typography>
                   </Grid>
                 </Grid>
@@ -373,7 +386,7 @@ const Bpo = () => {
                     <Typography
                       sx={{ fontFamily: "Poppins", fontSize: "16px" }}
                     >
-                      : {selectedDetail.presidium}
+                      : {AnggotaData[selectedDetail - 1].jabatan}
                     </Typography>
                   </Grid>
                 </Grid>
@@ -392,7 +405,7 @@ const Bpo = () => {
                     <Typography
                       sx={{ fontFamily: "Poppins", fontSize: "16px" }}
                     >
-                      : {selectedDetail.division}
+                      : {AnggotaData[selectedDetail - 1].konsentrasi}
                     </Typography>
                   </Grid>
                 </Grid>
@@ -484,17 +497,17 @@ const Bpo = () => {
                     </TableRow>
                   </TableHead>
                   <TableBody sx={{ fontFamily: "Poppins" }}>
-                    {data &&
-                      data.map((row) => (
+                    {AnggotaData &&
+                      AnggotaData.map((row) => (
                         <TableRow key={row.id} className={classes.blueRow}>
                           <TableCell sx={{ fontFamily: "Poppins" }}>
-                            {row.name}
+                            {row.nama}
                           </TableCell>
                           <TableCell sx={{ fontFamily: "Poppins" }}>
-                            {row.presidium}
+                            {row.jabatan}
                           </TableCell>
                           <TableCell sx={{ fontFamily: "Poppins" }}>
-                            {row.division}
+                            {row.konsentrasi}
                           </TableCell>
                           <TableCell>
                             <Stack

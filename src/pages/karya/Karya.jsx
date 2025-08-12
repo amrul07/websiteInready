@@ -46,6 +46,7 @@ import IconKegiatan from "../../assets/detailKegiatan.svg";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import { fetchData, postData, putData, deleteData } from "../../service/api";
+import { KaryaData, KegiatanData } from "../../values/Constant";
 
 const useStyles = makeStyles({
   blueRow: {
@@ -58,10 +59,10 @@ const useStyles = makeStyles({
 const Karya = () => {
   const [data, setData] = useState();
   const [dataMember, setDataMember] = useState([]);
-  const [itemsPerPage, setItemsPerPage] = useState(0);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
-  const [totalItems, setTotalItems] = useState(0);
+  const [totalItems, setTotalItems] = useState(10);
   const [openDrawer, setOpenDrawer] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
   const [newImage, setNewImage] = useState("");
@@ -90,9 +91,11 @@ const Karya = () => {
 
   // detail
   const handleDetailClick = (id) => {
-    fetchData(`/work/${id}`).then((res) => {
-      setSelectedDetail(res.data);
-    });
+    // fetchData(`/work/${id}`).then((res) => {
+    //   setSelectedDetail(res.data);
+    // });
+
+    setSelectedDetail(id);
   };
 
   const handleCloseDetail = () => {
@@ -144,16 +147,16 @@ const Karya = () => {
   // edit
   const handleEdit = (id) => {
     setEditingId(id);
-    const selectedItem = data.find((item) => item.id === id);
-    setNewImage(selectedItem.image);
-    setNewTitle(selectedItem.title);
-    setNewCreator(selectedItem.creator);
+    const selectedItem = KaryaData.find((item) => item.id === id);
+    setNewImage(selectedItem.gambar);
+    setNewTitle(selectedItem.judul);
+    setNewCreator(selectedItem.kreator);
     setNewLink(selectedItem.link);
-    setNewConcentration(selectedItem.concentration);
+    setNewConcentration(selectedItem.konsentrasi);
     // setInputValue(selectedItem.concentration)
-    setNewCreatedAt(selectedItem.created_at);
-    setNewUpdateAt(selectedItem.updated_at);
-    setNewDescription(selectedItem.description);
+    setNewCreatedAt(selectedItem.tanggal_post);
+    setNewUpdateAt(selectedItem.tanggal_update);
+    setNewDescription(selectedItem.deskripsi);
     setMemberId(selectedItem.member_id);
     setOpenDrawer(true);
     setEditMode(true);
@@ -310,22 +313,22 @@ const Karya = () => {
     document.body.innerHTML = originalContents;
   };
 
-  useEffect(() => {
-    fetchData(`/work?page=${page}&per_page=${itemsPerPage}`).then((res) => {
-      setData(res.data);
-      setTotalPages(res.meta.total_page);
-      setTotalItems(res.meta.total_item);
-      setItemsPerPage(res.meta.perpage);
-      console.log(res.data);
-    });
-    // data anggota
-    fetchData(`/member`).then((res) => {
-      setDataMember(res.data);
-      console.log(res.data);
-      // console.log(dataMember([1].id))
-      // console.log(dataMember[0].nri)
-    });
-  }, [page, itemsPerPage, totalItems, totalPages]);
+  // useEffect(() => {
+  //   fetchData(`/work?page=${page}&per_page=${itemsPerPage}`).then((res) => {
+  //     setData(res.data);
+  //     setTotalPages(res.meta.total_page);
+  //     setTotalItems(res.meta.total_item);
+  //     setItemsPerPage(res.meta.perpage);
+  //     console.log(res.data);
+  //   });
+  //   // data anggota
+  //   fetchData(`/member`).then((res) => {
+  //     setDataMember(res.data);
+  //     console.log(res.data);
+  //     // console.log(dataMember([1].id))
+  //     // console.log(dataMember[0].nri)
+  //   });
+  // }, [page, itemsPerPage, totalItems, totalPages]);
 
   return (
     <Box sx={{ fontFamily: "Poppins", mt: "-23px" }}>
@@ -388,8 +391,8 @@ const Karya = () => {
               <Grid container spacing={2}>
                 <Grid item xs={4}>
                   <img
-                    src={selectedDetail.image}
-                    alt={selectedDetail.title}
+                    src={KaryaData[selectedDetail - 1].gambar}
+                    alt={KaryaData[selectedDetail - 1].judul}
                     style={{
                       width: "80%",
                       height: "300px",
@@ -419,7 +422,7 @@ const Karya = () => {
                         <Typography
                           sx={{ fontFamily: "Poppins", fontSize: "16px" }}
                         >
-                          : {selectedDetail.title}
+                          : {KaryaData[selectedDetail - 1].judul}
                         </Typography>
                       </Grid>
                     </Grid>
@@ -438,7 +441,7 @@ const Karya = () => {
                         <Typography
                           sx={{ fontFamily: "Poppins", fontSize: "16px" }}
                         >
-                          : {selectedDetail.creator}
+                          : {KaryaData[selectedDetail - 1].kreator}
                         </Typography>
                       </Grid>
                     </Grid>
@@ -457,7 +460,7 @@ const Karya = () => {
                         <Typography
                           sx={{ fontFamily: "Poppins", fontSize: "16px" }}
                         >
-                          : {selectedDetail.concentration}
+                          : {KaryaData[selectedDetail - 1].konsentrasi}
                         </Typography>
                       </Grid>
                     </Grid>
@@ -476,7 +479,7 @@ const Karya = () => {
                         <Typography
                           sx={{ fontFamily: "Poppins", fontSize: "16px" }}
                         >
-                          : {selectedDetail.link}
+                          : {KaryaData[selectedDetail - 1].link}
                         </Typography>
                       </Grid>
                     </Grid>
@@ -495,7 +498,7 @@ const Karya = () => {
                         <Typography
                           sx={{ fontFamily: "Poppins", fontSize: "16px" }}
                         >
-                          : {selectedDetail.created_at}
+                          : {KaryaData[selectedDetail - 1].tanggal_post}
                         </Typography>
                       </Grid>
                     </Grid>
@@ -514,7 +517,7 @@ const Karya = () => {
                         <Typography
                           sx={{ fontFamily: "Poppins", fontSize: "16px" }}
                         >
-                          : {selectedDetail.updated_at}
+                          : {KaryaData[selectedDetail - 1].tanggal_update}
                         </Typography>
                       </Grid>
                     </Grid>
@@ -541,8 +544,11 @@ const Karya = () => {
                       sx={{ fontFamily: "Poppins", fontSize: "16px" }}
                     >
                       {showFullText
-                        ? selectedDetail.description
-                        : selectedDetail.description.slice(0, 450) + "..."}
+                        ? KaryaData[selectedDetail - 1].deskripsi
+                        : KaryaData[selectedDetail - 1].deskripsi.slice(
+                            0,
+                            450
+                          ) + "..."}
                       <Typography
                         sx={{
                           mt: 1,
@@ -647,14 +653,14 @@ const Karya = () => {
                     </TableRow>
                   </TableHead>
                   <TableBody sx={{ fontFamily: "Poppins" }}>
-                    {data &&
-                      data.map((row) => (
+                    {KaryaData &&
+                      KaryaData.map((row) => (
                         <TableRow key={row.id} className={classes.blueRow}>
                           <TableCell sx={{ fontFamily: "Poppins" }}>
-                            {row.title}
+                            {row.judul}
                           </TableCell>
                           <TableCell sx={{ fontFamily: "Poppins" }}>
-                            {row.creator}
+                            {row.kreator}
                           </TableCell>
                           <TableCell sx={{ fontFamily: "Poppins" }}>
                             {row.link}

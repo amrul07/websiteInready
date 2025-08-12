@@ -53,7 +53,12 @@ const Login = ({ setIsLoggedIn }) => {
     <Grid container sx={{ height: "100vh" }}>
       <Grid item xs={6}>
         <CardMedia
-          sx={{ height: "100vh", width: "111%", backgroundColor: "#FFC400",marginLeft: "-75px" }}
+          sx={{
+            height: "100vh",
+            width: "111%",
+            backgroundColor: "#FFC400",
+            marginLeft: "-75px",
+          }}
           image={Bg}
           alt={"bg"}
         />
@@ -90,9 +95,9 @@ const Login = ({ setIsLoggedIn }) => {
                 borderRadius: "7px",
                 mt: 1,
                 width: "50%",
-                alignSelf: "center"
+                alignSelf: "center",
               }}
-              placeholder="Masukkan Judul Agenda"
+              placeholder="Masukkan Email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             ></OutlinedInput>
@@ -104,9 +109,9 @@ const Login = ({ setIsLoggedIn }) => {
                 borderRadius: "7px",
                 mt: 1,
                 width: "50%",
-                alignSelf: "center"
+                alignSelf: "center",
               }}
-              placeholder="Masukkan Judul Agenda"
+              placeholder="Masukkan Password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             ></OutlinedInput>
@@ -138,7 +143,7 @@ const Login = ({ setIsLoggedIn }) => {
                 mt: 3,
                 py: 1,
                 borderRadius: "12px",
-                alignSelf: "center"
+                alignSelf: "center",
               }}
             >
               Login

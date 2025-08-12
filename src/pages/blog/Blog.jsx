@@ -43,6 +43,7 @@ import IconKegiatan from "../../assets/detailKegiatan.svg";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import { fetchData, postData, putData, deleteData } from "../../service/api";
+import { BlogData } from "../../values/Constant";
 
 const useStyles = makeStyles({
   blueRow: {
@@ -54,10 +55,10 @@ const useStyles = makeStyles({
 
 const Blog = () => {
   const [data, setData] = useState();
-  const [itemsPerPage, setItemsPerPage] = useState(0);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
   const [page, setPage] = useState(0);
-  const [totalPages, setTotalPages] = useState(0);
-  const [totalItems, setTotalItems] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(10);
   const [menu, setMenu] = useState(1);
   const [openDrawer, setOpenDrawer] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
@@ -83,10 +84,12 @@ const Blog = () => {
   };
 
   // detail
-  const handleDetailClick = (slug) => {
-    fetchData(`/article/${slug}`).then((res) => {
-      setSelectedDetail(res.data);
-    });
+  const handleDetailClick = (id) => {
+    // fetchData(`/article/${slug}`).then((res) => {
+    //   setSelectedDetail(res.data);
+    // });
+
+    setSelectedDetail(id)
   };
 
   const handleCloseDetail = () => {
@@ -137,14 +140,14 @@ const Blog = () => {
   // edit
   const handleEdit = (slug) => {
     setEditingSlug(slug);
-    const selectedItem = data.find((item) => item.slug === slug);
-    setNewImage(selectedItem?.image);
-    setNewTitle(selectedItem?.title);
-    setNewCategory(selectedItem?.category);
-    setNewWriter(selectedItem?.writer);
-    setNewCreatedAt(selectedItem?.created_at);
-    setNewUpdateAt(selectedItem?.updated_at);
-    setNewContent(selectedItem?.content);
+    const selectedItem = BlogData.find((item) => item.id === slug);
+    setNewImage(selectedItem?.gambar);
+    setNewTitle(selectedItem?.judul);
+    setNewCategory(selectedItem?.kategori);
+    setNewWriter(selectedItem?.penulis);
+    setNewCreatedAt(selectedItem?.tanggal_post);
+    setNewUpdateAt(selectedItem?.tanggal_update);
+    setNewContent(selectedItem?.isi_berita);
     setOpenDrawer(true);
     setEditMode(true);
   };
@@ -293,15 +296,15 @@ const Blog = () => {
     document.body.innerHTML = originalContents;
   };
 
-  useEffect(() => {
-    fetchData(`/article?page=${page}&per_page=${itemsPerPage}`).then((res) => {
-      setData(res.data);
-      setTotalPages(res.meta.total_page);
-      setTotalItems(res.meta.total_item);
-      setItemsPerPage(res.meta.perpage);
-      console.log(res.data);
-    });
-  }, [page, itemsPerPage, totalItems, totalPages]);
+  // useEffect(() => {
+  //   fetchData(`/article?page=${page}&per_page=${itemsPerPage}`).then((res) => {
+  //     setData(res.data);
+  //     setTotalPages(res.meta.total_page);
+  //     setTotalItems(res.meta.total_item);
+  //     setItemsPerPage(res.meta.perpage);
+  //     console.log(res.data);
+  //   });
+  // }, [page, itemsPerPage, totalItems, totalPages]);
 
   return (
     <Box sx={{ fontFamily: "Poppins", mt: "-23px" }}>
@@ -364,8 +367,8 @@ const Blog = () => {
               <Grid container spacing={2}>
                 <Grid item xs={4}>
                   <img
-                    src={selectedDetail?.image}
-                    alt={selectedDetail?.title}
+                    src={BlogData[selectedDetail - 1]?.gambar}
+                    alt={BlogData[selectedDetail - 1]?.judul}
                     style={{
                       width: "80%",
                       height: "300px",
@@ -395,7 +398,7 @@ const Blog = () => {
                         <Typography
                           sx={{ fontFamily: "Poppins", fontSize: "16px" }}
                         >
-                          : {selectedDetail?.title}
+                          : {BlogData[selectedDetail - 1]?.judul}
                         </Typography>
                       </Grid>
                     </Grid>
@@ -414,7 +417,7 @@ const Blog = () => {
                         <Typography
                           sx={{ fontFamily: "Poppins", fontSize: "16px" }}
                         >
-                          : {selectedDetail?.category}
+                          : {BlogData[selectedDetail - 1]?.kategori}
                         </Typography>
                       </Grid>
                     </Grid>
@@ -433,7 +436,7 @@ const Blog = () => {
                         <Typography
                           sx={{ fontFamily: "Poppins", fontSize: "16px" }}
                         >
-                          : {selectedDetail?.writer}
+                          : {BlogData[selectedDetail - 1]?.penulis}
                         </Typography>
                       </Grid>
                     </Grid>
@@ -452,7 +455,7 @@ const Blog = () => {
                         <Typography
                           sx={{ fontFamily: "Poppins", fontSize: "16px" }}
                         >
-                          : {selectedDetail?.created_at}
+                          : {BlogData[selectedDetail - 1]?.tanggal_post}
                         </Typography>
                       </Grid>
                     </Grid>
@@ -471,7 +474,7 @@ const Blog = () => {
                         <Typography
                           sx={{ fontFamily: "Poppins", fontSize: "16px" }}
                         >
-                          : {selectedDetail?.updated_at}
+                          : {BlogData[selectedDetail - 1]?.tanggal_update}
                         </Typography>
                       </Grid>
                     </Grid>
@@ -498,8 +501,8 @@ const Blog = () => {
                       sx={{ fontFamily: "Poppins", fontSize: "16px" }}
                     >
                       {showFullText
-                        ? selectedDetail?.content
-                        : selectedDetail?.content.slice(0, 450) + "..."}
+                        ? BlogData[selectedDetail - 1]?.isi_berita
+                        : BlogData[selectedDetail - 1]?.isi_berita.slice(0, 450) + "..."}
                       <Typography
                         sx={{
                           mt: 1,
@@ -607,20 +610,20 @@ const Blog = () => {
                     </TableRow>
                   </TableHead>
                   <TableBody sx={{ fontFamily: "Poppins" }}>
-                    {data &&
-                      data.map((row) => (
-                        <TableRow key={row.slug} className={classes.blueRow}>
+                    {BlogData &&
+                      BlogData.map((row) => (
+                        <TableRow key={row.id} className={classes.blueRow}>
                           <TableCell sx={{ fontFamily: "Poppins" }}>
-                            {row?.title}
+                            {row?.judul}
                           </TableCell>
                           <TableCell sx={{ fontFamily: "Poppins" }}>
-                            {row?.category}
+                            {row?.kategori}
                           </TableCell>
                           <TableCell sx={{ fontFamily: "Poppins" }}>
-                            {row?.writer}
+                            {row?.penulis}
                           </TableCell>
                           <TableCell sx={{ fontFamily: "Poppins" }}>
-                            {row?.created_at}
+                            {row?.tanggal_post}
                           </TableCell>
                           <TableCell>
                             <Stack
@@ -636,14 +639,14 @@ const Blog = () => {
                                 variant="Contained"
                                 sx={{ color: "white" }}
                                 style={{ width: "-10px" }}
-                                onClick={() => handleDetailClick(row?.slug)}
+                                onClick={() => handleDetailClick(row?.id)}
                               >
                                 <VisibilityIcon />
                               </ButtonGreen>
                               <ButtonYellow
                                 sx={{ color: "white" }}
                                 variant="Contained"
-                                onClick={() => handleEdit(row?.slug)}
+                                onClick={() => handleEdit(row?.id)}
                               >
                                 <CreateIcon />
                               </ButtonYellow>
@@ -652,7 +655,7 @@ const Blog = () => {
                                 sx={{ fontSize: "20px", color: "#FF2E00" }}
                                 variant="Contained"
                                 size="small"
-                                onClick={() => handleDelete(row?.slug)}
+                                onClick={() => handleDelete(row?.id)}
                               >
                                 <RiDeleteBin5Fill
                                   sx={{ color: "#FF2E00", fontSize: "20px" }}

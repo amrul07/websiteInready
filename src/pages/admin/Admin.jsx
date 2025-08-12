@@ -44,6 +44,7 @@ import VisibilityIcon from "@mui/icons-material/Visibility";
 import { fetchData, postData, putData, deleteData } from "../../service/api";
 import { useEffect } from "react";
 import { useParams } from "react-router-dom";
+import { AdminData } from "../../values/Constant";
 
 const useStyles = makeStyles({
   blueRow: {
@@ -54,10 +55,10 @@ const useStyles = makeStyles({
 });
 const Admin = () => {
   const [data, setData] = useState();
-  const [itemsPerPage, setItemsPerPage] = useState(0);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
-  const [totalItems, setTotalItems] = useState(0);
+  const [totalItems, setTotalItems] = useState(10);
   const [openDrawer, setOpenDrawer] = useState(false);
   const [newName, setNewName] = useState("");
   const [newUserName, setNewUserName] = useState("");
@@ -78,9 +79,11 @@ const Admin = () => {
 
   // detail
   const handleDetailClick = (id) => {
-    fetchData(`/user/${id}`).then((res) => {
-      setSelectedDetail(res.data);
-    });
+    // fetchData(`/user/${id}`).then((res) => {
+    //   setSelectedDetail(res.data);
+    // });
+
+    setSelectedDetail(id)
   };
 
   const handleCloseDetail = () => {
@@ -142,12 +145,12 @@ const Admin = () => {
   // edit
   const handleEdit = (id) => {
     setEditingId(id);
-    const selectedItem = data.find((item) => item.id === id);
-    setNewName(selectedItem.name);
+    const selectedItem = AdminData.find((item) => item.id === id);
+    setNewName(selectedItem.nama);
     setNewUserName(selectedItem.username);
     setNewLevel(selectedItem.level);
-    setNewCreatedAt(selectedItem.created_at);
-    setNewUpdateAt(selectedItem.updated_at);
+    setNewCreatedAt(selectedItem.tanggal_post);
+    setNewUpdateAt(selectedItem.tanggal_update);
     setOpenDrawer(true);
     setEditMode(true);
   };
@@ -250,20 +253,20 @@ const Admin = () => {
     document.body.innerHTML = originalContents;
   };
 
-  useEffect(() => {
-    fetchData(`/user?page=${page}&per_page=${itemsPerPage}`).then((res) => {
-      setData(res.data);
-      setTotalPages(res.meta.total_page);
-      setTotalItems(res.meta.total_item);
-      setItemsPerPage(res.meta.perpage);
-      console.log(res.data);
-    });
+  // useEffect(() => {
+  //   fetchData(`/user?page=${page}&per_page=${itemsPerPage}`).then((res) => {
+  //     setData(res.data);
+  //     setTotalPages(res.meta.total_page);
+  //     setTotalItems(res.meta.total_item);
+  //     setItemsPerPage(res.meta.perpage);
+  //     console.log(res.data);
+  //   });
 
-    fetchData("/member/all").then((res) => {
-      console.log(res.data);
-      setMemberData(res.data);
-    });
-  }, [page, itemsPerPage, totalItems, totalPages]);
+  //   fetchData("/member/all").then((res) => {
+  //     console.log(res.data);
+  //     setMemberData(res.data);
+  //   });
+  // }, [page, itemsPerPage, totalItems, totalPages]);
 
   return (
     <Box sx={{ fontFamily: "Poppins", mt: "-23px" }}>
@@ -342,7 +345,7 @@ const Admin = () => {
                     <Typography
                       sx={{ fontFamily: "Poppins", fontSize: "16px" }}
                     >
-                      : {selectedDetail.name}
+                      : {AdminData[selectedDetail - 1].nama}
                     </Typography>
                   </Grid>
                 </Grid>
@@ -361,7 +364,7 @@ const Admin = () => {
                     <Typography
                       sx={{ fontFamily: "Poppins", fontSize: "16px" }}
                     >
-                      : {selectedDetail.username}
+                      : {AdminData[selectedDetail - 1].username}
                     </Typography>
                   </Grid>
                 </Grid>
@@ -380,7 +383,7 @@ const Admin = () => {
                     <Typography
                       sx={{ fontFamily: "Poppins", fontSize: "16px" }}
                     >
-                      : {selectedDetail.level}
+                      : {AdminData[selectedDetail - 1].level}
                     </Typography>
                   </Grid>
                 </Grid>
@@ -399,7 +402,7 @@ const Admin = () => {
                     <Typography
                       sx={{ fontFamily: "Poppins", fontSize: "16px" }}
                     >
-                      : {selectedDetail.created_at}
+                      : {AdminData[selectedDetail - 1].tanggal_post}
                     </Typography>
                   </Grid>
                 </Grid>
@@ -418,7 +421,7 @@ const Admin = () => {
                     <Typography
                       sx={{ fontFamily: "Poppins", fontSize: "16px" }}
                     >
-                      : {selectedDetail.updated_at}
+                      : {AdminData[selectedDetail - 1].tanggal_update}
                     </Typography>
                   </Grid>
                 </Grid>
@@ -510,11 +513,11 @@ const Admin = () => {
                     </TableRow>
                   </TableHead>
                   <TableBody sx={{ fontFamily: "Poppins" }}>
-                    {data &&
-                      data.map((row) => (
+                    {AdminData &&
+                      AdminData.map((row) => (
                         <TableRow key={row.id} className={classes.blueRow}>
                           <TableCell sx={{ fontFamily: "Poppins" }}>
-                            {row.name}
+                            {row.nama}
                           </TableCell>
                           <TableCell sx={{ fontFamily: "Poppins" }}>
                             {row.username}
